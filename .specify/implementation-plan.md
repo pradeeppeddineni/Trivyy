@@ -25,6 +25,18 @@ A second `node-pg-migrate` migration, additive where possible:
 - `questions` → add `category_id` (fk) alongside or replacing the free-text `category`; backfill during seeding.
 - Indexes: `games.game_code` (exists), `game_players(game_id)`, `answers(game_id, player_id)` (exist); add `questions(category_id, difficulty, status)`.
 - Leaderboard / head-to-head stay **derived** (API-8) — no ranking table.
+- **From DB revalidation:** add a `session` table (Postgres session store, see Admin auth); `answers.elapsed_ms` (nullable int, response-time stats, OBS-3); `games.difficulty` nullable (NULL = any); indexes `answers(player_id)` (exclude already-seen) and `answers(question_id)` (most-missed stat); unique `(game_id, player_id)` on `game_players` (no double-join).
+
+---
+
+## Design source & asset locations
+
+- `design/` (repo root) — Claude Design source of truth: the exported `Trivyy.dc.html` + `support.js` and a `README.md` with the project URL/ID and DesignSync re-pull steps (it is a prototype, not React).
+- `client/src/styles/tokens.css` — extracted design tokens (single styling source, ARC-3).
+- `client/src/components/` — translated React components.
+- `client/src/assets/` — logos, icons, images imported by Vite (fingerprinted); `client/src/assets/fonts/` if fonts are self-hosted later.
+- `client/public/` — static fixed-URL files (favicon, apple-touch-icon, og-image, manifest).
+- Design project id: `1f1b8460-2310-47e0-be3f-2788ec04ec1e` (re-pull via the DesignSync MCP tool).
 
 ---
 
@@ -57,7 +69,7 @@ Host creates game → lobby with game code + client-generated QR; `GET /api/game
 
 ### Phase 5 — Admin
 
-Login (decide username+password vs password-only — spec §10 open decision), dashboard (games played, most-missed questions, distributions from `answers`/`events`, OBS-3), question manager (search/filter by category/difficulty/status, add/edit modal, hide/unhide), category management. Admin login/dashboard/questions/modal screens.
+Login (**username + password**, single admin; argon2id hash + `ADMIN_USERNAME` from env; **Postgres-backed sessions** via `connect-pg-simple`; `httpOnly` + `sameSite=lax` + `secure` cookie with `trust proxy`; short admin-elevation re-check; `express-rate-limit` on the login route; audit events to `events`; see ADR 0004), dashboard (games played, most-missed questions, distributions from `answers`/`events`, OBS-3), question manager (search/filter by category/difficulty/status, add/edit modal, hide/unhide), category management. Admin login/dashboard/questions/modal screens.
 **Verify:** supertest for `requireAdmin` on every admin route; Playwright admin login → hide a question → confirm it stops appearing.
 
 ### Phase 6 — Deploy
@@ -71,12 +83,13 @@ Login (decide username+password vs password-only — spec §10 open decision), d
 
 - **Polling discipline (API-7):** poll endpoints stay cheap; client interval ~2–4s with backoff when idle; settle the cadence early in Phase 3.
 - **Coverage stays ≥ 80%** every phase (TEST-2); scoring/lobby/leaderboard logic kept pure where possible (ARC-1).
+- **Observability (OBS-1/2):** logs are already structured JSON via `logger.ts`. In Phase 2 add an `AsyncLocalStorage` request context + request-id middleware so every line auto-carries `requestId`/`gameId` (today `gameId` is opt-in per call). Distributed tracing is out of v1 scope.
 - **Each phase is a branch → PR → green CI + 8-layer review → squash-merge** (GIT-6/7). Main is protected.
 - **Field alignment:** nickname max 16; game code ~5-char uppercase; question counts 5/10/15 (spec §10).
 
 ## Open decisions to settle before the phase they block
 
-- Admin username+password vs password-only (blocks Phase 5).
+- ~~Admin username+password vs password-only~~ → **Resolved: username + password**, Postgres-backed sessions (ADR 0004).
 - Poll interval + backoff (blocks Phase 3).
 - Game-code format/generator (blocks Phase 3).
 - Self-host fonts vs CDN (blocks Phase 6 / CSP).

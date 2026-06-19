@@ -168,13 +168,15 @@ The visual language comes from the Claude Design prototype (`Trivyy.dc.html`): a
 
 **questions** — `id` (pk), `text`, `correct_answer`, `incorrect_answers` (array), `category_id` (fk), `difficulty` (easy / medium / hard), `source` (opentdb / admin), `status` (active / hidden), `created_at`, `updated_at`
 
-**games** — `id` (pk), `mode` (**solo / duel / together**), `game_code` (for duel + group invites), `category_id`, `difficulty`, `num_questions`, `question_ids` (the locked set), `status` (open / in_progress / complete), `host_player_id`, `created_at`
+**games** — `id` (pk), `mode` (**solo / duel / together**), `game_code` (for duel + group invites), `category_id`, `difficulty` (nullable; NULL = any), `num_questions`, `question_ids` (the locked set), `status` (open / in_progress / complete), `host_player_id`, `created_at`
 
 **game_players** — `id` (pk), `game_id` (fk), `player_id` (fk), `role` (**creator / opponent / host / player**), `score`, `status` (joined / playing / done), `completed_at`. A game has 2 rows for a duel and N rows for a group game.
 
-**answers** — `id` (pk), `game_id` (fk), `player_id` (fk), `question_id` (fk), `selected_answer`, `is_correct`, `answered_at`
+**answers** — `id` (pk), `game_id` (fk), `player_id` (fk), `question_id` (fk), `selected_answer`, `is_correct`, `elapsed_ms` (nullable, client-measured response time), `answered_at`
 
 **events** — `id` (pk), `game_id`, `type`, `payload` (jsonb), `created_at` — audit trail the admin dashboard reads.
+
+**session** — server-side session store (managed by `connect-pg-simple`); holds the signed session payload (player nickname, admin elevation). Created via migration for DB-2 compliance. See ADR `docs/adr/0004-admin-auth-and-session-store.md`.
 
 The **leaderboard** for a group game is derived: `game_players` for that game, ordered by `score` desc. The duel head-to-head is derived from the two `game_players` rows plus their `answers`.
 
@@ -224,7 +226,7 @@ QR codes are generated on the client from the join link (no server endpoint need
 
 ## 10. Open decisions
 
-- **Admin identity:** the design shows a username + password; the spec/auth uses a single admin password. Keep password-only, or add a username field? (Leaning password-only for v1.)
+- **Admin identity:** _Resolved_ — **username + password** (matches the design): `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` from env, single admin, Postgres-backed sessions (`connect-pg-simple`). See ADR `docs/adr/0004-admin-auth-and-session-store.md`.
 - **Poll interval:** how often the lobby/result polls (e.g. 2–4s) and when it backs off.
 - **Score weighting / tiebreaks:** flat +1 vs. difficulty weighting; draws vs. answer-time tiebreak.
 - **Game code format:** length and alphabet (the design shows a short ~5-char uppercase code).

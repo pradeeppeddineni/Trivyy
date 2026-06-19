@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&family=Baloo+2:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#E7E5F2;color:#26233A;-webkit-font-smoothing:antialiased;}
+  :root{--accent:#6C5CE7;--accent-strong:#5a4ad1;--accent-soft:#F4F2FE;--display:'Fredoka';--t:.16s;--pop:.42s;--ease:cubic-bezier(.34,1.42,.5,1);}
+  input,textarea,select,button{font-family:'Plus Jakarta Sans',sans-serif;}
+  input:focus,textarea:focus{outline:none;}
+  ::placeholder{color:#A9A4C0;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  @keyframes popIn{0%{opacity:0;transform:scale(.92);}60%{transform:scale(1.015);}100%{opacity:1;transform:scale(1);}}
+  @keyframes trophyPop{0%{opacity:0;transform:scale(.4) rotate(-10deg);}55%{transform:scale(1.14) rotate(4deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+  @keyframes shine{0%{transform:translateX(-130%) skewX(-18deg);}100%{transform:translateX(260%) skewX(-18deg);}}
+  @keyframes toastIn{from{opacity:0;transform:translate(-50%,16px);}to{opacity:1;transform:translate(-50%,0);}}
+  @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(108,92,231,.35);}70%{box-shadow:0 0 0 14px rgba(108,92,231,0);}100%{box-shadow:0 0 0 0 rgba(108,92,231,0);}}
+  @keyframes barRise{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+</style>
+</helmet>
+<div style="{{ themeVars }}">
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(rgba(43,38,74,.055) 1.1px, transparent 1.1px);background-size:22px 22px;background-position:-11px -11px;"></div>
+
+  <div style="position:relative;z-index:1;max-width:440px;margin:0 auto;min-height:100dvh;background:#FCFCFE;box-shadow:0 0 60px rgba(43,38,74,.12);display:flex;flex-direction:column;overflow:hidden;">
+
+    <!-- ===== PLAYER HEADER ===== -->
+    <sc-if value="{{ showPlayerHeader }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;position:sticky;top:0;z-index:20;background:rgba(252,252,254,.86);backdrop-filter:blur(10px);border-bottom:1px solid #F0EEF8;">
+        <div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;">
+          <div style="width:34px;height:34px;border-radius:11px;background:var(--accent);display:grid;place-items:center;box-shadow:0 4px 10px rgba(108,92,231,.35);">
+            <span style="font-family:var(--display),sans-serif;font-weight:700;color:#fff;font-size:20px;line-height:1;">T</span>
+          </div>
+          <span style="font-family:var(--display),sans-serif;font-weight:600;font-size:21px;letter-spacing:.3px;color:#2B264A;">Trivyy</span>
+        </div>
+        <sc-if value="{{ nickname }}" hint-placeholder-val="">
+          <div style="display:flex;align-items:center;gap:7px;background:var(--accent-soft);border:1px solid #E8E4FB;padding:6px 12px 6px 8px;border-radius:999px;">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;">{{ nickInitial }}</div>
+            <span style="font-size:13.5px;font-weight:600;color:var(--accent-strong);">{{ nickname }}</span>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ===================== HOME ===================== -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;flex-direction:column;padding:8px 24px 32px;animation:fadeUp var(--pop) var(--ease);">
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:24px;">
+          <div style="position:relative;width:92px;height:92px;border-radius:26px;background:var(--accent);display:grid;place-items:center;box-shadow:0 12px 28px rgba(108,92,231,.34);margin-bottom:22px;">
+            <span style="font-family:var(--display),sans-serif;font-weight:700;color:#fff;font-size:52px;line-height:1;margin-top:-2px;">T</span>
+            <div style="position:absolute;right:14px;top:16px;width:9px;height:9px;border-radius:50%;background:#FFC24B;"></div>
+          </div>
+          <h1 style="font-family:var(--display),sans-serif;font-weight:700;font-size:46px;margin:0;letter-spacing:.5px;color:#2B264A;">Trivyy</h1>
+          <p style="font-size:16px;color:#736E8C;margin:8px 0 0;max-width:280px;line-height:1.5;">Quick trivia duels with friends. Pick a name, pick a topic, go.</p>
+        </div>
+
+        <div style="margin-top:8px;">
+          <label style="font-size:13px;font-weight:600;color:#8A85A3;margin-left:4px;">YOUR NICKNAME</label>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <input value="{{ nickDraft }}" onInput="{{ onNickInput }}" placeholder="e.g. QuizWhiz" maxlength="16" style="flex:1;padding:15px 16px;border:2px solid #ECEAF5;border-radius:15px;font-size:16px;font-weight:600;color:#2B264A;background:#fff;transition:border-color .15s;" />
+          </div>
+          <sc-if value="{{ nickname }}" hint-placeholder-val="">
+            <p style="font-size:13.5px;color:var(--accent-strong);margin:9px 0 0 4px;font-weight:600;">You're playing as {{ nickname }}</p>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:22px;">
+            <button onClick="{{ onPlaySolo }}" style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:17px;border:none;border-radius:17px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.34);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">
+              <span style="display:flex;">{{ soloIcon }}</span> Play solo
+            </button>
+            <button onClick="{{ onChallenge }}" style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:17px;border:2px solid #E7E4F6;border-radius:17px;background:#fff;color:var(--accent-strong);font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;transition:transform var(--t) ease,border-color .15s;" style-hover="transform:translateY(-2px);border-color:var(--accent);" style-active="transform:translateY(1px);">
+              <span style="display:flex;">{{ challengeIcon }}</span> Challenge a friend
+            </button>
+            <button onClick="{{ onPlayTogether }}" style="display:flex;flex-direction:column;align-items:center;gap:1px;width:100%;padding:13px 17px;border:2px solid #FBE6BE;border-radius:17px;background:#FFFBF2;color:#9a7320;font-family:var(--display),sans-serif;cursor:pointer;transition:transform var(--t) ease,border-color .15s;" style-hover="transform:translateY(-2px);border-color:#F5A623;" style-active="transform:translateY(1px);">
+              <span style="display:flex;align-items:center;gap:9px;font-weight:600;font-size:18px;"><span style="display:flex;">{{ togetherIcon }}</span> Play together</span>
+              <span style="font-size:12px;font-weight:600;color:#bd9a4e;">Online · invite by code or QR</span>
+            </button>
+          </div>
+          <div style="text-align:center;margin-top:14px;">
+            <span onClick="{{ onJoinByCode }}" style="font-size:14px;color:var(--accent-strong);cursor:pointer;font-weight:700;" style-hover="text-decoration:underline;">Have a code? Join a game →</span>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:26px;">
+          <span onClick="{{ goAdmin }}" style="font-size:13px;color:#A8A3BE;cursor:pointer;font-weight:500;" style-hover="color:var(--accent);">Admin</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== SETUP ===================== -->
+    <sc-if value="{{ isSetup }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;animation:fadeUp var(--pop) var(--ease);overflow-y:auto;">
+        <div style="margin:6px 0 18px;">
+          <p style="font-size:13px;font-weight:700;color:var(--accent);letter-spacing:1px;margin:0;">{{ setupKicker }}</p>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:600;font-size:28px;margin:4px 0 0;color:#2B264A;">Set up your round</h2>
+          <sc-if value="{{ isDuelSetup }}" hint-placeholder-val="">
+            <div style="display:flex;align-items:center;gap:9px;margin-top:12px;background:#FFF7E8;border:1px solid #FBE6BE;border-radius:13px;padding:11px 13px;">
+              <span style="font-size:17px;">⚔️</span>
+              <span style="font-size:13px;color:#9a7320;font-weight:600;line-height:1.4;">You'll play this set first, then get a <b>link &amp; code to share</b> with a friend.</span>
+            </div>
+          </sc-if>
+        </div>
+
+        <p style="font-size:14px;font-weight:700;color:#8A85A3;margin:0 0 11px;letter-spacing:.4px;">CATEGORY</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+          <sc-for list="{{ categoryCards }}" as="c" hint-placeholder-count="6">
+            <div onClick="{{ c.onClick }}" style="{{ c.style }}">
+              <span style="font-size:26px;line-height:1;">{{ c.icon }}</span>
+              <span style="font-size:14.5px;font-weight:600;margin-top:7px;">{{ c.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <p style="font-size:14px;font-weight:700;color:#8A85A3;margin:22px 0 11px;letter-spacing:.4px;">DIFFICULTY</p>
+        <div style="display:flex;gap:9px;">
+          <sc-for list="{{ difficultyChips }}" as="d" hint-placeholder-count="4">
+            <div onClick="{{ d.onClick }}" style="{{ d.style }}">{{ d.label }}</div>
+          </sc-for>
+        </div>
+
+        <p style="font-size:14px;font-weight:700;color:#8A85A3;margin:22px 0 11px;letter-spacing:.4px;">QUESTIONS</p>
+        <div style="display:flex;gap:9px;">
+          <sc-for list="{{ countChips }}" as="n" hint-placeholder-count="3">
+            <div onClick="{{ n.onClick }}" style="{{ n.style }}">{{ n.label }}</div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:auto;padding-top:24px;">
+          <div style="background:var(--accent-soft);border:1px solid #E9E5FB;border-radius:15px;padding:13px 16px;margin-bottom:13px;display:flex;align-items:center;gap:9px;">
+            <span style="font-size:18px;color:var(--accent);display:flex;">{{ summaryIcon }}</span>
+            <span style="font-size:14px;color:#5b5677;font-weight:500;line-height:1.4;">{{ setupSummary }}</span>
+          </div>
+          <button onClick="{{ onStart }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:17px;border:none;border-radius:17px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.34);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">
+            Start {{ startVerb }} →
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== GAMEPLAY ===================== -->
+    <sc-if value="{{ isGame }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:10px 22px 24px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span onClick="{{ quitGame }}" style="font-size:22px;color:#B6B1C9;cursor:pointer;line-height:1;">✕</span>
+          <div style="flex:1;">
+            <sc-if value="{{ isSoloDuelGame }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+                <span style="font-size:13px;font-weight:700;color:#8A85A3;">Question {{ qNum }} of {{ qTotal }}</span>
+                <span style="font-size:13px;font-weight:700;color:var(--accent);">{{ scoreNow }} correct</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isTogetherGame }}" hint-placeholder-val="">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="font-size:13px;font-weight:700;color:#8A85A3;">Question {{ qNum }} of {{ qTotal }}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#fff;background:{{ turnPillBg }};padding:4px 11px;border-radius:99px;">{{ turnName }} · {{ scoreNow }}</span>
+              </div>
+            </sc-if>
+            <div style="height:9px;border-radius:99px;background:#EDEBF6;overflow:hidden;">
+              <div style="height:100%;border-radius:99px;background:var(--accent);width:{{ progressPct }};transition:width .5s var(--ease);"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:22px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#5b5677;background:#F4F3F9;padding:6px 12px;border-radius:99px;">{{ qCatIcon }} {{ qCatLabel }}</span>
+          <span style="font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:99px;{{ qDiffStyle }}">{{ qDiffLabel }}</span>
+        </div>
+
+        <h2 style="font-family:var(--display),sans-serif;font-weight:600;font-size:27px;line-height:1.28;margin:18px 0 24px;color:#231F3B;text-wrap:pretty;">{{ qText }}</h2>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ choices }}" as="ch" hint-placeholder-count="4">
+            <button onClick="{{ ch.onClick }}" style="{{ ch.style }}">
+              <span style="{{ ch.letterStyle }}">{{ ch.badge }}</span>
+              <span style="flex:1;text-align:left;font-size:16.5px;font-weight:600;line-height:1.3;">{{ ch.text }}</span>
+            </button>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ graded }}" hint-placeholder-val="">
+          <div style="margin-top:auto;padding-top:18px;animation:fadeUp .3s var(--ease);">
+            <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:12px;">
+              <span style="{{ gradeIconWrap }}">{{ gradeIcon }}</span>
+              <span style="font-family:var(--display),sans-serif;font-weight:600;font-size:18px;{{ gradeColor }}">{{ gradeMsg }}</span>
+            </div>
+            <button onClick="{{ onNext }}" style="width:100%;padding:16px;border:none;border-radius:16px;background:#231F3B;color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">{{ nextLabel }}</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- ===================== SOLO RESULTS ===================== -->
+    <sc-if value="{{ isSoloResults }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;animation:fadeUp var(--pop) var(--ease);overflow-y:auto;">
+        <div style="text-align:center;padding:24px 0 18px;">
+          <div style="{{ resultIconWrap }}animation:trophyPop .6s var(--ease);">{{ resultIcon }}</div>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:30px;margin:10px 0 2px;color:#2B264A;">{{ resultHeadline }}</h2>
+          <p style="font-size:15px;color:#736E8C;margin:0;">{{ resultSub }}</p>
+          <div style="display:inline-flex;align-items:baseline;gap:4px;margin-top:18px;background:var(--accent-soft);border:1px solid #E8E4FB;padding:14px 28px;border-radius:20px;">
+            <span style="font-family:var(--display),sans-serif;font-weight:700;font-size:46px;color:var(--accent);line-height:1;">{{ finalScore }}</span>
+            <span style="font-family:var(--display),sans-serif;font-weight:600;font-size:22px;color:#A39DBE;">/ {{ qTotalResult }}</span>
+          </div>
+        </div>
+
+        <p style="font-size:13px;font-weight:700;color:#8A85A3;letter-spacing:.5px;margin:8px 0 11px;">REVIEW</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #EFEDF7;border-radius:16px;padding:14px 15px;box-shadow:0 2px 8px rgba(43,38,74,.04);">
+              <div style="display:flex;gap:10px;">
+                <span style="font-size:16px;line-height:1.3;font-weight:800;color:{{ r.markColor }};">{{ r.mark }}</span>
+                <div style="flex:1;">
+                  <p style="font-size:15px;font-weight:600;color:#2B264A;margin:0 0 7px;line-height:1.35;">{{ r.q }}</p>
+                  <p style="font-size:13.5px;margin:0;color:{{ r.yourColor }};font-weight:600;">Your answer: {{ r.your }}</p>
+                  <sc-if value="{{ r.showCorrect }}" hint-placeholder-val="">
+                    <p style="font-size:13.5px;margin:4px 0 0;color:#16A765;font-weight:600;">Correct: {{ r.correct }}</p>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:22px;">
+          <button onClick="{{ onPlayAgain }}" style="width:100%;padding:16px;border:none;border-radius:16px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.32);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Play again</button>
+          <button onClick="{{ onChallengeFromResults }}" style="width:100%;padding:16px;border:2px solid #E7E4F6;border-radius:16px;background:#fff;color:var(--accent-strong);font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;transition:transform var(--t) ease,border-color .15s;" style-hover="transform:translateY(-2px);border-color:var(--accent);" style-active="transform:translateY(1px);">Challenge a friend with this set</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== DUEL INVITE ===================== -->
+    <sc-if value="{{ isInvite }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;animation:fadeUp var(--pop) var(--ease);overflow-y:auto;">
+        <div style="text-align:center;padding:18px 0 6px;">
+          <div style="width:80px;height:80px;border-radius:50%;display:inline-grid;place-items:center;background:var(--accent-soft);color:var(--accent);animation:trophyPop .55s var(--ease);">{{ sendIcon }}</div>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:27px;margin:8px 0 4px;color:#2B264A;">Your challenge is ready!</h2>
+          <p style="font-size:14.5px;color:#736E8C;margin:0;max-width:300px;display:inline-block;line-height:1.45;">You scored <b style="color:var(--accent-strong);">{{ finalScore }}/{{ qTotalResult }}</b>. Send this to a friend — they can play anytime.</p>
+        </div>
+
+        <div style="background:var(--accent);border-radius:22px;padding:20px;margin-top:18px;box-shadow:0 10px 24px rgba(108,92,231,.26);">
+          <p style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:2px;margin:0;text-align:center;">GAME CODE</p>
+          <p style="font-family:var(--display),sans-serif;font-weight:700;font-size:42px;letter-spacing:8px;color:#fff;margin:6px 0 0;text-align:center;">{{ duelCode }}</p>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-top:16px;background:#F6F5FB;border:1.5px solid #ECEAF5;border-radius:14px;padding:13px 15px;">
+          <span style="flex:1;font-size:13.5px;color:#6b6685;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ duelLink }}</span>
+        </div>
+
+        <div style="display:flex;gap:11px;margin-top:13px;">
+          <button onClick="{{ onCopyLink }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;border:none;border-radius:15px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:16px;cursor:pointer;box-shadow:0 6px 16px rgba(108,92,231,.3);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Copy link</button>
+          <button onClick="{{ onShare }}" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:15px 18px;border:2px solid #E7E4F6;border-radius:15px;background:#fff;color:var(--accent-strong);font-family:var(--display),sans-serif;font-weight:600;font-size:16px;cursor:pointer;transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Share</button>
+        </div>
+
+        <div style="margin-top:24px;background:#fff;border:1px solid #EFEDF7;border-radius:18px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(43,38,74,.04);">
+          <div style="width:42px;height:42px;border-radius:50%;background:#F4F3F9;display:grid;place-items:center;position:relative;animation:pulseRing 2s infinite;">
+            <span style="color:var(--accent);display:flex;">{{ clockIcon }}</span>
+          </div>
+          <div style="flex:1;">
+            <p style="font-size:15px;font-weight:600;color:#2B264A;margin:0;">Waiting for your friend…</p>
+            <p style="font-size:13px;color:#8A85A3;margin:3px 0 0;">We'll show the head-to-head once they play.</p>
+          </div>
+        </div>
+
+        <div style="margin-top:auto;padding-top:20px;display:flex;flex-direction:column;gap:10px;">
+          <button onClick="{{ onSimulateFriend }}" style="width:100%;padding:14px;border:1.5px dashed #CFC9E8;border-radius:14px;background:#FAFAFE;color:#7d77a0;font-weight:600;font-size:14.5px;cursor:pointer;transition:border-color .15s;" style-hover="border-color:var(--accent);color:var(--accent-strong);">Preview: friend opens the link</button>
+          <span onClick="{{ goHome }}" style="text-align:center;font-size:14px;color:#A8A3BE;cursor:pointer;font-weight:600;" style-hover="color:var(--accent);">Back to home</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== JOIN DUEL ===================== -->
+    <sc-if value="{{ isJoin }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 24px 30px;animation:fadeUp var(--pop) var(--ease);">
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+          <div style="display:flex;align-items:center;margin-bottom:18px;">
+            <div style="width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-family:var(--display),sans-serif;font-weight:700;font-size:26px;z-index:2;box-shadow:0 6px 14px rgba(108,92,231,.3);">{{ creatorInitial }}</div>
+            <div style="width:38px;height:38px;border-radius:50%;background:#FFB020;color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;margin-left:-12px;z-index:1;box-shadow:0 4px 10px rgba(255,176,32,.4);">VS</div>
+          </div>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:28px;margin:0;color:#2B264A;">{{ creatorName }} challenged you!</h2>
+          <p style="font-size:15px;color:#736E8C;margin:10px 0 0;max-width:290px;line-height:1.5;">{{ joinSub }}</p>
+
+          <div style="margin-top:26px;width:100%;text-align:left;">
+            <label style="font-size:13px;font-weight:700;color:#8A85A3;margin-left:4px;letter-spacing:.3px;">YOUR NICKNAME</label>
+            <input value="{{ friendDraft }}" onInput="{{ onFriendInput }}" placeholder="e.g. Challenger42" maxlength="16" style="width:100%;margin-top:8px;padding:15px 16px;border:2px solid #ECEAF5;border-radius:15px;font-size:16px;font-weight:600;color:#2B264A;background:#fff;" />
+          </div>
+        </div>
+        <button onClick="{{ onStartJoin }}" style="width:100%;padding:17px;border:none;border-radius:17px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.34);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Start the duel →</button>
+      </div>
+    </sc-if>
+
+    <!-- ===================== DUEL RESULTS ===================== -->
+    <sc-if value="{{ isDuelResults }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;overflow-y:auto;animation:fadeUp var(--pop) var(--ease);">
+        <div style="text-align:center;padding:18px 0 8px;">
+          <div style="{{ duelEmojiWrap }}animation:trophyPop .6s var(--ease);">{{ duelEmoji }}</div>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:28px;margin:8px 0 2px;color:#2B264A;">{{ duelHeadline }}</h2>
+          <p style="font-size:15px;color:#736E8C;margin:0;">{{ duelSub }}</p>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:14px;align-items:stretch;">
+          <div style="{{ p1CardStyle }}">
+            <div style="{{ p1AvatarStyle }}">{{ creatorInitial }}</div>
+            <p style="font-size:14px;font-weight:700;margin:10px 0 0;color:#2B264A;">{{ creatorName }}</p>
+            <p style="font-family:var(--display),sans-serif;font-weight:700;font-size:38px;margin:2px 0 0;color:{{ p1ScoreColor }};line-height:1;">{{ creatorScore }}</p>
+            <sc-if value="{{ p1Won }}" hint-placeholder-val="">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.6px;color:#16A765;background:#E6FAF0;padding:3px 9px;border-radius:99px;margin-top:7px;">WINNER</span>
+            </sc-if>
+          </div>
+          <div style="{{ p2CardStyle }}">
+            <div style="{{ p2AvatarStyle }}">{{ friendInitial }}</div>
+            <p style="font-size:14px;font-weight:700;margin:10px 0 0;color:#2B264A;">{{ friendName }}</p>
+            <p style="font-family:var(--display),sans-serif;font-weight:700;font-size:38px;margin:2px 0 0;color:{{ p2ScoreColor }};line-height:1;">{{ friendScore }}</p>
+            <sc-if value="{{ p2Won }}" hint-placeholder-val="">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.6px;color:#16A765;background:#E6FAF0;padding:3px 9px;border-radius:99px;margin-top:7px;">WINNER</span>
+            </sc-if>
+          </div>
+        </div>
+
+        <p style="font-size:13px;font-weight:700;color:#8A85A3;letter-spacing:.5px;margin:24px 0 11px;">QUESTION BREAKDOWN</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ duelRows }}" as="r" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #EFEDF7;border-radius:16px;padding:13px 15px;box-shadow:0 2px 8px rgba(43,38,74,.04);">
+              <p style="font-size:14.5px;font-weight:600;color:#2B264A;margin:0 0 10px;line-height:1.35;">{{ r.num }}. {{ r.q }}</p>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;font-weight:700;color:#8A85A3;width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.p1Name }}</span>
+                  <span style="font-size:14px;">{{ r.p1Mark }}</span>
+                  <span style="font-size:13.5px;font-weight:600;color:{{ r.p1Color }};">{{ r.p1Ans }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;font-weight:700;color:#8A85A3;width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.p2Name }}</span>
+                  <span style="font-size:14px;">{{ r.p2Mark }}</span>
+                  <span style="font-size:13.5px;font-weight:600;color:{{ r.p2Color }};">{{ r.p2Ans }}</span>
+                </div>
+                <sc-if value="{{ r.showCorrect }}" hint-placeholder-val="">
+                  <div style="display:flex;align-items:center;gap:8px;border-top:1px dashed #EEECF6;padding-top:7px;">
+                    <span style="font-size:12px;font-weight:700;color:#16A765;width:62px;">Answer</span>
+                    <span style="font-size:13.5px;font-weight:600;color:#16A765;">{{ r.correct }}</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:22px;">
+          <button onClick="{{ onRematch }}" style="width:100%;padding:16px;border:none;border-radius:16px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.32);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Rematch</button>
+          <button onClick="{{ goHome }}" style="width:100%;padding:16px;border:2px solid #E7E4F6;border-radius:16px;background:#fff;color:var(--accent-strong);font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;transition:transform var(--t) ease,border-color .15s;" style-hover="transform:translateY(-2px);border-color:var(--accent);" style-active="transform:translateY(1px);">New game</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== TOGETHER SETUP (host) ===================== -->
+    <sc-if value="{{ isTogetherSetup }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;animation:fadeUp var(--pop) var(--ease);overflow-y:auto;">
+        <div style="margin:6px 0 16px;">
+          <p style="font-size:13px;font-weight:700;color:#D9871F;letter-spacing:1px;margin:0;">🎮 PLAY TOGETHER</p>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:600;font-size:28px;margin:4px 0 6px;color:#2B264A;">Set up the game</h2>
+          <p style="font-size:14px;color:#736E8C;margin:0;line-height:1.45;">Pick the quiz, then invite friends by code or QR. Everyone answers the same set on their own phone.</p>
+        </div>
+
+        <p style="font-size:14px;font-weight:700;color:#8A85A3;margin:8px 0 11px;letter-spacing:.4px;">CATEGORY</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+          <sc-for list="{{ categoryCards }}" as="c" hint-placeholder-count="6">
+            <div onClick="{{ c.onClick }}" style="{{ c.style }}">
+              <span style="font-size:26px;line-height:1;">{{ c.icon }}</span>
+              <span style="font-size:14.5px;font-weight:600;margin-top:7px;">{{ c.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <p style="font-size:14px;font-weight:700;color:#8A85A3;margin:22px 0 11px;letter-spacing:.4px;">DIFFICULTY</p>
+        <div style="display:flex;gap:9px;">
+          <sc-for list="{{ difficultyChips }}" as="d" hint-placeholder-count="4">
+            <div onClick="{{ d.onClick }}" style="{{ d.style }}">{{ d.label }}</div>
+          </sc-for>
+        </div>
+
+        <p style="font-size:14px;font-weight:700;color:#8A85A3;margin:22px 0 11px;letter-spacing:.4px;">QUESTIONS</p>
+        <div style="display:flex;gap:9px;">
+          <sc-for list="{{ countChips }}" as="n" hint-placeholder-count="3">
+            <div onClick="{{ n.onClick }}" style="{{ n.style }}">{{ n.label }}</div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:auto;padding-top:24px;">
+          <button onClick="{{ onCreateGame }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:17px;border:none;border-radius:17px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.34);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">
+            Create game &amp; invite →
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== LOBBY ===================== -->
+    <sc-if value="{{ isLobby }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;animation:fadeUp var(--pop) var(--ease);overflow-y:auto;">
+        <div style="text-align:center;padding:10px 0 4px;">
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:25px;margin:0;color:#2B264A;">Invite your friends</h2>
+          <p style="font-size:13.5px;color:#736E8C;margin:5px 0 0;">{{ lobbySettingsText }}</p>
+        </div>
+
+        <div style="background:var(--accent);border-radius:22px;padding:18px;margin-top:14px;box-shadow:0 10px 24px rgba(108,92,231,.26);text-align:center;">
+          <p style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:2px;margin:0;">GAME CODE</p>
+          <p style="font-family:var(--display),sans-serif;font-weight:700;font-size:40px;letter-spacing:8px;color:#fff;margin:5px 0 14px;">{{ lobbyCode }}</p>
+          <div style="background:#fff;border-radius:16px;padding:14px;display:inline-flex;flex-direction:column;align-items:center;gap:7px;">
+            {{ qrEl }}
+            <span style="font-size:11px;font-weight:700;color:#8A85A3;letter-spacing:.5px;">SCAN TO JOIN</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:11px;margin-top:13px;">
+          <button onClick="{{ onCopyLobby }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:none;border-radius:14px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 6px 14px rgba(108,92,231,.28);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Copy link</button>
+          <button onClick="{{ onShareLobby }}" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 18px;border:2px solid #E7E4F6;border-radius:14px;background:#fff;color:var(--accent-strong);font-family:var(--display),sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Share</button>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:22px 0 11px;">
+          <p style="font-size:14px;font-weight:700;color:#8A85A3;letter-spacing:.4px;margin:0;">PLAYERS ({{ playerCount }})</p>
+          <span style="font-size:12.5px;font-weight:600;color:#A8A3BE;">Play one after another</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px;">
+          <sc-for list="{{ lobbyPlayers }}" as="p" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #EFEDF7;border-radius:14px;padding:11px 13px;box-shadow:0 2px 6px rgba(43,38,74,.04);">
+              <div style="{{ p.avatarStyle }}">{{ p.initial }}</div>
+              <div style="flex:1;">
+                <p style="font-size:15px;font-weight:700;color:#2B264A;margin:0;">{{ p.name }} {{ p.youTag }}</p>
+                <p style="font-size:12.5px;color:#8A85A3;margin:1px 0 0;font-weight:600;">{{ p.statusText }}</p>
+              </div>
+              <sc-if value="{{ p.canPlay }}" hint-placeholder-val="">
+                <button onClick="{{ p.onPlay }}" style="padding:9px 16px;border:none;border-radius:11px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 10px rgba(108,92,231,.26);">{{ p.playLabel }}</button>
+              </sc-if>
+              <sc-if value="{{ p.done }}" hint-placeholder-val="">
+                <span style="font-family:var(--display),sans-serif;font-weight:700;font-size:16px;color:#16A765;">{{ p.scoreText }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:18px;padding:13px;border:1.5px dashed #CFC9E8;border-radius:14px;background:#FAFAFE;text-align:center;">
+          <span onClick="{{ onSimJoin }}" style="font-size:13.5px;color:#7d77a0;cursor:pointer;font-weight:600;" style-hover="color:var(--accent-strong);">Preview: a friend joins with the code</span>
+        </div>
+
+        <div style="margin-top:auto;padding-top:20px;">
+          <sc-if value="{{ allPlayed }}" hint-placeholder-val="">
+            <button onClick="{{ onSeeLeaderboard }}" style="width:100%;padding:17px;border:none;border-radius:17px;background:#16C079;color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;box-shadow:0 8px 20px rgba(22,192,121,.3);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">See results</button>
+          </sc-if>
+          <sc-if value="{{ notAllPlayed }}" hint-placeholder-val="{{ true }}">
+            <p style="text-align:center;font-size:13px;color:#A8A3BE;font-weight:600;margin:0;">{{ waitingText }}</p>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== JOIN BY CODE ===================== -->
+    <sc-if value="{{ isJoinCode }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 24px 30px;animation:fadeUp var(--pop) var(--ease);">
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+          <div style="text-align:center;margin-bottom:8px;">
+          <div style="width:80px;height:80px;border-radius:50%;display:inline-grid;place-items:center;background:var(--accent-soft);color:var(--accent);margin:0 auto;">{{ ticketIcon }}</div>
+            <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:27px;margin:8px 0 4px;color:#2B264A;">Join a game</h2>
+            <p style="font-size:14.5px;color:#736E8C;margin:0;">Enter the code a friend shared with you.</p>
+          </div>
+
+          <label style="font-size:13px;font-weight:700;color:#8A85A3;margin:18px 0 0 2px;letter-spacing:.3px;">GAME CODE</label>
+          <input value="{{ joinCodeInput }}" onInput="{{ onJoinCodeInput }}" placeholder="{{ joinCodePlaceholder }}" maxlength="5" style="width:100%;margin-top:8px;padding:16px;border:2px solid #ECEAF5;border-radius:15px;font-family:var(--display),sans-serif;font-size:26px;font-weight:700;letter-spacing:8px;text-align:center;text-transform:uppercase;color:var(--accent-strong);background:#fff;" />
+
+          <sc-if value="{{ joinFound }}" hint-placeholder-val="">
+            <div style="margin-top:14px;background:var(--accent-soft);border:1px solid #E8E4FB;border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;">⚔️</span>
+              <span style="font-size:13.5px;color:#5b5677;font-weight:600;line-height:1.4;">{{ joinFoundText }}</span>
+            </div>
+            <label style="font-size:13px;font-weight:700;color:#8A85A3;margin:18px 0 0 2px;letter-spacing:.3px;">YOUR NICKNAME</label>
+            <input value="{{ joinNickInput }}" onInput="{{ onJoinNickInput }}" placeholder="e.g. Challenger42" maxlength="14" style="width:100%;margin-top:8px;padding:15px 16px;border:2px solid #ECEAF5;border-radius:15px;font-size:16px;font-weight:600;color:#2B264A;background:#fff;" />
+          </sc-if>
+          <sc-if value="{{ joinNotFound }}" hint-placeholder-val="">
+            <p style="font-size:13.5px;color:#A8A3BE;margin:14px 0 0;text-align:center;font-weight:600;">{{ joinHint }}</p>
+          </sc-if>
+        </div>
+
+        <button onClick="{{ onJoinGame }}" style="width:100%;padding:17px;border:none;border-radius:17px;background:{{ joinBtnBg }};color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:18px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.32);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Join &amp; play →</button>
+        <span onClick="{{ goHome }}" style="text-align:center;margin-top:14px;font-size:13.5px;color:#A8A3BE;cursor:pointer;font-weight:600;" style-hover="color:var(--accent);">← Back to home</span>
+      </div>
+    </sc-if>
+
+    <!-- ===================== LEADERBOARD ===================== -->
+    <sc-if value="{{ isLeaderboard }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;padding:6px 22px 26px;animation:fadeUp var(--pop) var(--ease);overflow-y:auto;">
+        <div style="text-align:center;padding:22px 0 10px;">
+          <div style="{{ leaderEmojiWrap }}animation:trophyPop .6s var(--ease);">{{ leaderEmoji }}</div>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:28px;margin:8px 0 2px;color:#2B264A;">{{ leaderHeadline }}</h2>
+          <p style="font-size:15px;color:#736E8C;margin:0;">{{ leaderSub }}</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+          <sc-for list="{{ leaderRows }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:13px;border-radius:16px;padding:14px 15px;{{ r.rowStyle }}">
+              <span style="font-family:var(--display),sans-serif;font-weight:700;font-size:18px;width:26px;text-align:center;color:{{ r.rankColor }};">{{ r.rank }}</span>
+              <div style="{{ r.avatarStyle }}">{{ r.initial }}</div>
+              <div style="flex:1;">
+                <p style="font-size:15.5px;font-weight:700;color:#2B264A;margin:0;">{{ r.name }} {{ r.medal }}</p>
+                <p style="font-size:12.5px;color:#8A85A3;margin:1px 0 0;font-weight:600;">{{ r.pct }}</p>
+              </div>
+              <span style="font-family:var(--display),sans-serif;font-weight:700;font-size:24px;color:{{ r.scoreColor }};">{{ r.score }}<span style="font-size:14px;color:#B6B1C9;">/{{ r.total }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:24px;">
+          <button onClick="{{ onTogetherRematch }}" style="width:100%;padding:16px;border:none;border-radius:16px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;box-shadow:0 8px 20px rgba(108,92,231,.32);transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">New game, same crew</button>
+          <button onClick="{{ goHome }}" style="width:100%;padding:16px;border:2px solid #E7E4F6;border-radius:16px;background:#fff;color:var(--accent-strong);font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;transition:transform var(--t) ease,border-color .15s;" style-hover="transform:translateY(-2px);border-color:var(--accent);" style-active="transform:translateY(1px);">Home</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== ADMIN LOGIN ===================== -->
+    <sc-if value="{{ isAdminLogin }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px;animation:fadeUp var(--pop) var(--ease);">
+        <div style="text-align:center;margin-bottom:26px;">
+          <div style="width:64px;height:64px;border-radius:19px;background:#231F3B;display:grid;place-items:center;margin:0 auto 16px;box-shadow:0 10px 22px rgba(35,31,59,.28);">
+            <span style="color:#fff;display:flex;">{{ lockIcon }}</span>
+          </div>
+          <h2 style="font-family:var(--display),sans-serif;font-weight:700;font-size:26px;margin:0;color:#2B264A;">Admin sign in</h2>
+          <p style="font-size:14px;color:#8A85A3;margin:6px 0 0;">Manage questions & view stats</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <input value="{{ adminUser }}" onInput="{{ onAdminUser }}" placeholder="Username" style="width:100%;padding:15px 16px;border:2px solid #ECEAF5;border-radius:14px;font-size:16px;font-weight:500;color:#2B264A;background:#fff;" />
+          <input value="{{ adminPass }}" onInput="{{ onAdminPass }}" type="password" placeholder="Password" style="width:100%;padding:15px 16px;border:2px solid #ECEAF5;border-radius:14px;font-size:16px;font-weight:500;color:#2B264A;background:#fff;" />
+          <sc-if value="{{ adminError }}" hint-placeholder-val="">
+            <p style="font-size:13.5px;color:#E5484D;margin:0 0 0 2px;font-weight:600;">{{ adminError }}</p>
+          </sc-if>
+          <button onClick="{{ onAdminLogin }}" style="width:100%;padding:16px;border:none;border-radius:14px;background:#231F3B;color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:17px;cursor:pointer;margin-top:4px;transition:transform var(--t) ease;" style-hover="transform:translateY(-2px);" style-active="transform:translateY(1px);">Sign in</button>
+        </div>
+        <div style="text-align:center;margin-top:18px;">
+          <span style="font-size:12.5px;color:#A8A3BE;">Demo — use <b style="color:#7d77a0;">admin</b> / <b style="color:#7d77a0;">trivyy</b></span>
+        </div>
+        <div style="text-align:center;margin-top:22px;">
+          <span onClick="{{ goHome }}" style="font-size:13.5px;color:#A8A3BE;cursor:pointer;font-weight:600;" style-hover="color:var(--accent);">← Back to game</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== ADMIN DASHBOARD ===================== -->
+    <sc-if value="{{ isAdminDash }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;background:#F7F6FB;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#231F3B;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <div style="width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;"><span style="font-family:var(--display),sans-serif;font-weight:700;color:#fff;font-size:17px;">T</span></div>
+            <span style="font-family:var(--display),sans-serif;font-weight:600;font-size:18px;color:#fff;">Trivyy Admin</span>
+          </div>
+          <span onClick="{{ onAdminLogout }}" style="font-size:13px;color:#B5B0CC;cursor:pointer;font-weight:600;" style-hover="color:#fff;">Sign out</span>
+        </div>
+        <div style="display:flex;gap:6px;padding:12px 16px 0;">
+          <div onClick="{{ goDash }}" style="{{ tabDashStyle }}">Dashboard</div>
+          <div onClick="{{ goQuestions }}" style="{{ tabQStyle }}">Questions</div>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:16px;">
+          <h2 style="font-family:var(--display),sans-serif;font-weight:600;font-size:23px;margin:4px 0 14px;color:#2B264A;">Overview</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+            <sc-for list="{{ statCards }}" as="s" hint-placeholder-count="4">
+              <div style="background:#fff;border:1px solid #EEECF6;border-radius:16px;padding:15px;box-shadow:0 2px 8px rgba(43,38,74,.04);">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <span style="color:var(--accent);display:flex;">{{ s.icon }}</span>
+                  <span style="font-size:12.5px;font-weight:600;color:#8A85A3;line-height:1.2;">{{ s.label }}</span>
+                </div>
+                <p style="font-family:var(--display),sans-serif;font-weight:700;font-size:30px;margin:8px 0 0;color:#2B264A;">{{ s.value }}</p>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="background:#fff;border:1px solid #EEECF6;border-radius:16px;padding:17px;margin-top:14px;box-shadow:0 2px 8px rgba(43,38,74,.04);">
+            <p style="font-size:14px;font-weight:700;color:#2B264A;margin:0 0 3px;">Games played</p>
+            <p style="font-size:12.5px;color:#A8A3BE;margin:0 0 16px;">Last 7 days</p>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:130px;">
+              <sc-for list="{{ chartBars }}" as="b" hint-placeholder-count="7">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end;">
+                  <div style="width:100%;border-radius:6px 6px 3px 3px;background:var(--accent);height:{{ b.h }};transform-origin:bottom;animation:barRise .6s var(--ease);"></div>
+                  <span style="font-size:11px;font-weight:600;color:#A8A3BE;">{{ b.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #EEECF6;border-radius:16px;padding:17px;margin-top:14px;box-shadow:0 2px 8px rgba(43,38,74,.04);">
+            <p style="font-size:14px;font-weight:700;color:#2B264A;margin:0 0 14px;">Most-missed questions</p>
+            <div style="display:flex;flex-direction:column;gap:13px;">
+              <sc-for list="{{ missedRows }}" as="m" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;">
+                    <span style="font-size:13.5px;font-weight:600;color:#3a3552;line-height:1.3;flex:1;">{{ m.q }}</span>
+                    <span style="font-size:13px;font-weight:700;color:#E5484D;white-space:nowrap;">{{ m.rate }}</span>
+                  </div>
+                  <div style="height:7px;border-radius:99px;background:#F1EFF7;overflow:hidden;">
+                    <div style="height:100%;border-radius:99px;background:#E5685C;width:{{ m.rate }};"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== ADMIN QUESTIONS ===================== -->
+    <sc-if value="{{ isAdminQ }}" hint-placeholder-val="">
+      <div style="flex:1;display:flex;flex-direction:column;background:#F7F6FB;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:#231F3B;">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <div style="width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;"><span style="font-family:var(--display),sans-serif;font-weight:700;color:#fff;font-size:17px;">T</span></div>
+            <span style="font-family:var(--display),sans-serif;font-weight:600;font-size:18px;color:#fff;">Trivyy Admin</span>
+          </div>
+          <span onClick="{{ onAdminLogout }}" style="font-size:13px;color:#B5B0CC;cursor:pointer;font-weight:600;" style-hover="color:#fff;">Sign out</span>
+        </div>
+        <div style="display:flex;gap:6px;padding:12px 16px 0;">
+          <div onClick="{{ goDash }}" style="{{ tabDashStyle }}">Dashboard</div>
+          <div onClick="{{ goQuestions }}" style="{{ tabQStyle }}">Questions</div>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
+            <h2 style="font-family:var(--display),sans-serif;font-weight:600;font-size:23px;margin:0;color:#2B264A;">Questions <span style="font-size:15px;color:#A8A3BE;font-weight:600;">({{ qCount }})</span></h2>
+            <button onClick="{{ onAddQuestion }}" style="display:flex;align-items:center;gap:6px;padding:10px 14px;border:none;border-radius:12px;background:var(--accent);color:#fff;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(108,92,231,.3);">+ Add</button>
+          </div>
+
+          <input value="{{ qSearch }}" onInput="{{ onQSearch }}" placeholder="Search questions…" style="width:100%;padding:12px 14px;border:1.5px solid #ECEAF5;border-radius:13px;font-size:14.5px;color:#2B264A;background:#fff;margin-bottom:10px;" />
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">
+            <sc-for list="{{ qFilterChips }}" as="f" hint-placeholder-count="5">
+              <div onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ hasQuestions }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px;">
+              <sc-for list="{{ questionRows }}" as="row" hint-placeholder-count="5">
+                <div style="background:#fff;border:1px solid #EEECF6;border-radius:14px;padding:13px 14px;box-shadow:0 2px 6px rgba(43,38,74,.04);{{ row.dim }}">
+                  <div style="display:flex;justify-content:space-between;gap:10px;">
+                    <p style="font-size:14.5px;font-weight:600;color:#2B264A;margin:0;line-height:1.35;flex:1;">{{ row.q }}</p>
+                    <span style="{{ row.statusStyle }}">{{ row.statusLabel }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:11px;">
+                    <div style="display:flex;gap:7px;">
+                      <span style="font-size:11.5px;font-weight:700;color:#6b6685;background:#F4F3F9;padding:4px 9px;border-radius:99px;">{{ row.catLabel }}</span>
+                      <span style="font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:99px;{{ row.diffStyle }}">{{ row.diffLabel }}</span>
+                    </div>
+                    <div style="display:flex;gap:14px;">
+                      <span onClick="{{ row.onEdit }}" style="font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;">Edit</span>
+                      <span onClick="{{ row.onToggle }}" style="font-size:13px;font-weight:700;color:#A8A3BE;cursor:pointer;">{{ row.toggleLabel }}</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noQuestions }}" hint-placeholder-val="">
+            <div style="text-align:center;padding:48px 20px;">
+              <div style="font-size:44px;opacity:.6;">🔍</div>
+              <p style="font-size:16px;font-weight:700;color:#5b5677;margin:12px 0 4px;">No questions match</p>
+              <p style="font-size:14px;color:#A8A3BE;margin:0;">Try clearing your search or filters.</p>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== ADD/EDIT QUESTION MODAL ===================== -->
+    <sc-if value="{{ showQModal }}" hint-placeholder-val="">
+      <div style="position:absolute;inset:0;z-index:60;background:rgba(35,31,59,.45);backdrop-filter:blur(3px);display:flex;align-items:flex-end;animation:fadeUp .2s ease;">
+        <div style="width:100%;max-height:92%;overflow-y:auto;background:#fff;border-radius:24px 24px 0 0;padding:22px 22px 28px;animation:popIn .3s var(--ease);">
+          <div style="width:42px;height:5px;border-radius:99px;background:#E6E3F0;margin:0 auto 16px;"></div>
+          <h3 style="font-family:var(--display),sans-serif;font-weight:600;font-size:22px;margin:0 0 18px;color:#2B264A;">{{ modalTitle }}</h3>
+
+          <label style="font-size:13px;font-weight:700;color:#8A85A3;">QUESTION</label>
+          <textarea value="{{ draftQ }}" onInput="{{ onDraftQ }}" placeholder="Type the question…" rows="2" style="width:100%;margin:7px 0 16px;padding:13px 14px;border:1.5px solid #ECEAF5;border-radius:13px;font-size:15px;color:#2B264A;resize:none;line-height:1.4;"></textarea>
+
+          <label style="font-size:13px;font-weight:700;color:#16A765;">✓ CORRECT ANSWER</label>
+          <input value="{{ draftCorrect }}" onInput="{{ onDraftCorrect }}" placeholder="The right answer" style="width:100%;margin:7px 0 16px;padding:13px 14px;border:1.5px solid #BFEAD3;border-radius:13px;font-size:15px;color:#2B264A;background:#F4FCF8;" />
+
+          <label style="font-size:13px;font-weight:700;color:#8A85A3;">WRONG ANSWERS</label>
+          <div style="display:flex;flex-direction:column;gap:9px;margin:7px 0 16px;">
+            <sc-for list="{{ draftWrongs }}" as="w" hint-placeholder-count="3">
+              <input value="{{ w.value }}" onInput="{{ w.onInput }}" placeholder="{{ w.ph }}" style="width:100%;padding:13px 14px;border:1.5px solid #ECEAF5;border-radius:13px;font-size:15px;color:#2B264A;" />
+            </sc-for>
+          </div>
+
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1;">
+              <label style="font-size:13px;font-weight:700;color:#8A85A3;">CATEGORY</label>
+              <select value="{{ draftCat }}" onChange="{{ onDraftCat }}" style="width:100%;margin-top:7px;padding:13px 12px;border:1.5px solid #ECEAF5;border-radius:13px;font-size:15px;color:#2B264A;background:#fff;cursor:pointer;">
+                <sc-for list="{{ catOptions }}" as="o" hint-placeholder-count="6">
+                  <option value="{{ o.id }}">{{ o.label }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label style="font-size:13px;font-weight:700;color:#8A85A3;">DIFFICULTY</label>
+              <select value="{{ draftDiff }}" onChange="{{ onDraftDiff }}" style="width:100%;margin-top:7px;padding:13px 12px;border:1.5px solid #ECEAF5;border-radius:13px;font-size:15px;color:#2B264A;background:#fff;cursor:pointer;">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:11px;margin-top:22px;">
+            <button onClick="{{ onCancelModal }}" style="flex:1;padding:15px;border:2px solid #ECEAF5;border-radius:14px;background:#fff;color:#6b6685;font-weight:600;font-size:16px;cursor:pointer;">Cancel</button>
+            <button onClick="{{ onSaveQuestion }}" style="flex:2;padding:15px;border:none;border-radius:14px;background:var(--accent);color:#fff;font-family:var(--display),sans-serif;font-weight:600;font-size:16px;cursor:pointer;box-shadow:0 6px 16px rgba(108,92,231,.3);">{{ saveLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== TOAST ===================== -->
+    <sc-if value="{{ toast }}" hint-placeholder-val="">
+      <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:9px;background:#231F3B;color:#fff;padding:13px 20px;border-radius:14px;box-shadow:0 10px 30px rgba(35,31,59,.4);font-size:14.5px;font-weight:600;animation:toastIn .3s var(--ease);white-space:nowrap;">
+        <span style="font-size:16px;">{{ toastIcon }}</span> {{ toast }}
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:860},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Indigo&quot;,&quot;Grape&quot;,&quot;Teal&quot;,&quot;Coral&quot;],&quot;default&quot;:&quot;Indigo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;display&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Fredoka&quot;,&quot;Poppins&quot;,&quot;Baloo 2&quot;],&quot;default&quot;:&quot;Fredoka&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Subtle&quot;,&quot;Playful&quot;,&quot;Minimal&quot;],&quot;default&quot;:&quot;Subtle&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.CATS = [
+      {id:'science',   label:'Science',   icon:'🔬'},
+      {id:'geography', label:'Geography', icon:'🌍'},
+      {id:'movies',    label:'Movies',    icon:'🎬'},
+      {id:'music',     label:'Music',     icon:'🎵'},
+      {id:'history',   label:'History',   icon:'📜'},
+      {id:'tech',      label:'Tech',      icon:'💻'},
+    ];
+    this.BANK = [
+      {id:'s1',cat:'science',diff:'easy',q:'Which planet is known as the Red Planet?',correct:'Mars',wrong:['Venus','Jupiter','Mercury']},
+      {id:'s2',cat:'science',diff:'easy',q:'What gas do plants absorb from the air?',correct:'Carbon dioxide',wrong:['Oxygen','Nitrogen','Hydrogen']},
+      {id:'s3',cat:'science',diff:'medium',q:'How many bones are in the adult human body?',correct:'206',wrong:['201','226','180']},
+      {id:'s4',cat:'science',diff:'medium',q:'What is the chemical symbol for gold?',correct:'Au',wrong:['Ag','Gd','Go']},
+      {id:'s5',cat:'science',diff:'medium',q:'What is often called the powerhouse of the cell?',correct:'Mitochondria',wrong:['Nucleus','Ribosome','Golgi body']},
+      {id:'s6',cat:'science',diff:'hard',q:'The speed of light is roughly…',correct:'300,000 km/s',wrong:['150,000 km/s','30,000 km/s','1,000,000 km/s']},
+      {id:'g1',cat:'geography',diff:'medium',q:'What is the capital of Australia?',correct:'Canberra',wrong:['Sydney','Melbourne','Perth']},
+      {id:'g2',cat:'geography',diff:'easy',q:'Mount Everest sits in which mountain range?',correct:'Himalayas',wrong:['Andes','Alps','Rockies']},
+      {id:'g3',cat:'geography',diff:'hard',q:'Which country spans the most time zones?',correct:'France',wrong:['Russia','United States','China']},
+      {id:'g4',cat:'geography',diff:'easy',q:'On which continent is the Sahara Desert?',correct:'Africa',wrong:['Asia','Australia','South America']},
+      {id:'g5',cat:'geography',diff:'easy',q:'How many continents are there?',correct:'7',wrong:['5','6','8']},
+      {id:'g6',cat:'geography',diff:'medium',q:'Which is the longest river commonly cited?',correct:'Nile',wrong:['Amazon','Yangtze','Mississippi']},
+      {id:'m1',cat:'movies',diff:'medium',q:'Who directed the 1975 film "Jaws"?',correct:'Steven Spielberg',wrong:['George Lucas','Ridley Scott','James Cameron']},
+      {id:'m2',cat:'movies',diff:'easy',q:'Who played Jack in "Titanic" (1997)?',correct:'Leonardo DiCaprio',wrong:['Brad Pitt','Johnny Depp','Tom Cruise']},
+      {id:'m3',cat:'movies',diff:'medium',q:'Which film won Best Picture in 2020?',correct:'Parasite',wrong:['1917','Joker','Ford v Ferrari']},
+      {id:'m4',cat:'movies',diff:'easy',q:"What was Pixar's first feature film?",correct:'Toy Story',wrong:["A Bug's Life",'Monsters, Inc.','Cars']},
+      {id:'m5',cat:'movies',diff:'hard',q:'"Here\u2019s looking at you, kid" is a line from…',correct:'Casablanca',wrong:['Citizen Kane','Gone with the Wind','The Godfather']},
+      {id:'m6',cat:'movies',diff:'medium',q:'Which had the highest nominal box-office gross?',correct:'Avatar',wrong:['Avengers: Endgame','Titanic','Star Wars']},
+      {id:'mu1',cat:'music',diff:'easy',q:'How many strings does a standard guitar have?',correct:'6',wrong:['4','5','7']},
+      {id:'mu2',cat:'music',diff:'easy',q:'Who is widely called the "King of Pop"?',correct:'Michael Jackson',wrong:['Elvis Presley','Prince','Freddie Mercury']},
+      {id:'mu3',cat:'music',diff:'easy',q:'Which instrument has 88 keys?',correct:'Piano',wrong:['Organ','Harp','Accordion']},
+      {id:'mu4',cat:'music',diff:'medium',q:'The Beatles formed in which city?',correct:'Liverpool',wrong:['London','Manchester','Dublin']},
+      {id:'mu5',cat:'music',diff:'medium',q:'"A cappella" means singing…',correct:'Without instruments',wrong:['With a full band','In a choir only','In Italian']},
+      {id:'mu6',cat:'music',diff:'hard',q:'How many lines make up a musical staff?',correct:'5',wrong:['4','6','7']},
+      {id:'h1',cat:'history',diff:'easy',q:'Who was the first U.S. President?',correct:'George Washington',wrong:['Abraham Lincoln','Thomas Jefferson','John Adams']},
+      {id:'h2',cat:'history',diff:'easy',q:'The Great Wall is located in which country?',correct:'China',wrong:['Japan','India','Mongolia']},
+      {id:'h3',cat:'history',diff:'easy',q:'In which year did World War II end?',correct:'1945',wrong:['1944','1939','1950']},
+      {id:'h4',cat:'history',diff:'easy',q:'Who painted the Mona Lisa?',correct:'Leonardo da Vinci',wrong:['Michelangelo','Raphael','Vincent van Gogh']},
+      {id:'h5',cat:'history',diff:'medium',q:'The pyramids of Giza were built by the ancient…',correct:'Egyptians',wrong:['Romans','Greeks','Mayans']},
+      {id:'h6',cat:'history',diff:'medium',q:'In which year did the Titanic sink?',correct:'1912',wrong:['1905','1920','1898']},
+      {id:'t1',cat:'tech',diff:'easy',q:'What does "CPU" stand for?',correct:'Central Processing Unit',wrong:['Computer Personal Unit','Central Process Utility','Core Power Unit']},
+      {id:'t2',cat:'tech',diff:'easy',q:'Who co-founded Microsoft?',correct:'Bill Gates',wrong:['Steve Jobs','Elon Musk','Mark Zuckerberg']},
+      {id:'t3',cat:'tech',diff:'medium',q:'HTML is primarily used to…',correct:'Structure web pages',wrong:['Style web pages','Query databases','Compile code']},
+      {id:'t4',cat:'tech',diff:'medium',q:'In which year was the first iPhone released?',correct:'2007',wrong:['2005','2009','2010']},
+      {id:'t5',cat:'tech',diff:'easy',q:'"www" stands for World Wide…',correct:'Web',wrong:['Wide','Window','Wire']},
+      {id:'t6',cat:'tech',diff:'medium',q:'Which company develops the Android OS?',correct:'Google',wrong:['Apple','Microsoft','Samsung']},
+    ];
+    // admin question store
+    const hidden = {s6:true, m5:true};
+    this.state = {
+      ...this.state,
+      questions: this.BANK.map(b=>({...b, status: hidden[b.id] ? 'hidden':'active'})),
+    };
+  }
+
+  state = {
+    screen:'home',
+    nickname:'', nickDraft:'',
+    category:'any', difficulty:'any', count:10,
+    mode:'solo',
+    round:[], qIndex:0, answers:[], graded:false, selected:null,
+    creatorName:'', creatorScore:0, creatorAnswers:[], duelCode:'',
+    friendDraft:'', friendName:'',
+    togetherCode:'', players:[], curPlayer:0,
+    joinCodeInput:'', joinNickInput:'',
+    adminUser:'', adminPass:'', adminAuthed:false, adminError:'', adminScreen:'dashboard',
+    qSearch:'', qFilter:'all',
+    showQModal:false, editId:null,
+    draftQ:'', draftCorrect:'', draftWrongs:['','',''], draftCat:'science', draftDiff:'easy',
+    toast:null, toastIcon:'✅',
+    questions:[],
+  };
+
+  // ---------- helpers ----------
+  shuffle(a){ const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; }
+  catMeta(id){ return this.CATS.find(c=>c.id===id) || {label:id,icon:'🎲'}; }
+  diffLabel(d){ return d==='easy'?'Easy':d==='medium'?'Medium':d==='hard'?'Hard':'Any'; }
+  diffPill(d){
+    if(d==='easy') return 'background:#E6FAF0;color:#16A765;';
+    if(d==='medium') return 'background:#FFF4E0;color:#D9871F;';
+    if(d==='hard') return 'background:#FFEDED;color:#E5484D;';
+    return 'background:#F4F3F9;color:#6b6685;';
+  }
+
+  buildRound(){
+    let pool = this.BANK.filter(b=>{
+      if(this.state.category!=='any' && b.cat!==this.state.category) return false;
+      if(this.state.difficulty!=='any' && b.diff!==this.state.difficulty) return false;
+      return true;
+    });
+    pool = this.shuffle(pool).slice(0, this.state.count);
+    return pool.map(p=>{
+      const choices = this.shuffle([p.correct, ...p.wrong]);
+      return {id:p.id, q:p.q, cat:p.cat, diff:p.diff, choices, correctIndex:choices.indexOf(p.correct), correct:p.correct};
+    });
+  }
+
+  scoreOf(answers, round){
+    return round.reduce((n,q,i)=> n + (answers[i]===q.correctIndex ? 1:0), 0);
+  }
+
+  setToast(msg, icon){
+    this.setState({toast:msg, toastIcon:icon||'✅'});
+    clearTimeout(this._tt);
+    this._tt = setTimeout(()=>this.setState({toast:null}), 2200);
+  }
+
+  startRound(mode){
+    const round = this.buildRound();
+    this.setState({mode, round, qIndex:0, answers:[], graded:false, selected:null, screen:'game'});
+  }
+
+  selectAnswer(i){
+    if(this.state.graded) return;
+    const answers = this.state.answers.slice();
+    answers[this.state.qIndex] = i;
+    this.setState({selected:i, graded:true, answers});
+    const wait = (this.props.motion==='Minimal')?700:1250;
+    clearTimeout(this._adv);
+    this._adv = setTimeout(()=>this.advance(), wait);
+  }
+
+  advance(){
+    clearTimeout(this._adv);
+    if(this.state.qIndex+1 < this.state.round.length){
+      this.setState(s=>({qIndex:s.qIndex+1, graded:false, selected:null}));
+    } else {
+      this.finishRound();
+    }
+  }
+
+  genCode(){ return Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join(''); }
+
+  createGame(){
+    const round = this.buildRound();
+    const code = this.genCode();
+    const host = this.state.nickname || 'You';
+    this.setState({
+      mode:'together', round, togetherCode:code,
+      players:[{name:host, isHost:true, isYou:true, played:false, score:0}],
+      curPlayer:0, screen:'lobby',
+    });
+  }
+
+  simulateJoin(){
+    const names = ['Sam','Priya','Jordan','Mia','Theo','Ana','Kai','Noor'];
+    const used = this.state.players.map(p=>p.name);
+    const pick = names.find(n=>!used.includes(n)) || ('Player'+(this.state.players.length+1));
+    const players = this.state.players.concat([{name:pick, isHost:false, isYou:false, played:false, score:0}]);
+    this.setState({players});
+    this.setToast(pick+' joined the game','👋');
+  }
+
+  playAs(idx){
+    this.setState({curPlayer:idx, qIndex:0, answers:[], graded:false, selected:null, screen:'game'});
+  }
+
+  joinGame(){
+    const code = (this.state.joinCodeInput||'').trim().toUpperCase();
+    if(code !== this.state.togetherCode || !this.state.togetherCode){
+      this.setToast('No game found for that code','🔍'); return;
+    }
+    const nick = (this.state.joinNickInput||'').trim();
+    if(!nick){ this.setToast('Enter a nickname','✏️'); return; }
+    const players = this.state.players.concat([{name:nick, isHost:false, isYou:false, played:false, score:0}]);
+    const idx = players.length-1;
+    this.setState({players, curPlayer:idx, qIndex:0, answers:[], graded:false, selected:null, screen:'game'});
+  }
+
+  finishRound(){
+    const score = this.scoreOf(this.state.answers, this.state.round);
+    if(this.state.mode==='solo'){
+      this.setState({screen:'soloResults'});
+    } else if(this.state.mode==='duelCreate'){
+      const code = this.genCode();
+      this.setState({screen:'invite', creatorName:this.state.nickname||'You', creatorScore:score, creatorAnswers:this.state.answers.slice(), duelCode:code});
+    } else if(this.state.mode==='duelJoin'){
+      this.setState({screen:'duelResults'});
+    } else if(this.state.mode==='together'){
+      const players = this.state.players.map((p,i)=> i===this.state.curPlayer ? {...p, played:true, score} : p);
+      this.setState({players, screen:'lobby'});
+    }
+  }
+
+  // build a deterministic QR-style matrix from a code (decorative, prototype)
+  makeQR(code){
+    const N = 25;
+    let h = 2166136261;
+    const seed = 'trivyy:'+code;
+    for(let i=0;i<seed.length;i++){ h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+    const rnd = ()=>{ h ^= h<<13; h ^= h>>>17; h ^= h<<5; return ((h>>>0)%1000)/1000; };
+    const finder = (r,c)=> (r<7&&c<7) || (r<7&&c>=N-7) || (r>=N-7&&c<7);
+    const inFinder = (r,c,r0,c0)=>{ const dr=r-r0, dc=c-c0; const ring=(dr===0||dr===6||dc===0||dc===6); const core=(dr>=2&&dr<=4&&dc>=2&&dc<=4); return ring||core; };
+    const cells=[];
+    const px=5, gap=0, off=8;
+    for(let r=0;r<N;r++){ for(let c=0;c<N;c++){
+      let on=false;
+      if(r<7&&c<7) on=inFinder(r,c,0,0);
+      else if(r<7&&c>=N-7) on=inFinder(r,c,0,N-7);
+      else if(r>=N-7&&c<7) on=inFinder(r,c,N-7,0);
+      else on = rnd()>0.5;
+      if(on) cells.push(React.createElement('rect',{key:r+'-'+c, x:off+c*px, y:off+r*px, width:px, height:px, rx:1, fill:'#231F3B'}));
+    }}
+    const size = N*px+off*2;
+    return React.createElement('svg',{width:128, height:128, viewBox:'0 0 '+size+' '+size, style:{display:'block'}},
+      React.createElement('rect',{x:0,y:0,width:size,height:size,fill:'#fff'}),
+      ...cells
+    );
+  }
+
+  icon(name, size){
+    size = size || 22;
+    const P = (d, extra)=> React.createElement('path', Object.assign({d, fill:'none', stroke:'currentColor', strokeWidth:1.8, strokeLinecap:'round', strokeLinejoin:'round'}, extra||{}));
+    const C = (cx,cy,r,extra)=> React.createElement('circle', Object.assign({cx,cy,r, fill:'none', stroke:'currentColor', strokeWidth:1.8}, extra||{}));
+    let kids;
+    switch(name){
+      case 'science': kids=[P('M9 3h6'),P('M10 3v6.4L4.9 17.1A1.9 1.9 0 0 0 6.6 20h10.8a1.9 1.9 0 0 0 1.7-2.9L14 9.4V3'),P('M7.6 14h8.8')]; break;
+      case 'geography': kids=[C(12,12,9),P('M3 12h18'),P('M12 3c3.2 2.6 3.2 15.4 0 18c-3.2-2.6-3.2-15.4 0-18')]; break;
+      case 'movies': kids=[P('M3.5 8h17v10.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z'),P('M3.6 8 5.7 4.4h2.6L6.2 8 M9.7 8l2.1-3.6h2.6L12.3 8 M15.8 8 18 4.4h2.6L18.4 8')]; break;
+      case 'music': kids=[P('M9 17V5l11-2v12'),C(6,17,3),C(17,15,3)]; break;
+      case 'history': kids=[P('M3.5 21h17'),P('M5.5 21v-9 M9.5 21v-9 M14.5 21v-9 M18.5 21v-9'),P('M12 3.2 3.8 8h16.4z')]; break;
+      case 'tech': kids=[P('M7 7h10v10H7z'),P('M10.5 10.5h3v3h-3z'),P('M9.5 4.5v2.5 M14.5 4.5v2.5 M9.5 17v2.5 M14.5 17v2.5 M4.5 9.5h2.5 M4.5 14.5h2.5 M17 9.5h2.5 M17 14.5h2.5')]; break;
+      case 'dice': kids=[P('M5 5h14v14H5z'),P('M8.6 8.6h.01 M15.4 8.6h.01 M12 12h.01 M8.6 15.4h.01 M15.4 15.4h.01',{strokeWidth:2.6})]; break;
+      case 'target': kids=[C(12,12,8.4),C(12,12,4.4),C(12,12,1,{strokeWidth:2.4})]; break;
+      case 'swords': kids=[P('M4 4h3.2L18 14.8'),P('M20 4h-3.2L6 14.8'),P('M4 16.4 7.6 20 M20 16.4 16.4 20 M13.6 14l3.6 3.6 M10.4 14 6.8 17.6')]; break;
+      case 'people': kids=[C(8.6,8,3),P('M3 20v-1.3A4 4 0 0 1 7 14.7h3.2a4 4 0 0 1 4 4V20'),P('M15.8 5.4a3 3 0 0 1 0 5.6 M15.6 14.7h1.1a4 4 0 0 1 4 4V20')]; break;
+      case 'trophy': kids=[P('M8 21h8 M12 17.4V21 M7 4.5h10v3.6a5 5 0 0 1-10 0z'),P('M7 6.6H4.6v1.4a3 3 0 0 0 3 3 M17 6.6h2.4v1.4a3 3 0 0 1-3 3')]; break;
+      case 'check': kids=[P('M20 6.5 9.2 17.5 4 12.3')]; break;
+      case 'cross': kids=[P('M6.5 6.5l11 11 M17.5 6.5l-11 11')]; break;
+      case 'link': kids=[P('M9.6 14.4 14.4 9.6'),P('M11 7.2 12.6 5.6a3.4 3.4 0 0 1 4.8 4.8L15.8 12'),P('M13 16.8l-1.6 1.6a3.4 3.4 0 0 1-4.8-4.8L8.2 12')]; break;
+      case 'share': kids=[C(6,12,2.3),C(17,6,2.3),C(17,18,2.3),P('M8 11 15 7.2 M8 13 15 16.8')]; break;
+      case 'play': kids=[P('M8 5.5v13l11-6.5z')]; break;
+      case 'help': kids=[C(12,12,9),P('M9.4 9.2a2.6 2.6 0 0 1 5.1.7c0 1.7-2.5 2.1-2.5 4'),P('M12 17.4h.01',{strokeWidth:2.4})]; break;
+      case 'ticket': kids=[P('M4 8.5A1.5 1.5 0 0 1 5.5 7h13A1.5 1.5 0 0 1 20 8.5v1a2 2 0 0 0 0 5v1A1.5 1.5 0 0 1 18.5 17h-13A1.5 1.5 0 0 1 4 15.5v-1a2 2 0 0 0 0-5z'),P('M13.5 7v10',{strokeDasharray:'2 2.6'})]; break;
+      case 'lock': kids=[P('M6.5 11h11a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1V12a1 1 0 0 1 1-1z'),P('M8 11V8.5a4 4 0 0 1 8 0V11')]; break;
+      case 'clock': kids=[C(12,12,8.5),P('M12 7.5V12l3 1.8')]; break;
+      case 'send': kids=[P('M20 4 3 11l6.5 2.2L12 20l3-7z'),P('M9.5 13.2 20 4')]; break;
+      case 'plus': kids=[P('M12 5.5v13 M5.5 12h13')]; break;
+      default: kids=[C(12,12,8.5)];
+    }
+    return React.createElement('svg',{width:size,height:size,viewBox:'0 0 24 24',style:{display:'block',flex:'none'}}, ...kids);
+  }
+
+  // ---------- render ----------
+  renderVals(){
+    const S = this.state, P = this.props;
+    const v = {};
+
+    // theme tokens
+    const accents = {Indigo:['#6C5CE7','#5a4ad1','#F4F2FE'], Grape:['#8B5CF6','#7338e0','#F5F0FE'], Teal:['#0EA5A5','#0b8585','#ECFAFA'], Coral:['#F2637E','#dc4768','#FEF0F3']};
+    const acc = accents[P.accent] || accents.Indigo;
+    const display = P.display ? `'${P.display}'` : "'Fredoka'";
+    const motion = P.motion || 'Subtle';
+    const tv = {'--accent':acc[0], '--accent-strong':acc[1], '--accent-soft':acc[2], '--display':display};
+    if(motion==='Playful'){ tv['--pop']='.55s'; tv['--ease']='cubic-bezier(.34,1.56,.5,1)'; }
+    else if(motion==='Minimal'){ tv['--pop']='.001s'; tv['--t']='.05s'; }
+    v.themeVars = tv;
+
+    // screen flags
+    v.isHome = S.screen==='home';
+    v.isSetup = S.screen==='setup';
+    v.isGame = S.screen==='game';
+    v.isSoloDuelGame = S.screen==='game' && S.mode!=='together';
+    v.isTogetherGame = S.screen==='game' && S.mode==='together';
+    v.isTogetherSetup = S.screen==='togetherSetup';
+    v.isLobby = S.screen==='lobby';
+    v.isJoinCode = S.screen==='joinCode';
+    v.isLeaderboard = S.screen==='leaderboard';
+    v.isSoloResults = S.screen==='soloResults';
+    v.isInvite = S.screen==='invite';
+    v.isJoin = S.screen==='join';
+    v.isDuelResults = S.screen==='duelResults';
+    v.isAdminLogin = S.screen==='adminLogin';
+    v.isAdminDash = S.screen==='admin' && S.adminScreen==='dashboard';
+    v.isAdminQ = S.screen==='admin' && S.adminScreen==='questions';
+    v.showPlayerHeader = ['home','setup','togetherSetup','soloResults','invite','join','duelResults','lobby','leaderboard'].includes(S.screen);
+
+    v.nickname = S.nickname;
+    v.nickInitial = (S.nickname||'?').charAt(0).toUpperCase();
+    v.nickDraft = S.nickDraft;
+
+    // ---- home ----
+    v.onNickInput = e=>{ const val=e.target.value; this.setState({nickDraft:val, nickname:val.trim()}); };
+    v.onPlaySolo = ()=>{ if(!S.nickname){ this.setToast('Pick a nickname first','✏️'); return; } this.setState({mode:'solo', screen:'setup'}); };
+    v.onChallenge = ()=>{ if(!S.nickname){ this.setToast('Pick a nickname first','✏️'); return; } this.setState({mode:'duelCreate', screen:'setup'}); };
+    v.onPlayTogether = ()=>{ if(!S.nickname){ this.setToast('Pick a nickname first','✏️'); return; } this.setState({mode:'together', screen:'togetherSetup'}); };
+    v.onJoinByCode = ()=> this.setState({screen:'joinCode', joinCodeInput:'', joinNickInput:''});
+    v.soloIcon = this.icon('target', 21);
+    v.challengeIcon = this.icon('swords', 21);
+    v.togetherIcon = this.icon('people', 21);
+    v.sendIcon = this.icon('send', 32);
+    v.clockIcon = this.icon('clock', 20);
+    v.ticketIcon = this.icon('ticket', 30);
+    v.lockIcon = this.icon('lock', 26);
+    v.goHome = ()=> this.setState({screen:'home'});
+    v.goAdmin = ()=> this.setState({screen:'adminLogin'});
+
+    // ---- setup ----
+    v.setupKicker = S.mode==='duelCreate' ? 'CHALLENGE A FRIEND' : 'SOLO ROUND';
+    v.isDuelSetup = S.mode==='duelCreate';
+    v.startVerb = S.mode==='duelCreate' ? 'challenge' : 'round';
+    v.categoryCards = [{id:'any',label:'Surprise me',ic:'dice'}, ...this.CATS.map(c=>({id:c.id,label:c.label,ic:c.id}))].map(c=>{
+      const sel = S.category===c.id;
+      return {label:c.label, icon:this.icon(c.ic, 25), onClick:()=>this.setState({category:c.id}),
+        style: `display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px 8px;border-radius:16px;cursor:pointer;text-align:center;transition:all .15s;border:2px solid ${sel?'var(--accent)':'#ECEAF5'};background:${sel?'var(--accent-soft)':'#fff'};color:${sel?'var(--accent-strong)':'#5b5677'};box-shadow:${sel?'0 4px 12px rgba(108,92,231,.16)':'0 1px 4px rgba(43,38,74,.04)'};`};
+    });
+    v.difficultyChips = [['any','Any'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([id,label])=>{
+      const sel = S.difficulty===id;
+      return {label, onClick:()=>this.setState({difficulty:id}),
+        style:`flex:1;text-align:center;padding:12px 4px;border-radius:13px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;border:2px solid ${sel?'var(--accent)':'#ECEAF5'};background:${sel?'var(--accent-soft)':'#fff'};color:${sel?'var(--accent-strong)':'#6b6685'};`};
+    });
+    v.countChips = [5,10,15].map(n=>{
+      const sel = S.count===n;
+      return {label:String(n), onClick:()=>this.setState({count:n}),
+        style:`flex:1;text-align:center;padding:13px 4px;border-radius:13px;font-family:var(--display),sans-serif;font-size:17px;font-weight:600;cursor:pointer;transition:all .15s;border:2px solid ${sel?'var(--accent)':'#ECEAF5'};background:${sel?'var(--accent-soft)':'#fff'};color:${sel?'var(--accent-strong)':'#6b6685'};`};
+    });
+    const catLbl = S.category==='any' ? 'mixed topics' : this.catMeta(S.category).label;
+    const avail = this.BANK.filter(b=> (S.category==='any'||b.cat===S.category) && (S.difficulty==='any'||b.diff===S.difficulty)).length;
+    const realCount = Math.min(S.count, avail);
+    v.summaryIcon = this.icon(S.category==='any' ? 'dice' : S.category, 18);
+    v.setupSummary = `${realCount} ${this.diffLabel(S.difficulty).toLowerCase()==='any'?'mixed-difficulty':this.diffLabel(S.difficulty).toLowerCase()} questions on ${catLbl}.`;
+    v.onStart = ()=> this.startRound(S.mode==='duelCreate'?'duelCreate':'solo');
+
+    // ---- game ----
+    const round = S.round, q = round[S.qIndex];
+    v.quitGame = ()=>{ clearTimeout(this._adv); this.setState({screen:'home'}); };
+    v.qNum = S.qIndex+1;
+    v.qTotal = round.length;
+    v.scoreNow = this.scoreOf(S.answers, round);
+    const answeredFrac = (S.qIndex + (S.graded?1:0)) / Math.max(round.length,1);
+    v.progressPct = Math.round(answeredFrac*100)+'%';
+    if(q){
+      const cm = this.catMeta(q.cat);
+      v.qCatIcon = this.icon(q.cat, 15); v.qCatLabel = cm.label;
+      v.qDiffLabel = this.diffLabel(q.diff); v.qDiffStyle = this.diffPill(q.diff);
+      v.qText = q.q;
+      v.choices = q.choices.map((text,i)=>{
+        let card, letter, badge=String.fromCharCode(65+i);
+        const base = 'display:flex;align-items:center;gap:13px;width:100%;padding:15px 16px;border-radius:17px;cursor:pointer;text-align:left;transition:all .18s;font-family:inherit;';
+        const baseLetter = 'flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-weight:800;font-size:15px;transition:all .18s;';
+        if(!S.graded){
+          card = base+'border:2px solid #ECEAF5;background:#fff;color:#2B264A;';
+          letter = baseLetter+'background:#F2F0FB;color:var(--accent);';
+        } else {
+          const isCorrect = i===q.correctIndex;
+          const isPicked = i===S.selected;
+          if(isCorrect){
+            card = base+'border:2px solid #16C079;background:#ECFBF3;color:#127A4E;';
+            letter = baseLetter+'background:#16C079;color:#fff;'; badge='✓';
+          } else if(isPicked){
+            card = base+'border:2px solid #FF5C5C;background:#FFF1F1;color:#C0353A;';
+            letter = baseLetter+'background:#FF5C5C;color:#fff;'; badge='✕';
+          } else {
+            card = base+'border:2px solid #ECEAF5;background:#fff;color:#2B264A;opacity:.5;';
+            letter = baseLetter+'background:#F2F0FB;color:#A8A3BE;';
+          }
+        }
+        return {text, badge, style:card, letterStyle:letter, onClick:()=>this.selectAnswer(i)};
+      });
+      v.graded = S.graded;
+      const right = S.selected===q.correctIndex;
+      v.gradeIcon = this.icon(right ? 'check' : 'cross', 16);
+      v.gradeIconWrap = `flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;background:${right?'#16C079':'#E5685C'};`;
+      v.gradeMsg = right ? (['Nailed it','Correct','Yes','Sharp'][S.qIndex%4]) : 'Not quite';
+      v.gradeColor = right ? 'color:#16A765;' : 'color:#E5484D;';
+      v.nextLabel = (S.mode==='together')
+        ? ((S.qIndex+1<round.length) ? 'Next question' : 'Finish my round →')
+        : ((S.qIndex+1<round.length) ? 'Next question' : 'See results');
+      v.onNext = ()=> this.advance();
+    } else {
+      v.choices = []; v.graded=false;
+    }
+
+    // ---- solo results ----
+    const sScore = this.scoreOf(S.answers, round);
+    v.finalScore = sScore;
+    v.qTotalResult = round.length;
+    const pct = round.length? sScore/round.length : 0;
+    v.resultIcon = this.icon(pct>=0.4 ? 'trophy' : 'target', 40);
+    v.resultIconWrap = `width:88px;height:88px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;background:${pct>=0.7?'#16C079':pct>=0.4?'var(--accent)':'#F5A623'};box-shadow:0 10px 24px rgba(43,38,74,.16);`;
+    v.resultHeadline = pct===1?'Perfect run':pct>=0.7?'Nice run':pct>=0.4?'Good effort':'Keep going';
+    v.resultSub = pct===1?'You answered every single one.':pct>=0.7?'You really know your stuff.':pct>=0.4?'Solid — a rematch could tip it.':'Everyone starts somewhere. Try again.';
+    v.reviewRows = round.map((qq,i)=>{
+      const picked = S.answers[i];
+      const ok = picked===qq.correctIndex;
+      return {mark: ok?'✓':'✕', markColor: ok?'#16A765':'#E5685C', q:qq.q,
+        your: picked==null?'No answer':qq.choices[picked],
+        yourColor: ok?'#16A765':'#E5484D',
+        showCorrect: !ok, correct:qq.correct};
+    });
+    v.onPlayAgain = ()=> this.startRound('solo');
+    v.onChallengeFromResults = ()=> this.startRound('duelCreate');
+
+    // ---- invite ----
+    v.duelCode = S.duelCode;
+    v.duelLink = `trivyy.app/d/${S.duelCode}`;
+    v.onCopyLink = ()=> this.setToast('Link copied!','🔗');
+    v.onShare = ()=> this.setToast('Sharing… (demo)','📤');
+    v.onSimulateFriend = ()=> this.setState({screen:'join', friendDraft:'', friendName:''});
+
+    // ---- join ----
+    v.creatorName = S.creatorName || 'A friend';
+    v.creatorInitial = (S.creatorName||'?').charAt(0).toUpperCase();
+    v.joinSub = `They scored ${S.creatorScore}/${round.length} on a ${round.length}-question round. Beat it — you can play anytime.`;
+    v.friendDraft = S.friendDraft;
+    v.onFriendInput = e=>{ const val=e.target.value; this.setState({friendDraft:val, friendName:val.trim()}); };
+    v.onStartJoin = ()=>{
+      if(!S.friendName){ this.setToast('Enter a nickname','✏️'); return; }
+      this.setState({mode:'duelJoin', qIndex:0, answers:[], graded:false, selected:null, screen:'game'});
+    };
+
+    // ---- duel results ----
+    const fScore = this.scoreOf(S.answers, round);
+    v.friendName = S.friendName || 'Challenger';
+    v.friendInitial = (S.friendName||'?').charAt(0).toUpperCase();
+    v.friendScore = fScore;
+    v.creatorScore = S.creatorScore;
+    const p1Won = S.creatorScore>fScore, p2Won = fScore>S.creatorScore, tie = S.creatorScore===fScore;
+    v.p1Won = p1Won; v.p2Won = p2Won;
+    v.duelEmoji = this.icon(tie?'people':'trophy', 38);
+    v.duelEmojiWrap = `width:84px;height:84px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;background:${tie?'#F5A623':'#16C079'};box-shadow:0 10px 24px rgba(43,38,74,.16);`;
+    v.duelHeadline = tie?"It's a tie":(p1Won? `${v.creatorName} wins` : `${v.friendName} wins`);
+    v.duelSub = tie?'Dead even — somebody call a rematch.':(Math.abs(S.creatorScore-fScore)===1?'Down to the wire!':'Well played, both of you.');
+    const winCard = 'flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 10px;border-radius:18px;border:2px solid #16C079;background:#F0FCF6;box-shadow:0 6px 16px rgba(22,192,121,.16);';
+    const normCard = 'flex:1;display:flex;flex-direction:column;align-items:center;padding:18px 10px;border-radius:18px;border:1px solid #EFEDF7;background:#fff;box-shadow:0 2px 8px rgba(43,38,74,.05);';
+    v.p1CardStyle = p1Won?winCard:normCard;
+    v.p2CardStyle = p2Won?winCard:normCard;
+    v.p1AvatarStyle = `width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:var(--display),sans-serif;font-weight:700;font-size:21px;color:#fff;background:var(--accent);`;
+    v.p2AvatarStyle = `width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:var(--display),sans-serif;font-weight:700;font-size:21px;color:#fff;background:#F5A623;`;
+    v.p1ScoreColor = p1Won?'#16A765':'#2B264A';
+    v.p2ScoreColor = p2Won?'#16A765':'#2B264A';
+    v.duelRows = round.map((qq,i)=>{
+      const a1=S.creatorAnswers[i], a2=S.answers[i];
+      const ok1=a1===qq.correctIndex, ok2=a2===qq.correctIndex;
+      return {num:i+1, q:qq.q,
+        p1Name:v.creatorName, p1Mark:ok1?'✅':'❌', p1Ans:a1==null?'—':qq.choices[a1], p1Color:ok1?'#16A765':'#E5484D',
+        p2Name:v.friendName, p2Mark:ok2?'✅':'❌', p2Ans:a2==null?'—':qq.choices[a2], p2Color:ok2?'#16A765':'#E5484D',
+        showCorrect: !(ok1&&ok2), correct:qq.correct};
+    });
+    v.onRematch = ()=> this.startRound('duelCreate');
+
+    // ---- play together (online) ----
+    const settingsCat = S.category==='any' ? 'Mixed topics' : this.catMeta(S.category).label;
+    const total = (S.round && S.round.length) ? S.round.length : S.count;
+    v.lobbySettingsText = `${settingsCat} · ${this.diffLabel(S.difficulty)} · ${total} questions`;
+    v.onCreateGame = ()=> this.createGame();
+    v.lobbyCode = S.togetherCode;
+    v.qrEl = this.makeQR(S.togetherCode || 'TRIVYY');
+    v.onCopyLobby = ()=> this.setToast('Invite link copied!','🔗');
+    v.onShareLobby = ()=> this.setToast('Sharing… (demo)','📤');
+    v.onSimJoin = ()=> this.simulateJoin();
+    v.playerCount = S.players.length;
+    const palettes = ['#F5A623','#16C079','#E2517A','#2BA7C9'];
+    const avatarFor = (p,i)=> `flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--display),sans-serif;font-weight:700;font-size:17px;color:#fff;background:${p.isHost?'var(--accent)':palettes[i%palettes.length]};`;
+    v.lobbyPlayers = S.players.map((p,i)=>({
+      name:p.name, initial:(p.name||'?').charAt(0).toUpperCase(),
+      youTag: p.isHost?'· host':(p.isYou?'· you':''),
+      avatarStyle: avatarFor(p,i),
+      statusText: p.played ? 'Finished their round' : 'Yet to play',
+      canPlay: !p.played, done: p.played,
+      playLabel: 'Play',
+      scoreText: p.score+'/'+total+' ✓',
+      onPlay: ()=> this.playAs(i),
+    }));
+    const allDone = S.players.length>0 && S.players.every(p=>p.played);
+    v.allPlayed = allDone;
+    v.notAllPlayed = !allDone;
+    const remaining = S.players.filter(p=>!p.played).length;
+    v.waitingText = S.players.length<=1 ? 'Invite a friend, then take turns playing.' : `${remaining} player${remaining===1?'':'s'} still to play.`;
+    v.onSeeLeaderboard = ()=> this.setState({screen:'leaderboard'});
+
+    // gameplay (together) top bar
+    const curP = S.players[S.curPlayer];
+    v.turnName = curP ? curP.name : (S.nickname||'You');
+    v.turnPillBg = (curP && !curP.isHost) ? '#F5A623' : 'var(--accent)';
+
+    // join by code
+    v.joinCodeInput = S.joinCodeInput;
+    v.joinCodePlaceholder = S.togetherCode ? S.togetherCode : '— — — — —';
+    v.onJoinCodeInput = e=> this.setState({joinCodeInput:e.target.value.toUpperCase()});
+    const codeMatch = !!S.togetherCode && (S.joinCodeInput||'').trim().toUpperCase()===S.togetherCode;
+    v.joinFound = codeMatch;
+    v.joinNotFound = !codeMatch;
+    const hostP = S.players.find(p=>p.isHost);
+    v.joinFoundText = `${hostP?hostP.name:'A friend'} invited you to a ${settingsCat.toLowerCase()} quiz · ${total} questions.`;
+    v.joinHint = S.togetherCode ? `Tip: this demo's active code is ${S.togetherCode}.` : 'No active game yet — create one from "Play together".';
+    v.joinNickInput = S.joinNickInput;
+    v.onJoinNickInput = e=> this.setState({joinNickInput:e.target.value});
+    v.joinBtnBg = (codeMatch && (S.joinNickInput||'').trim()) ? 'var(--accent)' : '#C9C3E6';
+    v.onJoinGame = ()=> this.joinGame();
+
+    // leaderboard
+    const ranked = S.players.map((p,idx)=>({...p, _idx:idx})).sort((a,b)=> b.score-a.score);
+    const topScore = ranked.length?ranked[0].score:0;
+    const winners = ranked.filter(p=>p.score===topScore);
+    v.leaderEmoji = this.icon(winners.length>1 ? 'people' : 'trophy', 38);
+    v.leaderEmojiWrap = `width:84px;height:84px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;background:${winners.length>1?'#F5A623':'#16C079'};box-shadow:0 10px 24px rgba(43,38,74,.16);`;
+    v.leaderHeadline = ranked.length===0 ? '' : (winners.length>1 ? "It's a tie" : `${ranked[0].name} wins`);
+    v.leaderSub = winners.length>1 ? `${winners.map(w=>w.name).join(' & ')} share the top spot.` : `${topScore}/${total} — nicely done.`;
+    const medals=['🥇','🥈','🥉'];
+    v.leaderRows = ranked.map((p,i)=>{
+      const isWinner = p.score===topScore;
+      return {rank:i+1, name:p.name, initial:(p.name||'?').charAt(0).toUpperCase(),
+        avatarStyle: avatarFor(p, p._idx),
+        medal: medals[i]||'',
+        rankColor: isWinner?'#16A765':'#A8A3BE',
+        pct: total?Math.round(p.score/total*100)+'% correct':'',
+        score:p.score, total,
+        scoreColor: isWinner?'#16A765':'#2B264A',
+        rowStyle: isWinner ? 'border:2px solid #16C079;background:#F0FCF6;box-shadow:0 6px 16px rgba(22,192,121,.14);' : 'border:1px solid #EFEDF7;background:#fff;box-shadow:0 2px 8px rgba(43,38,74,.04);'};
+    });
+    v.onTogetherRematch = ()=>{
+      const round = this.buildRound();
+      const players = S.players.map(p=>({...p, played:false, score:0}));
+      this.setState({round, players, togetherCode:this.genCode(), curPlayer:0, screen:'lobby', qIndex:0, answers:[], graded:false, selected:null});
+    };
+
+    // ---- admin login ----
+    v.adminUser=S.adminUser; v.adminPass=S.adminPass; v.adminError=S.adminError;
+    v.onAdminUser = e=>this.setState({adminUser:e.target.value, adminError:''});
+    v.onAdminPass = e=>this.setState({adminPass:e.target.value, adminError:''});
+    v.onAdminLogin = ()=>{
+      if(S.adminUser.trim()==='admin' && S.adminPass==='trivyy'){
+        this.setState({screen:'admin', adminScreen:'dashboard', adminError:'', adminPass:''});
+      } else { this.setState({adminError:'Wrong username or password. Try admin / trivyy.'}); }
+    };
+    v.onAdminLogout = ()=> this.setState({screen:'adminLogin', adminUser:'', adminPass:''});
+    v.goDash = ()=> this.setState({adminScreen:'dashboard'});
+    v.goQuestions = ()=> this.setState({adminScreen:'questions'});
+    const tab = (active)=> `padding:9px 16px;border-radius:11px 11px 0 0;font-size:14px;font-weight:600;cursor:pointer;background:${active?'#F7F6FB':'transparent'};color:${active?'#2B264A':'#B5B0CC'};`;
+    v.tabDashStyle = tab(S.adminScreen==='dashboard');
+    v.tabQStyle = tab(S.adminScreen==='questions');
+
+    // ---- admin dashboard ----
+    const activeQ = S.questions.filter(q2=>q2.status==='active').length;
+    v.statCards = [
+      {icon:this.icon('help',18), label:'Total questions', value:String(S.questions.length)},
+      {icon:this.icon('play',18), label:'Games played', value:'1,248'},
+      {icon:this.icon('people',18), label:'Active players', value:'342'},
+      {icon:this.icon('target',18), label:'Avg. score', value:'68%'},
+    ];
+    const bars=[42,55,38,61,73,52,80]; const maxB=Math.max(...bars); const days=['M','T','W','T','F','S','S'];
+    v.chartBars = bars.map((b,i)=>({h:Math.round(b/maxB*100)+'%', label:days[i]}));
+    v.missedRows = [
+      {q:'Which country spans the most time zones?', rate:'71%'},
+      {q:'The speed of light is roughly…', rate:'63%'},
+      {q:'"Here\u2019s looking at you, kid" is a line from…', rate:'58%'},
+      {q:'What is the capital of Australia?', rate:'49%'},
+    ];
+
+    // ---- admin questions ----
+    v.qSearch = S.qSearch;
+    v.onQSearch = e=>this.setState({qSearch:e.target.value});
+    const filters = [['all','All'],['active','Active'],['hidden','Hidden'], ...this.CATS.map(c=>[c.id,c.label])];
+    v.qFilterChips = filters.map(([id,label])=>{
+      const sel=S.qFilter===id;
+      return {label, onClick:()=>this.setState({qFilter:id}),
+        style:`flex:none;padding:8px 13px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${sel?'var(--accent)':'#ECEAF5'};background:${sel?'var(--accent)':'#fff'};color:${sel?'#fff':'#6b6685'};`};
+    });
+    const term = S.qSearch.trim().toLowerCase();
+    const filtered = S.questions.filter(q2=>{
+      if(term && !q2.q.toLowerCase().includes(term)) return false;
+      if(S.qFilter==='all') return true;
+      if(S.qFilter==='active') return q2.status==='active';
+      if(S.qFilter==='hidden') return q2.status==='hidden';
+      return q2.cat===S.qFilter;
+    });
+    v.qCount = S.questions.length;
+    v.hasQuestions = filtered.length>0;
+    v.noQuestions = filtered.length===0;
+    v.questionRows = filtered.map(q2=>{
+      const hidden = q2.status==='hidden';
+      return {q:q2.q, dim: hidden?'opacity:.62;':'',
+        catLabel:this.catMeta(q2.cat).label, diffLabel:this.diffLabel(q2.diff), diffStyle:this.diffPill(q2.diff),
+        statusLabel: hidden?'Hidden':'Active',
+        statusStyle: `flex:none;height:fit-content;font-size:11px;font-weight:800;letter-spacing:.3px;padding:4px 9px;border-radius:99px;${hidden?'background:#F1EFF7;color:#A8A3BE;':'background:#E6FAF0;color:#16A765;'}`,
+        toggleLabel: hidden?'Show':'Hide',
+        onEdit: ()=> this.openEdit(q2.id),
+        onToggle: ()=> this.toggleStatus(q2.id),
+      };
+    });
+
+    // ---- modal ----
+    v.showQModal = S.showQModal;
+    v.modalTitle = S.editId ? 'Edit question' : 'Add a question';
+    v.saveLabel = S.editId ? 'Save changes' : 'Add question';
+    v.draftQ = S.draftQ; v.draftCorrect=S.draftCorrect; v.draftCat=S.draftCat; v.draftDiff=S.draftDiff;
+    v.onDraftQ = e=>this.setState({draftQ:e.target.value});
+    v.onDraftCorrect = e=>this.setState({draftCorrect:e.target.value});
+    v.draftWrongs = S.draftWrongs.map((val,i)=>({value:val, ph:`Wrong answer ${i+1}`, onInput:e=>{ const w=this.state.draftWrongs.slice(); w[i]=e.target.value; this.setState({draftWrongs:w}); }}));
+    v.catOptions = this.CATS;
+    v.onDraftCat = e=>this.setState({draftCat:e.target.value});
+    v.onDraftDiff = e=>this.setState({draftDiff:e.target.value});
+    v.onAddQuestion = ()=> this.setState({showQModal:true, editId:null, draftQ:'', draftCorrect:'', draftWrongs:['','',''], draftCat:'science', draftDiff:'easy'});
+    v.onCancelModal = ()=> this.setState({showQModal:false});
+    v.onSaveQuestion = ()=>{
+      if(!S.draftQ.trim() || !S.draftCorrect.trim()){ this.setToast('Add a question and answer','✏️'); return; }
+      const wrongs = S.draftWrongs.map(w=>w.trim()).filter(Boolean);
+      if(wrongs.length<3){ this.setToast('Add three wrong answers','✏️'); return; }
+      const qs = this.state.questions.slice();
+      if(S.editId){
+        const idx = qs.findIndex(x=>x.id===S.editId);
+        qs[idx] = {...qs[idx], q:S.draftQ.trim(), correct:S.draftCorrect.trim(), wrong:wrongs.slice(0,3), cat:S.draftCat, diff:S.draftDiff};
+        this.setState({questions:qs, showQModal:false}); this.setToast('Question updated','✅');
+      } else {
+        qs.unshift({id:'q'+Date.now(), q:S.draftQ.trim(), correct:S.draftCorrect.trim(), wrong:wrongs.slice(0,3), cat:S.draftCat, diff:S.draftDiff, status:'active'});
+        this.setState({questions:qs, showQModal:false}); this.setToast('Question added','✅');
+      }
+    };
+
+    v.toast = S.toast; v.toastIcon = S.toastIcon;
+    return v;
+  }
+
+  openEdit(id){
+    const q = this.state.questions.find(x=>x.id===id);
+    if(!q) return;
+    const w = (q.wrong||['','','']).slice(0,3); while(w.length<3) w.push('');
+    this.setState({showQModal:true, editId:id, draftQ:q.q, draftCorrect:q.correct, draftWrongs:w, draftCat:q.cat, draftDiff:q.diff});
+  }
+  toggleStatus(id){
+    const qs = this.state.questions.map(q=> q.id===id ? {...q, status: q.status==='active'?'hidden':'active'} : q);
+    this.setState({questions:qs});
+  }
+}
+</script>
+</body>
+</html>
