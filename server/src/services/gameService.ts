@@ -1,7 +1,7 @@
 import { pool } from '../db/pool';
 import { logger } from '../lib/logger';
 import { scoreRound } from '../domain/scoring';
-import { buildChoices } from '../domain/choices';
+import { buildChoices, seededRng } from '../domain/choices';
 import { pickQuestions, type DifficultyFilter } from './questionService';
 
 /**
@@ -136,11 +136,24 @@ export async function submitAnswer(
   const correctAnswer = question.rows[0].correct_answer;
   const correct = selectedAnswer === correctAnswer;
 
-  await pool.query(
+  // First answer per question locks in; a re-submit is a no-op (idempotent via
+  // the unique (game_id, player_id, question_id) constraint) so a player cannot
+  // inflate their score by answering twice.
+  const inserted = await pool.query(
     `INSERT INTO answers (game_id, player_id, question_id, selected_answer, is_correct, elapsed_ms)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (game_id, player_id, question_id) DO NOTHING`,
     [gameId, playerId, questionId, selectedAnswer, correct, elapsedMs ?? null],
   );
+  // Only a genuinely new answer is recorded in the audit trail (DB-5, OBS-3)
+  // and logged (OBS-1, OBS-2) — re-submits add nothing.
+  if (inserted.rowCount && inserted.rowCount > 0) {
+    await pool.query(
+      `INSERT INTO events (game_id, type, payload) VALUES ($1, 'answer_submitted', $2)`,
+      [gameId, JSON.stringify({ playerId, questionId, correct, elapsedMs: elapsedMs ?? null })],
+    );
+    logger.info('answer_submitted', { gameId, correct });
+  }
   return { correct, correctAnswer };
 }
 
@@ -171,13 +184,21 @@ export async function completeGame(gameId: string, playerId: string): Promise<Co
         WHERE game_id = $2 AND player_id = $3`,
       [score, gameId, playerId],
     );
-    await client.query(`UPDATE games SET status = 'complete' WHERE id = $1`, [gameId]);
+    // The game is complete only once every player has finished — for solo that
+    // is immediately (one player), for duel/group when the last one finishes.
+    const pending = await client.query(
+      `SELECT 1 FROM game_players WHERE game_id = $1 AND status <> 'done' LIMIT 1`,
+      [gameId],
+    );
+    if (pending.rows.length === 0) {
+      await client.query(`UPDATE games SET status = 'complete' WHERE id = $1`, [gameId]);
+    }
     await client.query(
-      `INSERT INTO events (game_id, type, payload) VALUES ($1, 'solo_game_completed', $2)`,
+      `INSERT INTO events (game_id, type, payload) VALUES ($1, 'game_completed', $2)`,
       [gameId, JSON.stringify({ playerId, score, total })],
     );
     await client.query('COMMIT');
-    logger.info('solo_game_completed', { gameId, score, total });
+    logger.info('game_completed', { gameId, score, total });
     return { score, total };
   } catch (err) {
     await client.query('ROLLBACK');
@@ -259,7 +280,7 @@ async function loadGame(gameId: string): Promise<GameRow> {
   return result.rows[0];
 }
 
-function toClientQuestion(row: {
+export function toClientQuestion(row: {
   id: string;
   text: string;
   correct_answer: string;
@@ -274,6 +295,8 @@ function toClientQuestion(row: {
     category: row.category_label ?? null,
     categoryIcon: row.category_icon ?? null,
     difficulty: row.difficulty,
-    choices: buildChoices(row.correct_answer, row.incorrect_answers),
+    // Seed the shuffle by question id so the option order is identical on every
+    // serve — same for both duel players and any re-fetch (API-6).
+    choices: buildChoices(row.correct_answer, row.incorrect_answers, seededRng(row.id)),
   };
 }

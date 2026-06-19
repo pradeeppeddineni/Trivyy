@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { shuffle, buildChoices } from '../src/domain/choices';
+import { shuffle, buildChoices, seededRng } from '../src/domain/choices';
 
 describe('shuffle', () => {
   it('returns a new array and does not mutate the input', () => {
@@ -37,5 +37,38 @@ describe('buildChoices', () => {
   it('does not flag which choice is correct (plain strings only)', () => {
     const choices = buildChoices('right', ['w1', 'w2', 'w3']);
     expect(choices.every((c) => typeof c === 'string')).toBe(true);
+  });
+
+  it('orders choices identically for the same question seed (API-6)', () => {
+    const a = buildChoices('right', ['w1', 'w2', 'w3'], seededRng('question-42'));
+    const b = buildChoices('right', ['w1', 'w2', 'w3'], seededRng('question-42'));
+    expect(a).toEqual(b);
+  });
+
+  it('orders choices differently for different seeds (still varied)', () => {
+    // Two distinct seeds should not be forced to the same permutation.
+    const orders = new Set(
+      ['q1', 'q2', 'q3', 'q4', 'q5'].map((s) =>
+        buildChoices('right', ['w1', 'w2', 'w3'], seededRng(s)).join('|'),
+      ),
+    );
+    expect(orders.size).toBeGreaterThan(1);
+  });
+});
+
+describe('seededRng', () => {
+  it('produces values in [0, 1)', () => {
+    const rng = seededRng('seed');
+    for (let i = 0; i < 50; i += 1) {
+      const v = rng();
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThan(1);
+    }
+  });
+
+  it('is reproducible for the same seed and differs across seeds', () => {
+    const first = [seededRng('x')(), seededRng('x')()];
+    expect(first[0]).toBe(first[1]);
+    expect(seededRng('x')()).not.toBe(seededRng('y')());
   });
 });

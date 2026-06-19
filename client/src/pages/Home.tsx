@@ -1,12 +1,15 @@
 import type { CSSProperties } from 'react';
 import { Button } from '../components/Button';
+import { Logo } from '../components/Logo';
 import { NicknameInput } from '../components/NicknameInput';
 
 export interface HomeProps {
   readonly nickname: string;
   readonly onNicknameChange: (value: string) => void;
   readonly onPlaySolo: () => void;
-  readonly onComingSoon: (label: string) => void;
+  readonly onChallenge: () => void;
+  readonly onTogether: () => void;
+  readonly onJoin: () => void;
   readonly onAdmin: () => void;
 }
 
@@ -20,25 +23,14 @@ const HERO: CSSProperties = {
   paddingTop: '24px',
 };
 
-const LOGO: CSSProperties = {
-  position: 'relative',
-  width: '92px',
-  height: '92px',
-  borderRadius: 'var(--radius-xl)',
-  background: 'var(--accent)',
-  display: 'grid',
-  placeItems: 'center',
-  boxShadow: 'var(--shadow-logo)',
-  marginBottom: '22px',
-};
-
 /**
  * Home screen (design source of truth): logo, nickname, the three mode buttons,
  * a "Have a code?" link and an Admin link. Play solo is wired fully; the other
  * modes route to a "Coming soon" placeholder for now.
  */
 export function Home(props: HomeProps): JSX.Element {
-  const { nickname, onNicknameChange, onPlaySolo, onComingSoon, onAdmin } = props;
+  const { nickname, onNicknameChange, onPlaySolo, onChallenge, onTogether, onJoin, onAdmin } =
+    props;
 
   return (
     <main
@@ -50,19 +42,8 @@ export function Home(props: HomeProps): JSX.Element {
       }}
     >
       <div style={HERO}>
-        <div style={LOGO}>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              color: '#fff',
-              fontSize: '52px',
-              lineHeight: 1,
-              marginTop: '-2px',
-            }}
-          >
-            T
-          </span>
+        <div style={{ marginBottom: '22px' }}>
+          <Logo size={92} />
         </div>
         <h1
           style={{
@@ -107,18 +88,10 @@ export function Home(props: HomeProps): JSX.Element {
           <Button variant="primary" leftIcon={<span aria-hidden>🎯</span>} onClick={onPlaySolo}>
             Play solo
           </Button>
-          <Button
-            variant="secondary"
-            leftIcon={<span aria-hidden>⚔️</span>}
-            onClick={() => onComingSoon('Challenge a friend')}
-          >
+          <Button variant="secondary" leftIcon={<span aria-hidden>⚔️</span>} onClick={onChallenge}>
             Challenge a friend
           </Button>
-          <Button
-            variant="warning"
-            leftIcon={<span aria-hidden>👥</span>}
-            onClick={() => onComingSoon('Play together')}
-          >
+          <Button variant="warning" leftIcon={<span aria-hidden>👥</span>} onClick={onTogether}>
             Play together
           </Button>
         </div>
@@ -126,7 +99,7 @@ export function Home(props: HomeProps): JSX.Element {
         <div style={{ textAlign: 'center', marginTop: '14px' }}>
           <button
             type="button"
-            onClick={() => onComingSoon('Join by code')}
+            onClick={onJoin}
             style={{
               border: 'none',
               background: 'transparent',

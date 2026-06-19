@@ -7,14 +7,32 @@ import { z } from 'zod';
 
 export const difficultySchema = z.enum(['any', 'easy', 'medium', 'hard']);
 
+export const gameModeSchema = z.enum(['solo', 'duel', 'together']);
+export type GameMode = z.infer<typeof gameModeSchema>;
+
 export const createGameSchema = z.object({
-  mode: z.literal('solo'),
+  mode: gameModeSchema,
   categorySlug: z.string().trim().min(1).max(40).optional(),
   difficulty: difficultySchema.optional(),
   count: z.coerce.number().int().min(1).max(50),
 });
 
 export type CreateGameInput = z.infer<typeof createGameSchema>;
+
+/**
+ * Join a duel or group game by its short code. Codes are case-insensitive on
+ * the wire and normalised to uppercase before lookup (game codes are stored
+ * uppercase, see domain/gameCode.ts).
+ */
+export const joinGameSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .length(5)
+    .transform((value) => value.toUpperCase()),
+});
+
+export type JoinGameInput = z.infer<typeof joinGameSchema>;
 
 export const submitAnswerSchema = z.object({
   questionId: z.string().uuid(),

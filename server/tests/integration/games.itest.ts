@@ -43,7 +43,8 @@ describe('solo games API (integration)', () => {
 
   it('POST /api/games rejects an invalid body', async () => {
     const agent = await makePlayerAgent();
-    const res = await agent.post('/api/games').send({ mode: 'duel', count: 5 });
+    // Unknown mode + out-of-range count are both rejected by the schema.
+    const res = await agent.post('/api/games').send({ mode: 'banana', count: 0 });
     expect(res.status).toBe(400);
   });
 
@@ -99,6 +100,28 @@ describe('solo games API (integration)', () => {
       .post(`/api/games/${gameId}/answers`)
       .send({ questionId: first.id, selectedAnswer: wrong.body.correctAnswer });
     expect(right.body.correct).toBe(true);
+  });
+
+  it('is idempotent: re-answering a question does not duplicate rows', async () => {
+    const agent = await makePlayerAgent();
+    const created = await agent.post('/api/games').send({ mode: 'solo', count: 5 });
+    const { gameId, questions } = created.body;
+    const first = questions[0];
+
+    const a1 = await agent
+      .post(`/api/games/${gameId}/answers`)
+      .send({ questionId: first.id, selectedAnswer: first.choices[0] });
+    // Re-submit the same question several times; the first answer is locked in.
+    for (let i = 0; i < 3; i += 1) {
+      await agent
+        .post(`/api/games/${gameId}/answers`)
+        .send({ questionId: first.id, selectedAnswer: a1.body.correctAnswer });
+    }
+
+    const result = await agent.get(`/api/games/${gameId}/result`);
+    // Exactly one review row per question — no duplicate answer rows inflate it.
+    expect(result.body.review).toHaveLength(5);
+    expect(result.body.score).toBeLessThanOrEqual(5);
   });
 
   it('plays a full game: complete + result review', async () => {

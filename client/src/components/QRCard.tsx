@@ -1,6 +1,9 @@
 import type { CSSProperties } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export interface QRCardProps {
+  /** The URL the QR encodes (e.g. the join link). */
+  readonly value: string;
   readonly caption?: string;
   readonly size?: number;
 }
@@ -16,38 +19,22 @@ const WRAP: CSSProperties = {
 };
 
 /**
- * Placeholder QR box. The real client-generated QR code arrives in Phase 4;
- * this renders a labelled square so the lobby layout is reviewable now.
+ * Client-generated QR code for the join link. Renders inline SVG via
+ * `qrcode.react` — fully bundled, no network request, so it satisfies the
+ * self-hosted CSP (OP/SEC). Phones scan it to open the join URL directly.
  */
 export function QRCard(props: QRCardProps): JSX.Element {
-  const { caption = 'SCAN TO JOIN', size = 128 } = props;
-
-  const placeholder: CSSProperties = {
-    width: `${size}px`,
-    height: `${size}px`,
-    borderRadius: 'var(--radius-sm)',
-    display: 'grid',
-    placeItems: 'center',
-    background:
-      'repeating-conic-gradient(var(--ink-deep) 0deg 90deg, #fff 90deg 180deg) 0 0 / 16px 16px',
-    color: 'var(--faint)',
-  };
+  const { value, caption = 'SCAN TO JOIN', size = 128 } = props;
 
   return (
     <div style={WRAP}>
-      <div style={placeholder} aria-label="QR code placeholder">
-        <span
-          style={{
-            fontSize: '11px',
-            fontWeight: 700,
-            background: '#fff',
-            padding: '2px 6px',
-            borderRadius: 'var(--radius-sm)',
-          }}
-        >
-          QR
-        </span>
-      </div>
+      <QRCodeSVG
+        value={value}
+        size={size}
+        level="M"
+        marginSize={0}
+        title="QR code to join the game"
+      />
       <span
         style={{
           fontSize: '11px',

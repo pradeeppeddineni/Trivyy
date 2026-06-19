@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import type { CSSProperties, FormEvent } from 'react';
 import { Button } from '../components/Button';
+import { Logo } from '../components/Logo';
 
 export interface AdminLoginProps {
   readonly value: string;
@@ -21,17 +22,6 @@ const FIELD: CSSProperties = {
   color: 'var(--ink)',
   background: 'var(--card)',
   transition: 'border-color 0.15s',
-};
-
-const LOGO: CSSProperties = {
-  width: '72px',
-  height: '72px',
-  borderRadius: 'var(--radius-xl)',
-  background: 'var(--accent)',
-  display: 'grid',
-  placeItems: 'center',
-  boxShadow: 'var(--shadow-logo)',
-  margin: '0 auto 18px',
 };
 
 /**
@@ -59,10 +49,8 @@ export function AdminLogin(props: AdminLoginProps): JSX.Element {
           textAlign: 'center',
         }}
       >
-        <div style={LOGO}>
-          <span aria-hidden style={{ fontSize: '34px', lineHeight: 1 }}>
-            🔐
-          </span>
+        <div style={{ margin: '0 auto 18px' }}>
+          <Logo size={72} />
         </div>
         <h1
           style={{
