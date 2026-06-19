@@ -1,24 +1,222 @@
 /*
- * Design tokens — PLACEHOLDER.
+ * Trivyy design tokens — the single styling source (ARC-3).
  *
- * Claude Design produces the real token set (color, type, spacing) in parallel.
- * Its output replaces this file. Per ARC-3, components consume these tokens via
- * CSS custom properties; raw hard-coded style values must not appear in markup.
+ * Extracted from the Claude Design prototype (design/Trivyy.dc.html). Components
+ * consume these custom properties via var(--…); raw hard-coded style values must
+ * not appear in component markup.
+ *
+ * Fonts load from Google Fonts (see client/index.html). Phase 6 may self-host
+ * these fonts under client/src/assets/fonts/ for CSP/offline support.
  */
 :root {
-  --color-bg: #ffffff;
-  --color-fg: #111418;
-  --color-accent: #4f46e5;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-4: 1rem;
-  --radius: 0.5rem;
-  --font-sans: system-ui, sans-serif;
+  /* ---- Accent ---- */
+  --accent: #6c5ce7;
+  --accent-strong: #5a4ad1;
+  --accent-soft: #f4f2fe;
+  --accent-tint: #f2f0fb;
+  --accent-glow: rgba(108, 92, 231, 0.35);
+
+  /* ---- Surfaces ---- */
+  --page-bg: #e7e5f2;
+  --surface: #fcfcfe;
+  --surface-muted: #f7f6fb;
+  --surface-faint: #f6f5fb;
+  --card: #ffffff;
+  --card-tint: #f4f3f9;
+  --admin-bg: #231f3b;
+
+  /* ---- Ink / text ---- */
+  --ink: #2b264a;
+  --ink-deep: #231f3b;
+  --body: #26233a;
+  --body-soft: #5b5677;
+  --muted: #736e8c;
+  --faint: #8a85a3;
+  --faint-soft: #a8a3be;
+  --placeholder: #a9a4c0;
+
+  /* ---- Borders ---- */
+  --border: #eceaf5;
+  --border-soft: #efedf7;
+  --border-faint: #f0eef8;
+  --border-accent: #e7e4f6;
+  --border-accent-soft: #e8e4fb;
+  --border-dashed: #cfc9e8;
+
+  /* ---- Status ---- */
+  --success: #16a765;
+  --success-strong: #16c079;
+  --success-soft: #e6faf0;
+  --success-tint: #ecfbf3;
+  --success-ink: #127a4e;
+  --success-border: #bfead3;
+
+  --warning: #f5a623;
+  --warning-strong: #ffb020;
+  --warning-bright: #ffc24b;
+  --warning-soft: #fff7e8;
+  --warning-tint: #fffbf2;
+  --warning-tint-2: #fff4e0;
+  --warning-border: #fbe6be;
+  --warning-ink: #9a7320;
+  --warning-ink-soft: #d9871f;
+
+  --danger: #e5484d;
+  --danger-soft: #ff5c5c;
+  --danger-tint: #fff1f1;
+  --danger-bg: #ffeded;
+  --danger-ink: #c0353a;
+  --danger-bar: #e5685c;
+
+  /* ---- Fonts ---- */
+  --font-display: 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* ---- Spacing ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-6: 26px;
+  --space-7: 32px;
+
+  /* ---- Radii ---- */
+  --radius-sm: 11px;
+  --radius-md: 14px;
+  --radius-lg: 17px;
+  --radius-xl: 20px;
+  --radius-2xl: 26px;
+  --radius-pill: 999px;
+
+  /* ---- Shadows ---- */
+  --shadow-accent: 0 8px 20px rgba(108, 92, 231, 0.34);
+  --shadow-accent-soft: 0 6px 16px rgba(108, 92, 231, 0.3);
+  --shadow-accent-card: 0 10px 24px rgba(108, 92, 231, 0.26);
+  --shadow-card: 0 2px 8px rgba(43, 38, 74, 0.04);
+  --shadow-card-soft: 0 2px 6px rgba(43, 38, 74, 0.04);
+  --shadow-success: 0 8px 20px rgba(22, 192, 121, 0.3);
+  --shadow-toast: 0 10px 30px rgba(35, 31, 59, 0.4);
+  --shadow-frame: 0 0 60px rgba(43, 38, 74, 0.12);
+
+  /* ---- Motion ---- */
+  --t: 0.16s;
+  --pop: 0.42s;
+  --ease: cubic-bezier(0.34, 1.42, 0.5, 1);
+
+  /* ---- Layout ---- */
+  --app-width: 440px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  font-family: var(--font-sans);
-  color: var(--color-fg);
-  background: var(--color-bg);
+  font-family: var(--font-body);
+  background: var(--page-bg);
+  color: var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: var(--font-body);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+::placeholder {
+  color: var(--placeholder);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.015);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes trophyPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-10deg);
+  }
+  55% {
+    transform: scale(1.14) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(108, 92, 231, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(108, 92, 231, 0);
+  }
+}
+
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
