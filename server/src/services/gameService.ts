@@ -2,7 +2,7 @@ import { pool } from '../db/pool';
 import { logger } from '../lib/logger';
 import { scoreRound } from '../domain/scoring';
 import { buildChoices } from '../domain/choices';
-import { pickQuestions, categoryIdForSlug, type DifficultyFilter } from './questionService';
+import { pickQuestions, type DifficultyFilter } from './questionService';
 
 /**
  * Solo game orchestration (spec 4.1). Queries Postgres; holds no Express types
@@ -41,7 +41,6 @@ export async function createSoloGame(
 ): Promise<CreateSoloGameResult> {
   const { playerId, count, categorySlug, difficulty } = options;
 
-  const categoryId = categorySlug ? await categoryIdForSlug(categorySlug) : null;
   const picked = await pickQuestions({ playerId, count, categorySlug, difficulty });
   if (picked.length === 0) {
     throw new GameError('no_questions_available', 422);
@@ -54,10 +53,10 @@ export async function createSoloGame(
   try {
     await client.query('BEGIN');
     const game = await client.query<{ id: string }>(
-      `INSERT INTO games (mode, category_id, difficulty, num_questions, question_ids, status, host_player_id)
+      `INSERT INTO games (mode, category, difficulty, num_questions, question_ids, status, host_player_id)
        VALUES ('solo', $1, $2, $3, $4, 'in_progress', $5)
        RETURNING id`,
-      [categoryId, normalizedDifficulty, questionIds.length, questionIds, playerId],
+      [categorySlug ?? null, normalizedDifficulty, questionIds.length, questionIds, playerId],
     );
     const gameId = game.rows[0].id;
     await client.query(
