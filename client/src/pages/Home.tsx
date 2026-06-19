@@ -7,6 +7,7 @@ export interface HomeProps {
   readonly onNicknameChange: (value: string) => void;
   readonly onPlaySolo: () => void;
   readonly onComingSoon: (label: string) => void;
+  readonly onAdmin: () => void;
 }
 
 const HERO: CSSProperties = {
@@ -37,7 +38,7 @@ const LOGO: CSSProperties = {
  * modes route to a "Coming soon" placeholder for now.
  */
 export function Home(props: HomeProps): JSX.Element {
-  const { nickname, onNicknameChange, onPlaySolo, onComingSoon } = props;
+  const { nickname, onNicknameChange, onPlaySolo, onComingSoon, onAdmin } = props;
 
   return (
     <main
@@ -143,7 +144,7 @@ export function Home(props: HomeProps): JSX.Element {
       <div style={{ textAlign: 'center', marginTop: '26px' }}>
         <button
           type="button"
-          onClick={() => onComingSoon('Admin')}
+          onClick={onAdmin}
           style={{
             border: 'none',
             background: 'transparent',
