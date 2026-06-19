@@ -12,5 +12,9 @@ export default defineConfig({
     // No coverage gate here; the unit run owns the 80% threshold.
     hookTimeout: 30_000,
     testTimeout: 30_000,
+    // Every file shares the one Postgres and resets it in beforeEach
+    // (TRUNCATE), so the files MUST run one at a time — otherwise one file's
+    // reset wipes another's in-flight data. Serialize file execution.
+    fileParallelism: false,
   },
 });
