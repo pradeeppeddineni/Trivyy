@@ -27,11 +27,35 @@ export default defineConfig({
     toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: 'npm run build --workspace client && npm run preview --workspace client',
-    cwd: '..',
-    url: `http://localhost:${PORT}`,
-    timeout: 120_000,
-    reuseExistingServer: !process.env.CI,
-  },
+  // Full stack for the critical-flow E2E (Phase 2): the Express API on :3000 and
+  // the built client preview on :4173. The client preview proxies /api to the
+  // API (see e2e/preview-proxy via vite preview server proxy in vite.config.ts).
+  // The API needs a database; CI provides DATABASE_URL + a seeded fixture before
+  // running this suite.
+  webServer: [
+    {
+      command: 'npm run start --workspace server',
+      cwd: '..',
+      url: 'http://localhost:3000/api/health',
+      timeout: 120_000,
+      reuseExistingServer: !process.env.CI,
+      env: {
+        NODE_ENV: 'test',
+        PORT: '3000',
+        DATABASE_URL: process.env.DATABASE_URL ?? 'postgres://trivyy:trivyy@localhost:5432/trivyy',
+        SESSION_SECRET: process.env.SESSION_SECRET ?? 'e2e-session-secret-e2e',
+        ADMIN_PASSWORD_HASH:
+          process.env.ADMIN_PASSWORD_HASH ??
+          '$argon2id$v=19$m=65536,t=3,p=4$dGVzdHNhbHR0ZXN0$Zm9vYmFyYmF6cXV4Y29ycmVjdGhvcml6b24',
+        CLIENT_ORIGIN: `http://localhost:${PORT}`,
+      },
+    },
+    {
+      command: 'npm run build --workspace client && npm run preview --workspace client',
+      cwd: '..',
+      url: `http://localhost:${PORT}`,
+      timeout: 120_000,
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });

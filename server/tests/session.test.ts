@@ -1,6 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 import { makeApp } from './helpers';
+
+// The session route upserts a players row (DB I/O). Unit tests stay DB-free, so
+// the player service is mocked here; the real DB behavior is covered by the
+// integration suite (tests/integration). This keeps `npm test` runnable with no
+// database, per the Phase 2 plan.
+vi.mock('../src/services/playerService', () => ({
+  getOrCreatePlayer: vi.fn(async () => ({ id: 'test-player-id', nickname: 'mock' })),
+}));
 
 describe('player session', () => {
   it('sets a nickname and returns it', async () => {
