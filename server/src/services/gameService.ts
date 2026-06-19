@@ -136,18 +136,24 @@ export async function submitAnswer(
   const correctAnswer = question.rows[0].correct_answer;
   const correct = selectedAnswer === correctAnswer;
 
-  await pool.query(
+  // First answer per question locks in; a re-submit is a no-op (idempotent via
+  // the unique (game_id, player_id, question_id) constraint) so a player cannot
+  // inflate their score by answering twice.
+  const inserted = await pool.query(
     `INSERT INTO answers (game_id, player_id, question_id, selected_answer, is_correct, elapsed_ms)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (game_id, player_id, question_id) DO NOTHING`,
     [gameId, playerId, questionId, selectedAnswer, correct, elapsedMs ?? null],
   );
-  // Record the interaction in the audit trail the admin dashboard reads
-  // (DB-5, OBS-3) and emit a traceable structured log line (OBS-1, OBS-2).
-  await pool.query(
-    `INSERT INTO events (game_id, type, payload) VALUES ($1, 'answer_submitted', $2)`,
-    [gameId, JSON.stringify({ playerId, questionId, correct, elapsedMs: elapsedMs ?? null })],
-  );
-  logger.info('answer_submitted', { gameId, correct });
+  // Only a genuinely new answer is recorded in the audit trail (DB-5, OBS-3)
+  // and logged (OBS-1, OBS-2) — re-submits add nothing.
+  if (inserted.rowCount && inserted.rowCount > 0) {
+    await pool.query(
+      `INSERT INTO events (game_id, type, payload) VALUES ($1, 'answer_submitted', $2)`,
+      [gameId, JSON.stringify({ playerId, questionId, correct, elapsedMs: elapsedMs ?? null })],
+    );
+    logger.info('answer_submitted', { gameId, correct });
+  }
   return { correct, correctAnswer };
 }
 
