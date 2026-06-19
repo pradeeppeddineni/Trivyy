@@ -16,6 +16,14 @@ import { errorHandler } from './middleware/error';
 export function createApp(env: Env): express.Express {
   const app = express();
 
+  // Behind the Cloudflare Tunnel + nginx, the API sees a proxied request. Trust
+  // the first proxy hop so `req.protocol`/`req.secure` reflect the original
+  // https at the edge — required for the `secure` session cookie to be set in
+  // production (ADR 0004 / 0005).
+  if (env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+
   app.use(express.json());
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
   app.use(
