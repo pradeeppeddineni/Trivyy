@@ -8,6 +8,11 @@ test('the design-system gallery renders its components', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Gallery' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Buttons' })).toBeVisible();
   await expect(page.getByText(/play solo/i).first()).toBeVisible();
+  // Representative components (also validates the a11y fixes: the nickname field
+  // is now label-associated, and category tiles are real buttons).
+  await expect(page.getByLabel('YOUR NICKNAME').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /science/i })).toBeVisible();
+  await expect(page.getByText(/how many bones/i)).toBeVisible();
 
   // Attach a full-page screenshot as run evidence (uploaded as a CI artifact in
   // the Playwright report — see the E2E job's upload-artifact step).

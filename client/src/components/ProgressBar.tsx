@@ -12,7 +12,7 @@ const clamp = (value: number): number => Math.min(1, Math.max(0, value));
 
 /** Slim rounded progress bar used in gameplay and the admin dashboard. */
 export function ProgressBar(props: ProgressBarProps): JSX.Element {
-  const { value, trackColor = '#edebf6', fillColor = 'var(--accent)', height = 9 } = props;
+  const { value, trackColor = 'var(--track)', fillColor = 'var(--accent)', height = 9 } = props;
 
   const track: CSSProperties = {
     height: `${height}px`,

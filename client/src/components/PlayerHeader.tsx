@@ -28,6 +28,17 @@ const LOGO_MARK: CSSProperties = {
   boxShadow: '0 4px 10px var(--accent-glow)',
 };
 
+const LOGO_GROUP: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '9px',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  font: 'inherit',
+  cursor: 'pointer',
+};
+
 const NICK_CHIP: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -43,42 +54,44 @@ export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
   const { nickname, onLogoClick } = props;
   const initial = nickname ? nickname.charAt(0).toUpperCase() : '';
 
-  return (
-    <div style={BAR}>
-      <div
-        onClick={onLogoClick}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '9px',
-          cursor: onLogoClick ? 'pointer' : 'default',
-        }}
-      >
-        <div style={LOGO_MARK}>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              color: '#fff',
-              fontSize: '20px',
-              lineHeight: 1,
-            }}
-          >
-            T
-          </span>
-        </div>
+  const logoMark = (
+    <>
+      <span style={LOGO_MARK}>
         <span
           style={{
             fontFamily: 'var(--font-display)',
-            fontWeight: 600,
-            fontSize: '21px',
-            letterSpacing: '0.3px',
-            color: 'var(--ink)',
+            fontWeight: 700,
+            color: '#fff',
+            fontSize: '20px',
+            lineHeight: 1,
           }}
         >
-          Trivyy
+          T
         </span>
-      </div>
+      </span>
+      <span
+        style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 600,
+          fontSize: '21px',
+          letterSpacing: '0.3px',
+          color: 'var(--ink)',
+        }}
+      >
+        Trivyy
+      </span>
+    </>
+  );
+
+  return (
+    <div style={BAR}>
+      {onLogoClick ? (
+        <button type="button" onClick={onLogoClick} aria-label="Go to home" style={LOGO_GROUP}>
+          {logoMark}
+        </button>
+      ) : (
+        <div style={{ ...LOGO_GROUP, cursor: 'default' }}>{logoMark}</div>
+      )}
       {nickname ? (
         <div style={NICK_CHIP}>
           <div
