@@ -19,6 +19,10 @@ npm-debug.log*
 .env.*
 !.env.example
 
+# Local tool/editor artifacts
+.claude/
+.playwright-mcp/
+
 # Python (CI tooling: scripts/pr_review.py)
 __pycache__/
 *.py[cod]
