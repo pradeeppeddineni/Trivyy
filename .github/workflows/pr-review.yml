@@ -1,33 +1,48 @@
 name: PR Review (8-layer)
 
-# AI pull request review on every PR (CI-4). Reads the diff and posts an
-# 8-layer review using the Anthropic API. The API key is a secret, never code.
+# AI pull request review on every PR (CI-4). Runs 8 specialist layers in
+# parallel via the Anthropic API, aggregates the findings, and posts a single
+# PR review with a verdict. The API key is a secret, never code (SEC-1).
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
 
-# Least privilege: read code, write PR comments only (CI-5).
+# Least privilege: read code, write PR reviews/comments only (CI-5).
 permissions:
   contents: read
   pull-requests: write
+
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   review:
     name: Anthropic 8-layer review
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Skip drafts; never run for fork PRs (secrets must not be exposed).
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Set up Node
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      - name: Set up Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
-          node-version: 20
+          python-version: '3.12'
 
-      - name: Run review
+      - name: Install dependencies
+        run: pip install "anthropic>=0.40,<1.0"
+
+      - name: Run 8-layer review
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/pr-review.mjs
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || 'claude-sonnet-4-6' }}
+        run: python scripts/pr_review.py
