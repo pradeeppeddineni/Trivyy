@@ -1,10 +1,12 @@
 # Trivyy Engineering Rules
 
-The non-negotiable rules for building Trivyy, the turn-based trivia game. This file is the scaled constitution and conventions for the project, derived from the Amida Engineering Playbook and the Amida Data Prism Constitution and trimmed to what this app actually needs.
+The non-negotiable rules for building Trivyy, the solo / duel / group trivia game. This file is the scaled constitution and conventions for the project, derived from the Amida Engineering Playbook and the Amida Data Prism Constitution and trimmed to what this app actually needs.
 
 **How to read it:** every rule is a testable SHALL statement with a stable ID (for example `SEC-2`). The ID prefix shows the source family so a student can trace it back to the Playbook or the Constitution. **Authority order** (highest wins): this file, then the spec for a given feature, then defaults. A change to this file SHALL go through a pull request with one approval.
 
-**The locked stack:** Node.js with Express serving a plain REST API (no WebSockets in v1), Postgres as the system of record with versioned migrations, a React single-page frontend, a battle-tested auth library for the single admin, Jest or Vitest with supertest and Playwright for tests, hosted on a Raspberry Pi behind a Cloudflare Tunnel at a real domain.
+**The locked stack:** Node.js with Express serving a plain REST API (the group lobby and the duel-result screen update via short-interval client polling; no WebSockets in v1), Postgres as the system of record with versioned migrations, a React + Vite mobile-first frontend, a battle-tested auth library for the single admin, Jest or Vitest with supertest and Playwright for tests, hosted on a Raspberry Pi behind a Cloudflare Tunnel at a real domain.
+
+**The three modes:** solo (play alone), duel (asynchronous 1-v-1 on a shared locked set), and group "play together" (host creates a game; friends join by code or QR; everyone answers the same locked set one after another; a leaderboard ranks them). See the spec for details.
 
 ---
 
@@ -74,16 +76,18 @@ The non-negotiable rules for building Trivyy, the turn-based trivia game. This f
 - **API-3** Errors SHALL return a clear JSON shape and SHALL NOT leak stack traces, SQL, or file paths.
 - **API-4** Every endpoint SHALL have an integration test using supertest against the Express app.
 - **API-5** Turn-based match state SHALL be persisted in Postgres after every answer submission, so either player can leave and resume an in-progress match later without both being online at once.
-- **API-6** A duel's question set SHALL be locked when the match is created and served identically to both players, so the comparison is fair.
+- **API-6** A game's question set SHALL be locked when the game is created and served identically to every player (both duel opponents, all group players), so the comparison is fair.
+- **API-7** Cross-device updates (the group lobby roster and per-player status, and the duel result screen) SHALL use short-interval client polling of a lightweight GET endpoint, not WebSockets. Poll responses SHALL be cheap and SHALL NOT trigger heavy recomputation on every call.
+- **API-8** A group game's leaderboard and a duel's head-to-head SHALL be derived from `game_players` and `answers`, not stored as denormalized ranking rows.
 
-**Deferred (future phase):** live or synchronous play over WebSockets is a v1 non-goal (see spec section 11). The WebSocket heartbeat, automatic reconnect, and server-held live-session rules return when that phase begins; v1 is request and response only.
+**Deferred (future phase):** live or synchronous play over WebSockets (everyone on the same question at once, with a shared countdown) is a v1 non-goal (see spec section 11). The WebSocket heartbeat, automatic reconnect, and server-held live-session rules return when that phase begins; v1 uses request/response plus short-interval polling for the lobby and result screens.
 
 ## Part VIII: Security (scaled to this app)
 
 - **SEC-1** Secrets (database credentials, the admin password hash, the CI Anthropic API key used by the review agent, any tokens) SHALL come from environment variables and SHALL NEVER be committed.
-- **SEC-2** Access SHALL use two roles enforced at the API layer: an anonymous nickname player and an authenticated admin. The creator-versus-opponent distinction inside a duel is per-game data, not an auth boundary. Frontend checks are UX only.
+- **SEC-2** Access SHALL use two roles enforced at the API layer: an anonymous nickname player and an authenticated admin. The host/creator and opponent/player distinctions inside a game are per-game data, not an auth boundary. Frontend checks are UX only.
 - **SEC-3** Players SHALL need no account; a player is identified by a nickname plus a browser session cookie that persists across games.
-- **SEC-4** Duel game codes SHALL be single-purpose: usable only to join the one match they belong to, and unusable once that match is complete.
+- **SEC-4** Game invite codes (duel and group) SHALL be single-purpose: usable only to join the one game they belong to, and unusable once that game is complete.
 - **SEC-5** The app SHALL NOT collect player personal data; nicknames are treated as untrusted input and SHALL be length-limited and filtered.
 - **SEC-6** Logs SHALL be structured and SHALL NOT contain anything beyond nicknames and gameplay events.
 - **SEC-7** Production traffic SHALL use TLS, provided by the Cloudflare Tunnel; no plaintext HTTP.
@@ -97,7 +101,7 @@ The non-negotiable rules for building Trivyy, the turn-based trivia game. This f
 - **TEST-1** Development SHALL be test-driven; tests are written before or with the code.
 - **TEST-2** Total coverage SHALL be at least 80 percent, enforced in CI with no override.
 - **TEST-3** The scoring logic SHALL have unit tests, including a correct answer, a wrong answer, an unanswered question, and a tie.
-- **TEST-4** Critical flows (start a solo game, create and join a duel, answer a question, view a match result) SHALL have Playwright end-to-end tests.
+- **TEST-4** Critical flows (start a solo game; create and join a duel; host and join a group game; answer a question; view a duel result and a group leaderboard) SHALL have Playwright end-to-end tests.
 
 ## Part X: CI/CD and quality gates
 
