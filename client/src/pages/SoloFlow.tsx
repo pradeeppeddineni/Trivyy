@@ -191,6 +191,9 @@ export function SoloFlow(): JSX.Element {
             onNicknameChange={setNickname}
             onPlaySolo={onPlaySolo}
             onComingSoon={comingSoon}
+            onAdmin={() => {
+              window.location.search = '?admin';
+            }}
           />
         );
       case 'setup':

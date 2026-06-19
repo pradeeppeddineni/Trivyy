@@ -110,3 +110,52 @@ export async function completeGame(gameId: string): Promise<CompleteGameResponse
 export async function getResult(gameId: string): Promise<ResultResponse> {
   return request<ResultResponse>(`/api/games/${gameId}/result`);
 }
+
+// --- Admin auth (spec 8, /api/admin/*) -------------------------------------
+// Frontend checks are UX only; the API's requireAdmin guard is the real
+// boundary (server middleware/auth.ts). These helpers just collect the password
+// and reflect the session state the API reports.
+
+/** Outcome of an admin login attempt — `invalid` is a wrong password (401). */
+export type AdminLoginResult = 'ok' | 'invalid';
+
+/**
+ * POST /api/admin/login. Returns 'ok' on success, 'invalid' on a wrong password
+ * (so the UI can show a precise message), and throws for anything unexpected
+ * (network, 500) so callers fall back to a generic error.
+ */
+export async function adminLogin(password: string): Promise<AdminLoginResult> {
+  let res: Response;
+  try {
+    res = await fetch('/api/admin/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (res.ok) {
+    return 'ok';
+  }
+  if (res.status === 401) {
+    return 'invalid';
+  }
+  throw new Error(`Request failed (${res.status})`);
+}
+
+export async function adminLogout(): Promise<void> {
+  await request<{ ok: true }>('/api/admin/logout', { method: 'POST' });
+}
+
+/** True when a valid admin session is active (GET /api/admin/whoami → 200). */
+export async function adminWhoami(): Promise<boolean> {
+  let res: Response;
+  try {
+    res = await fetch('/api/admin/whoami', { credentials: 'include' });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  return res.ok;
+}

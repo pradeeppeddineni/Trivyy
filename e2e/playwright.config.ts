@@ -44,9 +44,11 @@ export default defineConfig({
         PORT: '3000',
         DATABASE_URL: process.env.DATABASE_URL ?? 'postgres://trivyy:trivyy@localhost:5432/trivyy',
         SESSION_SECRET: process.env.SESSION_SECRET ?? 'e2e-session-secret-e2e',
+        // Real argon2id hash of the E2E admin password ('e2e-admin-password').
+        // The admin-login spec types that password to drive the full flow.
         ADMIN_PASSWORD_HASH:
           process.env.ADMIN_PASSWORD_HASH ??
-          '$argon2id$v=19$m=65536,t=3,p=4$dGVzdHNhbHR0ZXN0$Zm9vYmFyYmF6cXV4Y29ycmVjdGhvcml6b24',
+          '$argon2id$v=19$m=65536,t=3,p=4$vqrdWtW1e5CnGoiu+PYzzQ$hsd8ePrkwwBrDGTJpZDIX4KAuB3YTNUGXKuhuwiNe5w',
         CLIENT_ORIGIN: `http://localhost:${PORT}`,
       },
     },
