@@ -92,3 +92,42 @@ jobs:
             e2e/playwright-report
             e2e/test-results
           retention-days: 7
+
+  db-migrate:
+    name: DB migration (up/down)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: trivyy
+          POSTGRES_PASSWORD: trivyy
+          POSTGRES_DB: trivyy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trivyy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://trivyy:trivyy@localhost:5432/trivyy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Validates every migration applies and rolls back cleanly (DB-2).
+      - name: Migrate up
+        run: npm run migrate
+      - name: Migrate down (revert latest)
+        run: npm run migrate:down
