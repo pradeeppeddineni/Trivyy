@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { CSSProperties } from 'react';
 
 export interface NicknameInputProps {
@@ -32,10 +33,12 @@ export function NicknameInput(props: NicknameInputProps): JSX.Element {
     maxLength = 16,
     confirmation,
   } = props;
+  const fieldId = useId();
 
   return (
     <div>
       <label
+        htmlFor={fieldId}
         style={{
           fontSize: '13px',
           fontWeight: 600,
@@ -47,6 +50,7 @@ export function NicknameInput(props: NicknameInputProps): JSX.Element {
       </label>
       <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
         <input
+          id={fieldId}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}

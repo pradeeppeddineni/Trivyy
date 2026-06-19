@@ -34,6 +34,7 @@
   --faint: #8a85a3;
   --faint-soft: #a8a3be;
   --placeholder: #a9a4c0;
+  --score-total: #b6b1c9;
 
   /* ---- Borders ---- */
   --border: #eceaf5;
@@ -42,6 +43,7 @@
   --border-accent: #e7e4f6;
   --border-accent-soft: #e8e4fb;
   --border-dashed: #cfc9e8;
+  --stat-border: #eeecf6;
 
   /* ---- Status ---- */
   --success: #16a765;
@@ -50,6 +52,7 @@
   --success-tint: #ecfbf3;
   --success-ink: #127a4e;
   --success-border: #bfead3;
+  --winner-tint: #f0fcf6;
 
   --warning: #f5a623;
   --warning-strong: #ffb020;
@@ -96,6 +99,7 @@
   --shadow-card: 0 2px 8px rgba(43, 38, 74, 0.04);
   --shadow-card-soft: 0 2px 6px rgba(43, 38, 74, 0.04);
   --shadow-success: 0 8px 20px rgba(22, 192, 121, 0.3);
+  --shadow-winner: 0 6px 16px rgba(22, 192, 121, 0.14);
   --shadow-toast: 0 10px 30px rgba(35, 31, 59, 0.4);
   --shadow-frame: 0 0 60px rgba(43, 38, 74, 0.12);
 

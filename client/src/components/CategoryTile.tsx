@@ -12,6 +12,7 @@ export function CategoryTile(props: CategoryTileProps): JSX.Element {
   const { icon, label, selected = false, onClick } = props;
 
   const style: CSSProperties = {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -27,9 +28,9 @@ export function CategoryTile(props: CategoryTileProps): JSX.Element {
   };
 
   return (
-    <div onClick={onClick} style={style}>
+    <button type="button" onClick={onClick} aria-pressed={selected} style={style}>
       <span style={{ fontSize: '26px', lineHeight: 1 }}>{icon}</span>
       <span style={{ fontSize: '14.5px', fontWeight: 600, marginTop: '7px' }}>{label}</span>
-    </div>
+    </button>
   );
 }

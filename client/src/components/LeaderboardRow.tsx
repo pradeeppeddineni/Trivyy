@@ -23,8 +23,8 @@ export function LeaderboardRow(props: LeaderboardRowProps): JSX.Element {
     borderRadius: 'var(--radius-md)',
     padding: '14px 15px',
     border: isWinner ? '2px solid var(--success-strong)' : '1px solid var(--border-soft)',
-    background: isWinner ? '#f0fcf6' : 'var(--card)',
-    boxShadow: isWinner ? '0 6px 16px rgba(22, 192, 121, 0.14)' : 'var(--shadow-card)',
+    background: isWinner ? 'var(--winner-tint)' : 'var(--card)',
+    boxShadow: isWinner ? 'var(--shadow-winner)' : 'var(--shadow-card)',
   };
 
   const avatar: CSSProperties = {
@@ -89,7 +89,7 @@ export function LeaderboardRow(props: LeaderboardRowProps): JSX.Element {
         }}
       >
         {score}
-        <span style={{ fontSize: '14px', color: '#b6b1c9' }}>/{total}</span>
+        <span style={{ fontSize: '14px', color: 'var(--score-total)' }}>/{total}</span>
       </span>
     </div>
   );

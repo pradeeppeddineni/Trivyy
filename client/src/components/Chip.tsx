@@ -28,8 +28,8 @@ export function Chip(props: ChipProps): JSX.Element {
   };
 
   return (
-    <div onClick={onClick} style={style}>
+    <button type="button" onClick={onClick} aria-pressed={selected} style={style}>
       {label}
-    </div>
+    </button>
   );
 }

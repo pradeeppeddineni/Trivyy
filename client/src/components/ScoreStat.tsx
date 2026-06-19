@@ -8,7 +8,7 @@ export interface ScoreStatProps {
 
 const CARD: CSSProperties = {
   background: 'var(--card)',
-  border: '1px solid #eeecf6',
+  border: '1px solid var(--stat-border)',
   borderRadius: 'var(--radius-md)',
   padding: '15px',
   boxShadow: 'var(--shadow-card)',
