@@ -5,7 +5,7 @@ import type { ResultResponse } from '../api/client';
 export interface SoloResultsProps {
   readonly result: ResultResponse;
   readonly onPlayAgain: () => void;
-  readonly onComingSoon: (label: string) => void;
+  readonly onChallenge: () => void;
 }
 
 const REVIEW_CARD: CSSProperties = {
@@ -31,7 +31,7 @@ function headline(ratio: number): { title: string; sub: string } {
 
 /** Solo results: score headline, per-question review, Play again. */
 export function SoloResults(props: SoloResultsProps): JSX.Element {
-  const { result, onPlayAgain, onComingSoon } = props;
+  const { result, onPlayAgain, onChallenge } = props;
   const ratio = result.total > 0 ? result.score / result.total : 0;
   const { title, sub } = headline(ratio);
   const iconBg =
@@ -180,7 +180,7 @@ export function SoloResults(props: SoloResultsProps): JSX.Element {
         <Button variant="primary" onClick={onPlayAgain}>
           Play again
         </Button>
-        <Button variant="secondary" onClick={() => onComingSoon('Challenge a friend')}>
+        <Button variant="secondary" onClick={onChallenge}>
           Challenge a friend with this set
         </Button>
       </div>

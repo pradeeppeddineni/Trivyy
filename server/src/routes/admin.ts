@@ -3,6 +3,7 @@ import argon2 from 'argon2';
 import { z } from 'zod';
 import type { Env } from '../config/env';
 import { requireAdmin } from '../middleware/auth';
+import { getAdminStats } from '../services/statsService';
 
 const loginSchema = z.object({
   password: z.string().min(1, 'password is required'),
@@ -40,10 +41,19 @@ export function adminRouter(env: Env): Router {
     res.json({ ok: true });
   });
 
-  // Smoke endpoint proving the admin guard works. Real admin features
-  // (stats, question CRUD) are added in later course blocks.
   router.get('/whoami', requireAdmin, (_req, res) => {
     res.json({ role: 'admin' });
+  });
+
+  // Admin analytics dashboard data (OBS-3): games, players, answer
+  // distributions, response times, most-missed questions — all derived on read
+  // from the gameplay tables and the events audit trail.
+  router.get('/stats', requireAdmin, async (_req, res, next) => {
+    try {
+      res.json(await getAdminStats());
+    } catch (err) {
+      next(err);
+    }
   });
 
   return router;

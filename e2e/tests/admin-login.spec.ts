@@ -20,14 +20,15 @@ test('an admin can sign in, see the panel, and sign out', async ({ page }) => {
   await page.getByRole('button', { name: /sign in/i }).click();
   await expect(page.getByRole('alert')).toHaveText(/incorrect password/i);
 
-  // The correct password reaches the admin panel.
+  // The correct password reaches the analytics dashboard (OBS-3).
   await page.getByLabel(/admin password/i).fill(ADMIN_PASSWORD);
   await page.getByRole('button', { name: /sign in/i }).click();
 
-  await expect(page.getByRole('heading', { name: /^Admin$/ })).toBeVisible();
-  await expect(page.getByText(/signed in as the admin/i)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Analytics$/ })).toBeVisible();
+  await expect(page.getByText(/games played/i)).toBeVisible();
+  await expect(page.getByText(/unique players/i)).toBeVisible();
 
-  await test.info().attach('admin-dashboard', {
+  await test.info().attach('admin-analytics', {
     body: await page.screenshot({ fullPage: true }),
     contentType: 'image/png',
   });

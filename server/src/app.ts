@@ -1,5 +1,6 @@
 import express from 'express';
 import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
 import cors from 'cors';
 import type { Env } from './config/env';
 import { healthRouter } from './routes/health';
@@ -26,18 +27,30 @@ export function createApp(env: Env): express.Express {
 
   app.use(express.json());
   app.use(cors({ origin: env.CLIENT_ORIGIN, credentials: true }));
-  app.use(
-    session({
-      secret: env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: env.NODE_ENV === 'production',
-      },
-    }),
-  );
+
+  // Persist sessions in Postgres (DB-1, SEC-3) so a player's session — and thus
+  // their game membership — survives a server restart. The `session` table is
+  // created by migration v2. Unit tests run without a database, so they fall
+  // back to the in-memory store.
+  const sessionOptions: session.SessionOptions = {
+    secret: env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: env.NODE_ENV === 'production',
+    },
+  };
+  if (env.NODE_ENV !== 'test') {
+    const PgSession = connectPgSimple(session);
+    sessionOptions.store = new PgSession({
+      conString: env.DATABASE_URL,
+      tableName: 'session',
+      createTableIfMissing: false,
+    });
+  }
+  app.use(session(sessionOptions));
 
   app.use('/api', healthRouter);
   app.use('/api', sessionRouter);

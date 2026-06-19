@@ -1,22 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { CSSProperties } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
-import { Button } from '../components/Button';
 import { AdminLogin } from './AdminLogin';
+import { AdminDashboard } from './AdminDashboard';
 import { adminLogin, adminLogout, adminWhoami } from '../api/client';
 
 /** Admin screen state machine: probe the session, then sign in or show the panel. */
 type Screen = 'checking' | 'login' | 'dashboard';
-
-const CARD: CSSProperties = {
-  border: '2px solid var(--border)',
-  borderRadius: 'var(--radius-lg)',
-  background: 'var(--card)',
-  padding: '20px',
-  marginTop: '18px',
-};
 
 /** Send the browser back to the solo game (query-param routing, like ?gallery). */
 function goToGame(): void {
@@ -105,45 +96,7 @@ export function AdminFlow(): JSX.Element {
   return (
     <AppFrame>
       <PlayerHeader nickname="admin" onLogoClick={goToGame} />
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '8px 24px 32px' }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 700,
-            fontSize: '28px',
-            margin: '12px 0 0',
-            color: 'var(--ink)',
-          }}
-        >
-          Admin
-        </h1>
-        <p style={{ fontSize: '15px', color: 'var(--muted)', margin: '6px 0 0', lineHeight: 1.5 }}>
-          You are signed in as the admin.
-        </p>
-
-        <div style={CARD} role="status">
-          <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--ink)', margin: 0 }}>
-            Question management & game stats are coming soon.
-          </p>
-          <p
-            style={{
-              fontSize: '13.5px',
-              color: 'var(--muted)',
-              margin: '8px 0 0',
-              lineHeight: 1.5,
-            }}
-          >
-            This panel confirms admin sign-in works end to end. The CRUD and stats views land in a
-            later phase.
-          </p>
-        </div>
-
-        <div style={{ marginTop: '22px' }}>
-          <Button variant="secondary" onClick={() => void onLogout()}>
-            Sign out
-          </Button>
-        </div>
-      </main>
+      <AdminDashboard onLogout={() => void onLogout()} />
     </AppFrame>
   );
 }

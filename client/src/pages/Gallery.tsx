@@ -156,7 +156,7 @@ function CodesSection(): JSX.Element {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <GameCodeCard code="X7K2P" />
       <GameCodeCard code="QM4Z9" label="GAME CODE">
-        <QRCard />
+        <QRCard value="https://trivyy.com/?join=QM4Z9" />
       </GameCodeCard>
     </div>
   );

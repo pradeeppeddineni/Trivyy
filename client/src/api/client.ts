@@ -111,6 +111,130 @@ export async function getResult(gameId: string): Promise<ResultResponse> {
   return request<ResultResponse>(`/api/games/${gameId}/result`);
 }
 
+// --- Duel (async) + Group (play together) ----------------------------------
+
+export interface CreateDuelResponse {
+  readonly gameId: string;
+  readonly mode: 'duel';
+  readonly code: string;
+  readonly questions: ReadonlyArray<ApiQuestion>;
+}
+
+export interface CreateGroupResponse {
+  readonly gameId: string;
+  readonly mode: 'together';
+  readonly code: string;
+}
+
+/** Result of joining by code — questions are present only for a duel. */
+export interface JoinResponse {
+  readonly gameId: string;
+  readonly mode: 'duel' | 'together';
+  readonly role: string;
+  readonly questions?: ReadonlyArray<ApiQuestion>;
+}
+
+export type DuelOutcome = 'win' | 'loss' | 'draw';
+
+export interface DuelSide {
+  readonly nickname: string;
+  readonly score: number | null;
+}
+
+export interface DuelResultResponse {
+  readonly mode: 'duel';
+  readonly status: 'waiting' | 'complete';
+  readonly total: number;
+  readonly you: DuelSide;
+  readonly opponent: DuelSide | null;
+  readonly outcome: DuelOutcome | null;
+  readonly review: ReadonlyArray<ReviewRow>;
+}
+
+export interface LobbyPlayer {
+  readonly nickname: string;
+  readonly status: string;
+  readonly isHost: boolean;
+}
+
+export interface LobbyResponse {
+  readonly code: string;
+  readonly status: string;
+  readonly players: ReadonlyArray<LobbyPlayer>;
+}
+
+export interface LeaderboardEntry {
+  readonly rank: number;
+  readonly nickname: string;
+  readonly score: number;
+  readonly total: number;
+  readonly done: boolean;
+}
+
+export interface LeaderboardResponse {
+  readonly status: string;
+  readonly total: number;
+  readonly entries: ReadonlyArray<LeaderboardEntry>;
+}
+
+export async function createDuelGame(options: SoloGameOptions): Promise<CreateDuelResponse> {
+  return request<CreateDuelResponse>('/api/games', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'duel', ...options }),
+  });
+}
+
+export async function createGroupGame(options: SoloGameOptions): Promise<CreateGroupResponse> {
+  return request<CreateGroupResponse>('/api/games', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'together', ...options }),
+  });
+}
+
+/**
+ * Join a duel or group by code. Surfaces a precise message for the two expected
+ * rejections (404 unknown code, 409 not joinable) so the UI can guide the user.
+ */
+export async function joinGame(code: string): Promise<JoinResponse> {
+  let res: Response;
+  try {
+    res = await fetch('/api/games/join', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ code }),
+    });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (res.ok) {
+    return (await res.json()) as JoinResponse;
+  }
+  if (res.status === 404) {
+    throw new Error('No game found for that code.');
+  }
+  if (res.status === 409) {
+    throw new Error('That game can no longer be joined.');
+  }
+  throw new Error(`Request failed (${res.status})`);
+}
+
+export async function getDuelResult(gameId: string): Promise<DuelResultResponse> {
+  return request<DuelResultResponse>(`/api/games/${gameId}/result`);
+}
+
+export async function getLobby(gameId: string): Promise<LobbyResponse> {
+  return request<LobbyResponse>(`/api/games/${gameId}/lobby`);
+}
+
+export async function startGroup(gameId: string): Promise<{ status: string }> {
+  return request<{ status: string }>(`/api/games/${gameId}/start`, { method: 'POST' });
+}
+
+export async function getLeaderboard(gameId: string): Promise<LeaderboardResponse> {
+  return request<LeaderboardResponse>(`/api/games/${gameId}/leaderboard`);
+}
+
 // --- Admin auth (spec 8, /api/admin/*) -------------------------------------
 // Frontend checks are UX only; the API's requireAdmin guard is the real
 // boundary (server middleware/auth.ts). These helpers just collect the password
@@ -147,6 +271,58 @@ export async function adminLogin(password: string): Promise<AdminLoginResult> {
 
 export async function adminLogout(): Promise<void> {
   await request<{ ok: true }>('/api/admin/logout', { method: 'POST' });
+}
+
+export interface AdminStats {
+  readonly games: {
+    readonly total: number;
+    readonly solo: number;
+    readonly duel: number;
+    readonly together: number;
+    readonly completed: number;
+  };
+  readonly players: number;
+  readonly questions: number;
+  readonly answers: number;
+  readonly accuracyPct: number;
+  readonly avgResponseMs: number | null;
+  readonly mostMissed: ReadonlyArray<{
+    readonly question: string;
+    readonly attempts: number;
+    readonly missed: number;
+    readonly missRatePct: number;
+  }>;
+  readonly byCategory: ReadonlyArray<{
+    readonly category: string;
+    readonly answers: number;
+    readonly accuracyPct: number;
+  }>;
+  readonly byDifficulty: ReadonlyArray<{
+    readonly difficulty: string;
+    readonly answers: number;
+    readonly accuracyPct: number;
+  }>;
+  readonly recent: ReadonlyArray<{
+    readonly type: string;
+    readonly gameId: string | null;
+    readonly at: string;
+  }>;
+  readonly users: {
+    readonly unique: number;
+    readonly returning: number;
+    readonly newThisWeek: number;
+    readonly avgGamesPerPlayer: number;
+    readonly repeatRatePct: number;
+    readonly top: ReadonlyArray<{
+      readonly nickname: string;
+      readonly games: number;
+      readonly best: number;
+    }>;
+  };
+}
+
+export async function getAdminStats(): Promise<AdminStats> {
+  return request<AdminStats>('/api/admin/stats');
 }
 
 /** True when a valid admin session is active (GET /api/admin/whoami → 200). */

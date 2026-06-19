@@ -5,6 +5,7 @@ import { StatusScreen } from '../components/StatusScreen';
 import { Toast } from '../components/Toast';
 import { Home } from './Home';
 import { Setup } from './Setup';
+import { setStoredNickname } from '../lib/nickname';
 import { Gameplay, type GradeState } from './Gameplay';
 import { SoloResults } from './SoloResults';
 import {
@@ -54,9 +55,16 @@ export function SoloFlow(): JSX.Element {
     window.setTimeout(() => setToast(null), 2200);
   }, []);
 
-  const comingSoon = useCallback(
-    (label: string) => flashToast(`${label} is coming soon`),
-    [flashToast],
+  // Persist the nickname, then hand off to another mode via query-param routing
+  // (a full reload, so in-memory state is dropped — see lib/nickname).
+  const goToMode = useCallback(
+    (target: string) => {
+      if (nickname.trim()) {
+        setStoredNickname(nickname.trim());
+      }
+      window.location.search = target;
+    },
+    [nickname],
   );
 
   const goError = useCallback((message: string) => {
@@ -190,7 +198,9 @@ export function SoloFlow(): JSX.Element {
             nickname={nickname}
             onNicknameChange={setNickname}
             onPlaySolo={onPlaySolo}
-            onComingSoon={comingSoon}
+            onChallenge={() => goToMode('?duel')}
+            onTogether={() => goToMode('?group')}
+            onJoin={() => goToMode('?join')}
             onAdmin={() => {
               window.location.search = '?admin';
             }}
@@ -235,7 +245,13 @@ export function SoloFlow(): JSX.Element {
         if (!result) {
           return <StatusScreen title="Loading…" />;
         }
-        return <SoloResults result={result} onPlayAgain={onPlayAgain} onComingSoon={comingSoon} />;
+        return (
+          <SoloResults
+            result={result}
+            onPlayAgain={onPlayAgain}
+            onChallenge={() => goToMode('?duel')}
+          />
+        );
       case 'error':
         return (
           <StatusScreen

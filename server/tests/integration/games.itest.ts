@@ -43,7 +43,8 @@ describe('solo games API (integration)', () => {
 
   it('POST /api/games rejects an invalid body', async () => {
     const agent = await makePlayerAgent();
-    const res = await agent.post('/api/games').send({ mode: 'duel', count: 5 });
+    // Unknown mode + out-of-range count are both rejected by the schema.
+    const res = await agent.post('/api/games').send({ mode: 'banana', count: 0 });
     expect(res.status).toBe(400);
   });
 
