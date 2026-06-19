@@ -84,12 +84,13 @@ Login (**username + password**, single admin; argon2id hash + `ADMIN_USERNAME` f
 - **Polling discipline (API-7):** poll endpoints stay cheap; client interval ~2–4s with backoff when idle; settle the cadence early in Phase 3.
 - **Coverage stays ≥ 80%** every phase (TEST-2); scoring/lobby/leaderboard logic kept pure where possible (ARC-1).
 - **Observability (OBS-1/2):** logs are already structured JSON via `logger.ts`. In Phase 2 add an `AsyncLocalStorage` request context + request-id middleware so every line auto-carries `requestId`/`gameId` (today `gameId` is opt-in per call). Distributed tracing is out of v1 scope.
+- **Playwright in CI:** the `E2E (Playwright)` job runs the suite on every PR + push (CI-2, TEST-4) and uploads the report/traces as artifacts. Visual-regression snapshots turn on once fonts are self-hosted (deterministic rendering) and goldens are generated in the CI environment.
 - **Each phase is a branch → PR → green CI + 8-layer review → squash-merge** (GIT-6/7). Main is protected.
 - **Field alignment:** nickname max 16; game code ~5-char uppercase; question counts 5/10/15 (spec §10).
 
 ## Open decisions to settle before the phase they block
 
 - ~~Admin username+password vs password-only~~ → **Resolved: username + password**, Postgres-backed sessions (ADR 0004).
-- Poll interval + backoff (blocks Phase 3).
-- Game-code format/generator (blocks Phase 3).
-- Self-host fonts vs CDN (blocks Phase 6 / CSP).
+- ~~Poll interval + backoff~~ → **Resolved:** ~3s active / ~10s idle / pause hidden / stop on complete (API-7).
+- ~~Game-code format~~ → **Resolved:** 5-char uppercase, no `0/O/1/I/L`, collision-checked, single-use.
+- ~~Self-host fonts vs CDN~~ → **Resolved:** self-host (Phase 6); Google CDN interim.

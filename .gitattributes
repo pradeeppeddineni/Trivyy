@@ -1,0 +1,12 @@
+# Normalize line endings to LF in the repo (kills CRLF churn + Prettier mismatches
+# on Windows checkouts). Binary assets are marked so git never touches them.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary

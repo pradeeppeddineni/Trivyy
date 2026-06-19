@@ -220,16 +220,16 @@ QR codes are generated on the client from the join link (no server endpoint need
 - **Domain + Tunnel:** Cloudflare named tunnel routes the custom domain to the local app port; no open ports; TLS at Cloudflare's edge.
 - **Polling note:** lobby/result polling is plain HTTPS GET through the tunnel — no special config.
 - **WebSocket note (future):** if synchronous play is added later, WebSockets proxy through the tunnel; if the route sits behind a Cloudflare Access policy, set it to bypass to avoid spurious 302/502 on the socket.
-- **Fonts:** Google Fonts CDN today; self-host later if offline resilience or CSP tightening is needed.
+- **Fonts:** _Resolved_ — self-host (bundle Fredoka + Plus Jakarta Sans) so the CSP needs no external origins; Phase 0 uses the Google CDN as an interim, switched to self-hosted in Phase 6.
 
 ---
 
 ## 10. Open decisions
 
 - **Admin identity:** _Resolved_ — **username + password** (matches the design): `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` from env, single admin, Postgres-backed sessions (`connect-pg-simple`). See ADR `docs/adr/0004-admin-auth-and-session-store.md`.
-- **Poll interval:** how often the lobby/result polls (e.g. 2–4s) and when it backs off.
+- **Poll interval:** _Resolved_ — ~3s while active, back off to ~10s when idle, pause on a hidden tab, stop when the game completes; cheap version/`304` responses (API-7).
 - **Score weighting / tiebreaks:** flat +1 vs. difficulty weighting; draws vs. answer-time tiebreak.
-- **Game code format:** length and alphabet (the design shows a short ~5-char uppercase code).
+- **Game code format:** _Resolved_ — 5-char uppercase, alphabet excluding `0/O/1/I/L`, collision-checked, single-use (SEC-4).
 - **Seed size and category mix.**
 - **Time limits per question:** none in v1, or a soft countdown for flavor?
 

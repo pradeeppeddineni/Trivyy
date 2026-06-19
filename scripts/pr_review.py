@@ -256,12 +256,23 @@ def get_pr_diff(pr_number, repo):
     sys.exit(1)
 
 
+# Files we never read as text — decoding them as UTF-8 would crash the review.
+_BINARY_EXTS = (
+    '.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.zip', '.gz',
+    '.woff', '.woff2', '.ttf', '.otf', '.eot', '.mp4', '.mov',
+)
+
+
 def get_file_content(repo, filepath, ref):
-    """Get full file content. Try local first, then the GitHub contents API."""
+    """Get a changed file's text content, or None for binary/unreadable files."""
+    if filepath.lower().endswith(_BINARY_EXTS):
+        return None
     local = Path(filepath)
     if local.exists():
         try:
             return local.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            return None
         except OSError:
             pass
     raw = gh(

@@ -106,7 +106,7 @@ The non-negotiable rules for building Trivyy, the solo / duel / group trivia gam
 ## Part X: CI/CD and quality gates
 
 - **CI-1** A CI workflow SHALL run on every pull request to `main`; a deploy-only workflow does not satisfy this.
-- **CI-2** CI SHALL run lint, format, type check (`tsc`), and tests with coverage, all as blocking steps with no `continue-on-error`.
+- **CI-2** CI SHALL run lint, format, type check (`tsc`), tests with coverage, and the Playwright end-to-end suite, all as blocking steps with no `continue-on-error`.
 - **CI-3** CI SHALL include a secret scan.
 - **CI-4** An AI pull request review workflow (`pr-review.yml`) SHALL run the 8-layer review on every pull request using the Anthropic API.
 - **CI-5** GitHub Actions SHALL be pinned to commit SHAs, and workflow permissions SHALL be least privilege.
