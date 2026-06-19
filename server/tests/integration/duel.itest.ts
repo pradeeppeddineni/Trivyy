@@ -79,7 +79,8 @@ describe('duel games API (integration)', () => {
     expect(waiting.status).toBe(200);
     expect(waiting.body.status).toBe('waiting');
     expect(waiting.body.opponent).toBeNull();
-    expect(waiting.body.you.score).toBe(5);
+    // Scores are gated until both finish (spec §4.2) — no early reveal.
+    expect(waiting.body.you.score).toBeNull();
 
     // Opponent joins by code, gets the SAME locked set, scores lower.
     const joined = await opponent.post('/api/games/join').send({ code });

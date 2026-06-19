@@ -1,7 +1,7 @@
 import { pool } from '../db/pool';
 import { logger } from '../lib/logger';
 import { scoreRound } from '../domain/scoring';
-import { buildChoices } from '../domain/choices';
+import { buildChoices, seededRng } from '../domain/choices';
 import { pickQuestions, type DifficultyFilter } from './questionService';
 
 /**
@@ -289,6 +289,8 @@ export function toClientQuestion(row: {
     category: row.category_label ?? null,
     categoryIcon: row.category_icon ?? null,
     difficulty: row.difficulty,
-    choices: buildChoices(row.correct_answer, row.incorrect_answers),
+    // Seed the shuffle by question id so the option order is identical on every
+    // serve — same for both duel players and any re-fetch (API-6).
+    choices: buildChoices(row.correct_answer, row.incorrect_answers, seededRng(row.id)),
   };
 }

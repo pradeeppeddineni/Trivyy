@@ -111,8 +111,23 @@ export interface Lobby {
   readonly players: ReadonlyArray<LobbyPlayer>;
 }
 
+/**
+ * Reject a caller who is not a participant of this game (SEC-2): otherwise any
+ * authenticated session could poll any game's roster/leaderboard by id and
+ * harvest nicknames.
+ */
+async function assertMember(gameId: string, playerId: string): Promise<void> {
+  const member = await pool.query(
+    `SELECT 1 FROM game_players WHERE game_id = $1 AND player_id = $2 LIMIT 1`,
+    [gameId, playerId],
+  );
+  if (member.rows.length === 0) {
+    throw new GameError('not_in_game', 403);
+  }
+}
+
 /** Lobby snapshot for the host/joiners to poll (API-7). Host listed first. */
-export async function getLobby(gameId: string): Promise<Lobby> {
+export async function getLobby(gameId: string, playerId: string): Promise<Lobby> {
   const game = await pool.query<{ game_code: string; status: string; host_player_id: string }>(
     `SELECT game_code, status, host_player_id FROM games WHERE id = $1 AND mode = 'together'`,
     [gameId],
@@ -120,6 +135,7 @@ export async function getLobby(gameId: string): Promise<Lobby> {
   if (game.rows.length === 0) {
     throw new GameError('game_not_found', 404);
   }
+  await assertMember(gameId, playerId);
   const { game_code, status, host_player_id } = game.rows[0];
 
   const players = await pool.query<{ player_id: string; nickname: string; status: string }>(
@@ -183,7 +199,7 @@ export interface Leaderboard {
  * Derived leaderboard ranked by score desc. Ties share a rank (standard
  * competition ranking: 5,5,3 → ranks 1,1,3). Done players first, then by score.
  */
-export async function getLeaderboard(gameId: string): Promise<Leaderboard> {
+export async function getLeaderboard(gameId: string, playerId: string): Promise<Leaderboard> {
   const game = await pool.query<{ status: string; num_questions: number }>(
     `SELECT status, num_questions FROM games WHERE id = $1 AND mode = 'together'`,
     [gameId],
@@ -191,6 +207,7 @@ export async function getLeaderboard(gameId: string): Promise<Leaderboard> {
   if (game.rows.length === 0) {
     throw new GameError('game_not_found', 404);
   }
+  await assertMember(gameId, playerId);
   const total = game.rows[0].num_questions;
 
   const rows = await pool.query<{ nickname: string; score: number; status: string }>(

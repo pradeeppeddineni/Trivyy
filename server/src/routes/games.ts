@@ -219,7 +219,7 @@ gamesRouter.get('/:id/lobby', async (req, res, next) => {
     const player = await requirePlayer(req, res);
     if (!player) return;
 
-    res.json(await getLobby(id.data));
+    res.json(await getLobby(id.data, player.id));
   } catch (err) {
     sendGameError(res, err, next);
   }
@@ -253,7 +253,7 @@ gamesRouter.get('/:id/leaderboard', async (req, res, next) => {
     const player = await requirePlayer(req, res);
     if (!player) return;
 
-    res.json(await getLeaderboard(id.data));
+    res.json(await getLeaderboard(id.data, player.id));
   } catch (err) {
     sendGameError(res, err, next);
   }

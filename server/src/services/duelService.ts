@@ -182,10 +182,12 @@ export async function getDuelResult(gameId: string, playerId: string): Promise<D
     mode: 'duel',
     status: bothDone ? 'complete' : 'waiting',
     total: mine.total,
-    you: { nickname: you.nickname, score: mine.score },
+    // Scores and the review are revealed only once both rounds are in, so
+    // neither player learns the outcome early (spec §4.2).
+    you: { nickname: you.nickname, score: bothDone ? mine.score : null },
     opponent: opp ? { nickname: opp.nickname, score: bothDone ? opp.score : null } : null,
     outcome,
-    review: mine.review,
+    review: bothDone ? mine.review : [],
   };
 }
 
