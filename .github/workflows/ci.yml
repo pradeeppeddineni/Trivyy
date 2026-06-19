@@ -58,10 +58,73 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  integration:
+    name: Integration tests (DB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: trivyy
+          POSTGRES_PASSWORD: trivyy
+          POSTGRES_DB: trivyy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trivyy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://trivyy:trivyy@localhost:5432/trivyy
+      SESSION_SECRET: ci-session-secret-ci-session
+      ADMIN_PASSWORD_HASH: ci-unused-hash-placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Apply migrations, then run the supertest integration suite against the
+      # live Postgres service (API-4). Blocking gate (CI-2).
+      - name: Migrate
+        run: npm run migrate
+
+      - name: Integration tests
+        run: npm run test:integration --workspace server
+
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: trivyy
+          POSTGRES_PASSWORD: trivyy
+          POSTGRES_DB: trivyy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trivyy"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Full-stack run: the server reads these; Playwright's webServer starts the
+      # API + client preview (see e2e/playwright.config.ts).
+      DATABASE_URL: postgres://trivyy:trivyy@localhost:5432/trivyy
+      SESSION_SECRET: e2e-session-secret-e2e-session
+      ADMIN_PASSWORD_HASH: e2e-unused-hash-placeholder
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -78,8 +141,16 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      # Builds + previews the client (see e2e/playwright.config.ts webServer),
-      # then runs the E2E + visual suite. Blocking gate (TEST-4, CI-2).
+      # Apply migrations, then insert the deterministic question fixture so the
+      # solo flow has questions without calling the live OpenTDB API.
+      - name: Migrate
+        run: npm run migrate
+
+      - name: Seed deterministic question fixture
+        run: psql "$DATABASE_URL" -f server/tests/fixtures/questions.sql
+
+      # Starts the API + client preview (playwright.config.ts webServer), then
+      # runs the full-stack E2E suite. Blocking gate (TEST-4, CI-2).
       - name: Run E2E tests
         run: npm run test:e2e
 

@@ -1,2 +1,0 @@
-# Service layer (ARC-2): game, question, and session services live here.
-# API handlers stay thin and delegate business logic to these services.

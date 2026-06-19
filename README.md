@@ -63,8 +63,9 @@ Every variable is documented in [`.env.example`](./.env.example). Key ones:
 npm run lint            # ESLint
 npm run format:check    # Prettier
 npm run typecheck       # tsc across server + client
-npm test                # Vitest unit + integration, with coverage gate (>=80%)
-npm run test:e2e        # Playwright (the first solo-game test is intentionally red)
+npm test                # Vitest unit tests + coverage gate (>=80%, no DB needed)
+npm run test:integration --workspace server  # supertest API tests vs Postgres (needs DATABASE_URL + migrate)
+npm run test:e2e        # Playwright full-stack solo-game flow (needs Postgres + fixture)
 npm run seed            # import questions from OpenTDB (skeleton)
 ```
 

@@ -103,6 +103,8 @@
   --shadow-winner: 0 6px 16px rgba(22, 192, 121, 0.14);
   --shadow-toast: 0 10px 30px rgba(35, 31, 59, 0.4);
   --shadow-frame: 0 0 60px rgba(43, 38, 74, 0.12);
+  --shadow-logo: 0 12px 28px rgba(108, 92, 231, 0.34);
+  --shadow-result-icon: 0 10px 24px rgba(43, 38, 74, 0.16);
 
   /* ---- Motion ---- */
   --t: 0.16s;

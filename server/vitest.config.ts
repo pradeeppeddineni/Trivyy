@@ -10,7 +10,18 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       // Bootstrap and infrastructure modules are exercised by integration/e2e,
       // not unit tests, so they are excluded from the unit coverage gate.
-      exclude: ['src/index.ts', 'src/db/**', 'src/types/**', 'src/**/*.d.ts'],
+      // The services/routes layer queries Postgres and is covered by the
+      // DB-backed integration suite (tests/integration, run via
+      // `test:integration`); pure logic (domain/, schemas/) stays under the
+      // unit gate.
+      exclude: [
+        'src/index.ts',
+        'src/db/**',
+        'src/types/**',
+        'src/services/**',
+        'src/routes/**',
+        'src/**/*.d.ts',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

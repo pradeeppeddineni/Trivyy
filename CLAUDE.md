@@ -18,9 +18,10 @@ npm install
 npm run dev --workspace server     # API  http://localhost:3000
 npm run dev --workspace client     # SPA  http://localhost:5173
 npm run migrate                    # apply DB migrations
-npm test                           # Vitest + coverage (gate >=80%)
+npm test                           # Vitest unit + coverage (gate >=80%, no DB)
+npm run test:integration --workspace server  # supertest vs Postgres (needs DATABASE_URL)
 npm run lint && npm run typecheck  # ESLint + tsc
-npm run test:e2e                   # Playwright
+npm run test:e2e                   # Playwright (full stack: API + client preview)
 docker-compose up                  # full local stack
 ```
 

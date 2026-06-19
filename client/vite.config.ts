@@ -11,4 +11,13 @@ export default defineConfig({
       '/api': 'http://localhost:3000',
     },
   },
+  // `vite preview` (used by the E2E full-stack run) needs its own proxy block;
+  // it does not reuse `server.proxy`. Keeps the SPA and API same-origin so the
+  // session cookie stays first-party.
+  preview: {
+    port: 4173,
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
+  },
 });
