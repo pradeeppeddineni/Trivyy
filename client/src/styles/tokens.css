@@ -1,0 +1,24 @@
+/*
+ * Design tokens — PLACEHOLDER.
+ *
+ * Claude Design produces the real token set (color, type, spacing) in parallel.
+ * Its output replaces this file. Per ARC-3, components consume these tokens via
+ * CSS custom properties; raw hard-coded style values must not appear in markup.
+ */
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #111418;
+  --color-accent: #4f46e5;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --radius: 0.5rem;
+  --font-sans: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-fg);
+  background: var(--color-bg);
+}

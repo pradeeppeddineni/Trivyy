@@ -1,0 +1,2 @@
+# Claude Design components land here (question card, answer pills, leaderboard
+# row, timer). They consume design tokens from src/styles/tokens.css (ARC-3).

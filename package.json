@@ -1,0 +1,45 @@
+{
+  "name": "trivyy",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Trivyy — a turn-based trivia game (workshop project).",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "server",
+    "client",
+    "e2e"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace server",
+    "build": "npm run build --workspace server && npm run build --workspace client",
+    "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace client",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspace server",
+    "test:e2e": "npm run test --workspace e2e",
+    "migrate": "npm run migrate --workspace server",
+    "seed": "tsx scripts/seed-questions.ts",
+    "hash-admin": "tsx scripts/hash-admin.ts",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs,jsx,json,md,css,yml,yaml}": "prettier --write",
+    "*.{ts,tsx,js,mjs,cjs,jsx}": "eslint --fix"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

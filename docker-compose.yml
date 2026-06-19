@@ -1,0 +1,48 @@
+# Local stack (OP-2): Postgres + API + client. `docker-compose up` should get a
+# new contributor running in well under thirty minutes.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: trivyy
+      POSTGRES_PASSWORD: trivyy
+      POSTGRES_DB: trivyy
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U trivyy']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgres://trivyy:trivyy@db:5432/trivyy
+      SESSION_SECRET: dev-only-session-secret-change-me
+      # Generate with `npm run hash-admin` and override via your own .env.
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
+      CLIENT_ORIGIN: http://localhost:5173
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - '5173:5173'
+    depends_on:
+      - server
+
+volumes:
+  db_data:

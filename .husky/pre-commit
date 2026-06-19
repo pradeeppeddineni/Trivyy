@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+# Pre-commit gate (GIT-8): format + lint staged files, then scan for secrets.
+# Uses Node-native tooling (husky + lint-staged) so there is no Python dependency.
+
+npx lint-staged
+
+# Secret detection — skipped automatically if gitleaks is not installed locally
+# (CI runs gitleaks as a blocking gate regardless).
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --no-banner
+else
+  echo "gitleaks not found locally; skipping (CI enforces the secret scan)."
+fi
