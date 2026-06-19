@@ -11,8 +11,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
-    "migrate": "node-pg-migrate -j js -m migrations",
-    "migrate:down": "node-pg-migrate down -j js -m migrations"
+    "migrate": "node-pg-migrate -m migrations up",
+    "migrate:down": "node-pg-migrate -m migrations down"
   },
   "dependencies": {
     "argon2": "^0.41.1",
