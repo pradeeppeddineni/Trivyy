@@ -1,10 +1,12 @@
-# Trivia App — Specification (v2)
+# Trivia App — Specification (v3)
 
 **Status:** Draft for workshop
-**Last updated:** June 19, 2026
-**Scope:** Self-hosted trivia web app for friends, hosted on a Raspberry Pi. Three ways to play: solo, an asynchronous friend duel, and a group "play together" game with a shared lobby.
+**Last updated:** June 20, 2026
+**Scope:** Self-hosted trivia web app for friends, hosted on a Raspberry Pi. Three ways to play (solo, async duel, group "play together"), now with an optional **social layer**: user accounts, friends, persistent groups that can rematch, leaderboards scoped to a group or your friends, and regional question content.
 
-> **v2 change:** reconciled with the Claude Design prototype (`Trivyy.dc.html`). Adds the **play-together group mode** (lobby + leaderboard, invite by code or QR) and a per-game leaderboard. Group/lobby live updates use **short-interval polling over REST**, not WebSockets — true real-time synchronous play (everyone on the same question at once) remains a deferred non-goal. See ADR `docs/adr/0003-three-modes-and-polling.md`.
+> **v3 change (social layer):** adds **optional user accounts** (username + password, recovery-code reset, no email), **friends** (search + invite link), **persistent groups** the same players can re-summon for a **rematch**, **scoped leaderboards** (group standings + friends leaderboard, cumulative points), and **regional questions** (a country/region filter dimension, sourced from The Trivia API + admin authoring). Guest play (nickname only) is preserved. This reverses v1's "no accounts" stance for players who opt in; see §3 and §13. Real-time/WebSocket play, email/social login, global leaderboards, AI questions, and scheduled competitions remain non-goals.
+>
+> **v2 change:** reconciled with the Claude Design prototype (`Trivyy.dc.html`). Added the **play-together group mode** (lobby + leaderboard, invite by code or QR). Group/lobby live updates use **short-interval polling over REST**, not WebSockets. See ADR `docs/adr/0003-three-modes-and-polling.md`.
 
 ---
 
@@ -27,30 +29,36 @@ The app is hosted at home on a Raspberry Pi, backed by a Postgres database, and 
 - Players can play a **solo** game (answer a set of questions, get a score and a review).
 - Players can **challenge a friend** to an **asynchronous duel** using a shareable game code or link, then see a head-to-head, per-question breakdown.
 - Players can host a **play-together group game**: invite by **code or QR**, friends join on their own phones, all answer the **same locked set**, and a **leaderboard** ranks everyone.
-- Players **self-identify with a nickname**; no registration required.
+- Players **self-identify with a nickname**; registration is **optional** (guests can always play).
+- Players **may optionally register an account** (username + password, recovery-code reset) to unlock friends, persistent groups, scoped leaderboards, and cross-device history (§13).
+- Players can **add friends** (username search or invite link) and see a **friends leaderboard**.
+- Players can **create persistent groups**, invite others, **rematch** with the same group, and see **group standings**.
+- Questions can carry a **region** (e.g. India) so players can filter by country/region as well as category.
 - An **admin** can log in to view statistics, add/edit questions, hide bad questions, and manage categories.
-- Questions are **pre-seeded** from the Open Trivia Database and curated locally.
+- Questions are **pre-seeded** from the Open Trivia Database (and The Trivia API for regional content) and curated locally.
 - The app is reachable on a custom domain via Cloudflare Tunnel, with no open router ports.
 
-### Non-goals (v1, deferred)
+### Non-goals (deferred)
 
 - **Real-time synchronous play** — everyone on the same question at the same instant with a shared countdown. The group lobby updates via polling, not a live socket. _Deferred._
-- Player accounts, passwords, or social login.
+- **Email or social login.** Accounts are username + password with a recovery-code reset; no email is sent. _(v3: account passwords are now in scope; email is not.)_
+- **Scheduled / automated recurring competitions.** "Repeat" means the same group manually starting another round (a rematch), not a cron-driven schedule.
 - AI-generated questions.
 - Mobile native apps (the UI is a mobile-first web app).
 - Horizontal scaling / Redis / multiple server processes / WebSockets.
-- **Global** public leaderboards across games or all-time. (Per-game leaderboards are in scope; cross-game/global ones are not.)
+- **Global / all-time public leaderboards** across all players. Per-game, per-group, and friends-scoped leaderboards are in scope; global ones are not.
 
 ---
 
 ## 3. Users and roles
 
-| Role       | Auth                              | Capabilities                                                                                                                                              |
-| ---------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Player** | None (nickname + browser session) | Start a solo game; create or join a duel; host or join a group game; answer questions; view own results, the duel head-to-head, and the group leaderboard |
-| **Admin**  | Login required                    | Everything a player can do, plus: view statistics, add/edit questions, hide/unhide questions, manage categories                                           |
+| Role                  | Auth                              | Capabilities                                                                                                                                                 |
+| --------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Guest player**      | None (nickname + browser session) | Start a solo game; create or join a duel; host or join a group game; answer questions; view own results, the duel head-to-head, and the per-game leaderboard |
+| **Registered player** | Username + password               | Everything a guest can, plus: friends, persistent groups, scoped (group/friends) leaderboards, and cross-device history tied to their account                |
+| **Admin**             | Username + password (single)      | Everything a player can do, plus: view statistics, add/edit questions, hide/unhide questions, manage categories                                              |
 
-A player's identity is a nickname plus a browser session (cookie). This attributes scores and history within the friend group without real accounts. There are exactly **two auth roles** (anonymous player, single admin); the host/creator vs. opponent/player distinction inside a game is per-game data, not an auth boundary. A returning player keeps the same session while the cookie persists.
+There are **three auth roles** (guest player, registered player, single admin). The host/creator vs. opponent/player distinction inside a game, and group ownership, are per-game / per-group data, not an auth boundary. A guest is a nickname plus a browser-session cookie; a registered player additionally has a unique username + an argon2 password hash and can sign in on any device. **Registration is optional and upgrades the player's existing row in place**, preserving their nickname and history. Recovery uses a one-time code (see §13), not email.
 
 ---
 
@@ -117,7 +125,11 @@ The UI presents a **curated set of categories**, each with a display label and a
 
 ### 5.5 Admin curation
 
-Through the web UI the admin can: add a question (text, 1 correct + 3 incorrect, category, difficulty); edit any question; **hide/unhide** a question via a status flag (soft delete — never hard-delete, to preserve game-history references); and manage the category list. The questions screen supports search and filtering by category, difficulty, and status.
+Through the web UI the admin can: add a question (text, 1 correct + 3 incorrect, category, difficulty, **region**); edit any question; **hide/unhide** a question via a status flag (soft delete — never hard-delete, to preserve game-history references); and manage the category list. The questions screen supports search and filtering by category, difficulty, status, and region.
+
+### 5.6 Regional content (v3)
+
+Each question MAY carry a **region** (ISO-3166 alpha-2, e.g. `IN` for India; NULL = global). Region is a **filter dimension orthogonal to category**: a player can pick a region (or "anywhere") in setup alongside a category, and `pickQuestions` filters accordingly. Regional questions are sourced two ways: a new importer pulls from **The Trivia API** (`the-trivia-api.com`, which supports a region/language selector) tagging `source='trivia-api'` and the chosen `region`; and the **admin** can author region-tagged questions through the existing CRUD. OpenTDB content stays `region = NULL` (global).
 
 ---
 
@@ -162,13 +174,19 @@ The visual language comes from the Claude Design prototype (`Trivyy.dc.html`): a
 
 > Indicative, not final. Refine during the schema build via versioned migrations.
 
-**players** — `id` (pk), `nickname`, `session_token`, `created_at`
+**players** — `id` (pk), `nickname`, `session_token`, `created_at`, `ip`, `country`, `last_seen_at` (analytics, admin-only). **v3 account columns:** `username` (unique, nullable; null = guest), `password_hash` (argon2, nullable), `recovery_code_hash` (argon2 of the one-time code, nullable), `is_registered` (bool), `invite_code` (unique, for friend invite links). A registered player is the same row upgraded in place, so all `game_players`/`answers` history is retained.
+
+**friendships** (v3) — `id` (pk), `requester_id` (fk players), `addressee_id` (fk players), `status` (pending / accepted), `created_at`; unique on the player pair. Accepted friendship is symmetric (queried both directions).
+
+**groups** (v3, persistent — distinct from a `together` game) — `id` (pk), `name`, `code` (unique invite/join code), `owner_id` (fk players), `created_at`.
+
+**group_members** (v3) — `id` (pk), `group_id` (fk), `player_id` (fk), `role` (owner / member), `joined_at`; unique on (group_id, player_id).
 
 **categories** — `id` (pk), `slug`, `label`, `icon`, `status` (active / hidden), `created_at`
 
-**questions** — `id` (pk), `text`, `correct_answer`, `incorrect_answers` (array), `category_id` (fk), `difficulty` (easy / medium / hard), `source` (opentdb / admin), `status` (active / hidden), `created_at`, `updated_at`
+**questions** — `id` (pk), `text`, `correct_answer`, `incorrect_answers` (array), `category_id` (fk), `difficulty` (easy / medium / hard), `source` (opentdb / trivia-api / admin), `status` (active / hidden), `created_at`, `updated_at`, **`region`** (v3; ISO-3166 alpha-2, nullable; NULL = global)
 
-**games** — `id` (pk), `mode` (**solo / duel / together**), `game_code` (for duel + group invites), `category_id`, `difficulty` (nullable; NULL = any), `num_questions`, `question_ids` (the locked set), `status` (open / in_progress / complete), `host_player_id`, `created_at`
+**games** — `id` (pk), `mode` (**solo / duel / together**), `game_code` (for duel + group invites), `category_id`, `difficulty` (nullable; NULL = any), `num_questions`, `question_ids` (the locked set), `status` (open / in_progress / complete), `host_player_id`, `max_players`, `created_at`, **`group_id`** (v3; nullable fk groups — the persistent group this game belongs to, for standings + rematch)
 
 **game_players** — `id` (pk), `game_id` (fk), `player_id` (fk), `role` (**creator / opponent / host / player**), `score`, `status` (joined / playing / done), `completed_at`. A game has 2 rows for a duel and N rows for a group game.
 
@@ -186,10 +204,33 @@ The **leaderboard** for a group game is derived: `game_players` for that game, o
 
 > Indicative REST endpoints. Admin routes are auth-gated. Lobby/result reads are pollable.
 
-**Session**
+**Session (guest)**
 
-- `POST /api/session` — set/update nickname, issue session.
-- `GET /api/me` — current player info.
+- `POST /api/session` — set/update nickname, issue session (guest play).
+- `GET /api/me` — current player info (guest or registered).
+
+**Accounts (v3)**
+
+- `POST /api/auth/register` — username + nickname + password; upgrades the current player row in place; returns the one-time recovery code **once**.
+- `POST /api/auth/login` — username + password (rate-limited).
+- `POST /api/auth/logout`.
+- `POST /api/auth/reset` — username + recovery code + new password (rate-limited).
+- `GET /api/auth/me` — registered-account info (username, nickname, invite code).
+
+**Friends (v3, auth required)**
+
+- `GET /api/friends` — accepted friends; `GET /api/friends/requests` — pending.
+- `GET /api/friends/search?q=` — find players by username.
+- `POST /api/friends/requests` — send a request (by username); `POST /api/friends/requests/:id/accept` | `/decline`.
+- `POST /api/friends/invite/:code` — accept a friend invite link (`?friend=CODE`).
+- `GET /api/friends/leaderboard` — cumulative-points leaderboard over me + friends (derived, API-8).
+
+**Groups (v3, persistent; auth required)**
+
+- `POST /api/groups` — create; `GET /api/groups` — my groups; `GET /api/groups/:id` — detail + members.
+- `POST /api/groups/join` — join by code; `POST /api/groups/:id/invite` — invite a friend.
+- `POST /api/groups/:id/games` — launch a `together` game for this group; **rematch** = the same call again.
+- `GET /api/groups/:id/leaderboard` — cumulative standings across the group's games (derived, API-8).
 
 **Games (solo / duel / together)**
 
@@ -255,6 +296,32 @@ QR codes are generated on the client from the join link (no server endpoint need
 6. **Play together** — host create, lobby with QR + polling, join, sequential play, leaderboard.
 7. **Admin** — login, dashboard stats, question CRUD + hide/unhide, category management.
 8. **Deploy to the Pi behind the Cloudflare Tunnel.**
+
+v3 builds on this in dependency order (each its own PR → green CI → deploy):
+**A. Accounts** → **B. Friends** → **C. Groups + rematch + standings** → **D. Regional questions** (D is independent of A–C). See §13.
+
+---
+
+## 13. Social layer (v3)
+
+The social features are **opt-in** and layer onto the existing identity without breaking guest play or any v1/v2 flow.
+
+### 13.1 Accounts (optional)
+
+- A guest is `nickname` + browser session, as today. **Registering upgrades that same `players` row in place** (sets `username`, `password_hash`, `recovery_code_hash`, `is_registered`, `invite_code`), so the player keeps their nickname, scores, and answer history.
+- Auth is **username + argon2 password**. The server prefers a registered `playerId` in the session and falls back to the guest nickname/session otherwise.
+- **Recovery = a one-time code** shown exactly once at registration (copy-to-save), stored only as an argon2 hash. Reset takes username + code + new password. **No email is sent.** Login and reset are rate-limited (reusing the admin pattern).
+
+### 13.2 Friends
+
+- Connect two ways: **username search → request → accept** (symmetric), and a **personal invite link** (`?friend=CODE`) that sends/accepts a request on open. Decline and pending lists supported.
+- **Friends leaderboard:** cumulative points (total correct answers) over me + accepted friends, derived on read (API-8). Not global.
+
+### 13.3 Groups + rematch
+
+- A **persistent group** is a named set of players with an owner and a reusable join `code` (distinct from a single-use game code, SEC-4). Invite by code/link or from your friends.
+- The group can **launch a `together` game** seeded from its members; **"rematch" is the same launch call again** — the same group plays another round on a fresh locked set. Games carry `group_id` so rounds aggregate.
+- **Group standings:** cumulative points across all the group's games, derived (API-8). A rematch updates the running tally. There is no schedule — the owner starts each round manually.
 
 ---
 
