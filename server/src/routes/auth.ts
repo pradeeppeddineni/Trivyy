@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import { registerSchema, loginSchema, resetSchema } from '../schemas/auth';
 import { register, login, resetPassword, getAccountById } from '../services/accountService';
@@ -20,6 +20,13 @@ function sendError(res: Response, err: unknown, next: NextFunction): void {
   next(err);
 }
 
+/** Issue a fresh session id (defeats session fixation when privileges change). */
+function regenerateSession(req: Request): Promise<void> {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => (err ? reject(err) : resolve()));
+  });
+}
+
 // Generous limit for a single household, strict enough to blunt guessing.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -38,12 +45,14 @@ authRouter.post('/register', authLimiter, async (req, res, next) => {
       res.status(400).json({ error: 'invalid_request' });
       return;
     }
+    // Upgrade the guest row (keyed by the current session) BEFORE regenerating.
     const { account, recoveryCode } = await register(
       req.sessionID,
       parsed.data.username,
       parsed.data.password,
       parsed.data.nickname ?? req.session.nickname,
     );
+    await regenerateSession(req);
     req.session.playerId = account.id;
     req.session.nickname = account.nickname;
     res.status(201).json({ account, recoveryCode });
@@ -65,6 +74,7 @@ authRouter.post('/login', authLimiter, async (req, res, next) => {
       res.status(401).json({ error: 'invalid_credentials' });
       return;
     }
+    await regenerateSession(req);
     req.session.playerId = account.id;
     req.session.nickname = account.nickname;
     res.json({ account });
@@ -73,11 +83,16 @@ authRouter.post('/login', authLimiter, async (req, res, next) => {
   }
 });
 
-// POST /api/auth/logout — drop the account session (becomes a fresh guest).
-authRouter.post('/logout', (req, res) => {
-  req.session.playerId = undefined;
-  req.session.nickname = undefined;
-  res.json({ ok: true });
+// POST /api/auth/logout — destroy the session entirely (becomes a fresh guest).
+authRouter.post('/logout', (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      next(err);
+      return;
+    }
+    res.clearCookie('connect.sid');
+    res.json({ ok: true });
+  });
 });
 
 // POST /api/auth/reset — username + recovery code + new password.
@@ -88,16 +103,17 @@ authRouter.post('/reset', authLimiter, async (req, res, next) => {
       res.status(400).json({ error: 'invalid_request' });
       return;
     }
-    const ok = await resetPassword(
+    const result = await resetPassword(
       parsed.data.username,
       parsed.data.recoveryCode,
       parsed.data.newPassword,
     );
-    if (!ok) {
+    if (!result) {
       res.status(401).json({ error: 'invalid_credentials' });
       return;
     }
-    res.json({ ok: true });
+    // The old code is now invalid; return the freshly rotated one to show once.
+    res.json({ ok: true, recoveryCode: result.recoveryCode });
   } catch (err) {
     sendError(res, err, next);
   }

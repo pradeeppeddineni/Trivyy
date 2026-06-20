@@ -59,6 +59,10 @@ test('sign up, save recovery code, sign out/in, and reset with the code', async 
   await page.getByLabel(/new password/i).fill('secondpassword');
   await page.getByRole('button', { name: /reset password/i }).click();
 
+  // Reset rotates the code: a fresh recovery code is shown once.
+  await expect(page.getByRole('heading', { name: /save your recovery code/i })).toBeVisible();
+  await page.getByRole('button', { name: /saved it/i }).click();
+
   // Back on sign in; the new password works.
   await expect(page.getByRole('heading', { name: /^Sign in$/ })).toBeVisible();
   await page.getByLabel(/username/i).fill(username);

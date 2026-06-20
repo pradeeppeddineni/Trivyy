@@ -81,6 +81,10 @@ describe('accounts API (integration)', () => {
       .post('/api/auth/reset')
       .send({ username: 'rey', recoveryCode: code, newPassword: 'newpassword' });
     expect(reset.status).toBe(200);
+    // Reset rotates the code: a fresh one is returned, the old one is now dead.
+    const newCode = reset.body.recoveryCode as string;
+    expect(typeof newCode).toBe('string');
+    expect(newCode).not.toBe(code);
 
     expect(
       (
@@ -96,6 +100,25 @@ describe('accounts API (integration)', () => {
           .send({ username: 'rey', password: 'newpassword' })
       ).status,
     ).toBe(200);
+
+    // The used (old) code can no longer reset; the rotated one can.
+    const replay = await request(app)
+      .post('/api/auth/reset')
+      .send({ username: 'rey', recoveryCode: code, newPassword: 'thirdpassword' });
+    expect(replay.status).toBe(401);
+    const withNew = await request(app)
+      .post('/api/auth/reset')
+      .send({ username: 'rey', recoveryCode: newCode, newPassword: 'thirdpassword' });
+    expect(withNew.status).toBe(200);
+  });
+
+  it('logout ends the session', async () => {
+    const agent = request.agent(app);
+    await agent.post('/api/auth/register').send({ username: 'kira', password: 'password1' });
+    expect((await agent.get('/api/auth/me')).status).toBe(200);
+    const out = await agent.post('/api/auth/logout');
+    expect(out.status).toBe(200);
+    expect((await agent.get('/api/auth/me')).status).toBe(401);
   });
 
   it('upgrades a guest in place, preserving game history', async () => {

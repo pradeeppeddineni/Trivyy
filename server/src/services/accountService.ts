@@ -83,28 +83,37 @@ export async function register(
   );
 
   let row: AccountRow;
-  if (existing.rows.length > 0) {
-    if (existing.rows[0].is_registered) {
-      throw new GameError('already_registered', 409);
+  try {
+    if (existing.rows.length > 0) {
+      if (existing.rows[0].is_registered) {
+        throw new GameError('already_registered', 409);
+      }
+      const updated = await pool.query<AccountRow>(
+        `UPDATE players
+            SET username = $2, password_hash = $3, recovery_code_hash = $4,
+                is_registered = true, invite_code = $5,
+                nickname = COALESCE($6, nickname)
+          WHERE session_token = $1
+          RETURNING id, nickname, username, invite_code, is_registered`,
+        [sessionId, uname, passwordHash, recoveryHash, inviteCode, nickname ?? null],
+      );
+      row = updated.rows[0];
+    } else {
+      const inserted = await pool.query<AccountRow>(
+        `INSERT INTO players (nickname, session_token, username, password_hash, recovery_code_hash, is_registered, invite_code)
+         VALUES ($1, $2, $3, $4, $5, true, $6)
+         RETURNING id, nickname, username, invite_code, is_registered`,
+        [nickname ?? uname, sessionId, uname, passwordHash, recoveryHash, inviteCode],
+      );
+      row = inserted.rows[0];
     }
-    const updated = await pool.query<AccountRow>(
-      `UPDATE players
-          SET username = $2, password_hash = $3, recovery_code_hash = $4,
-              is_registered = true, invite_code = $5,
-              nickname = COALESCE($6, nickname)
-        WHERE session_token = $1
-        RETURNING id, nickname, username, invite_code, is_registered`,
-      [sessionId, uname, passwordHash, recoveryHash, inviteCode, nickname ?? null],
-    );
-    row = updated.rows[0];
-  } else {
-    const inserted = await pool.query<AccountRow>(
-      `INSERT INTO players (nickname, session_token, username, password_hash, recovery_code_hash, is_registered, invite_code)
-       VALUES ($1, $2, $3, $4, $5, true, $6)
-       RETURNING id, nickname, username, invite_code, is_registered`,
-      [nickname ?? uname, sessionId, uname, passwordHash, recoveryHash, inviteCode],
-    );
-    row = inserted.rows[0];
+  } catch (err) {
+    // A concurrent registration can lose the pre-check race and hit the unique
+    // index; surface it as the same friendly 409 rather than a 500.
+    if (typeof err === 'object' && err !== null && 'code' in err && err.code === '23505') {
+      throw new GameError('username_taken', 409);
+    }
+    throw err;
   }
 
   logger.info('account_registered', { playerId: row.id });
@@ -123,31 +132,43 @@ export async function login(username: string, password: string): Promise<Account
     return null;
   }
   const ok = await argon2.verify(row.password_hash, password);
+  logger.info('account_login', { playerId: row.id, ok });
   return ok ? toAccount(row) : null;
 }
 
-/** Reset a password with the one-time recovery code. Returns true on success. */
+/**
+ * Reset a password with the recovery code. On success the code is **rotated** (a
+ * fresh one is issued and the old hash replaced) so the used code can never be
+ * replayed (one-time semantics), and the new code is returned to show once.
+ * Returns null on a bad username/code.
+ */
 export async function resetPassword(
   username: string,
   recoveryCode: string,
   newPassword: string,
-): Promise<boolean> {
+): Promise<{ recoveryCode: string } | null> {
   const result = await pool.query<{ id: string; recovery_code_hash: string | null }>(
     `SELECT id, recovery_code_hash FROM players WHERE username = $1 AND is_registered = true`,
     [username.trim().toLowerCase()],
   );
   const row = result.rows[0];
   if (!row || !row.recovery_code_hash) {
-    return false;
+    return null;
   }
   const ok = await argon2.verify(row.recovery_code_hash, normalizeRecoveryCode(recoveryCode));
   if (!ok) {
-    return false;
+    return null;
   }
-  const newHash = await argon2.hash(newPassword);
-  await pool.query(`UPDATE players SET password_hash = $2 WHERE id = $1`, [row.id, newHash]);
+  const newPasswordHash = await argon2.hash(newPassword);
+  const newCode = generateRecoveryCode();
+  const newCodeHash = await argon2.hash(newCode);
+  await pool.query(`UPDATE players SET password_hash = $2, recovery_code_hash = $3 WHERE id = $1`, [
+    row.id,
+    newPasswordHash,
+    newCodeHash,
+  ]);
   logger.info('account_password_reset', { playerId: row.id });
-  return true;
+  return { recoveryCode: newCode };
 }
 
 /** A registered account by id (for the session-resolved current player). */

@@ -102,6 +102,9 @@ export function AccountFlow(): JSX.Element {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [notice, setNotice] = useState<string | undefined>(undefined);
+  // Where the recovery-code screen's "continue" goes: signed in after register,
+  // back to sign-in after a reset.
+  const [afterRecovery, setAfterRecovery] = useState<'account' | 'login'>('account');
 
   useEffect(() => {
     let active = true;
@@ -132,6 +135,7 @@ export function AccountFlow(): JSX.Element {
       setAccount(acc);
       setStoredNickname(acc.nickname);
       setIssuedCode(recoveryCode);
+      setAfterRecovery('account');
       setPassword('');
       setScreen('recovery');
     } catch (err) {
@@ -167,14 +171,17 @@ export function AccountFlow(): JSX.Element {
     setError(undefined);
     try {
       const r = await resetAccount(username.trim(), recoveryInput, password);
-      if (r === 'ok') {
-        setPassword('');
-        setRecoveryInput('');
-        setNotice('Password reset. Please sign in.');
-        setScreen('login');
-      } else {
+      if (r === 'invalid' || r === 'rate_limited') {
         setError(resultMessage(r));
+        return;
       }
+      // Reset issued a new one-time recovery code — show it once, then sign in.
+      setPassword('');
+      setRecoveryInput('');
+      setIssuedCode(r.recoveryCode);
+      setAfterRecovery('login');
+      setNotice('Password reset. Please sign in.');
+      setScreen('recovery');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not reset your password.');
     } finally {
@@ -235,6 +242,7 @@ export function AccountFlow(): JSX.Element {
 
   const noticeLine = notice ? (
     <p
+      role="status"
       style={{
         color: 'var(--accent-strong)',
         fontSize: '13.5px',
@@ -323,7 +331,7 @@ export function AccountFlow(): JSX.Element {
           <Button variant="secondary" onClick={() => void copyText(issuedCode)}>
             Copy code
           </Button>
-          <Button variant="primary" onClick={() => setScreen('account')}>
+          <Button variant="primary" onClick={() => setScreen(afterRecovery)}>
             I&apos;ve saved it — continue
           </Button>
         </div>

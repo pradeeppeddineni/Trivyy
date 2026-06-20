@@ -116,7 +116,12 @@ export async function registerAccount(
     return (await res.json()) as RegisterResult;
   }
   if (res.status === 409) {
-    throw new Error('That username is taken.');
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(
+      body.error === 'already_registered'
+        ? "You're already signed in to an account."
+        : 'That username is taken.',
+    );
   }
   if (res.status === 429) {
     throw new Error('Too many attempts. Please wait a few minutes.');
@@ -135,13 +140,19 @@ export async function loginAccount(username: string, password: string): Promise<
   throw new Error(`Request failed (${res.status})`);
 }
 
+/** Reset succeeds with a freshly rotated recovery code, or fails with a reason. */
+export type ResetResult = { readonly recoveryCode: string } | 'invalid' | 'rate_limited';
+
 export async function resetAccount(
   username: string,
   recoveryCode: string,
   newPassword: string,
-): Promise<AuthResult> {
+): Promise<ResetResult> {
   const res = await authPost('/api/auth/reset', { username, recoveryCode, newPassword });
-  if (res.ok) return 'ok';
+  if (res.ok) {
+    const data = (await res.json()) as { recoveryCode: string };
+    return { recoveryCode: data.recoveryCode };
+  }
   if (res.status === 401) return 'invalid';
   if (res.status === 429) return 'rate_limited';
   throw new Error(`Request failed (${res.status})`);
