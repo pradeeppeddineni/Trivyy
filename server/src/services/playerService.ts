@@ -43,3 +43,21 @@ export async function getOrCreatePlayer(
   );
   return result.rows[0];
 }
+
+/**
+ * Load a player by id (a registered, signed-in player), refreshing location +
+ * last_seen_at. Returns null if the id no longer exists. Used by
+ * resolveCurrentPlayer when the session carries a `playerId`.
+ */
+export async function getPlayerById(id: string, meta: PlayerMeta = {}): Promise<PlayerRow | null> {
+  const result = await pool.query<PlayerRow>(
+    `UPDATE players
+        SET ip = COALESCE($2, ip),
+            country = COALESCE($3, country),
+            last_seen_at = now()
+      WHERE id = $1 AND is_registered = true
+      RETURNING id, nickname`,
+    [id, meta.ip ?? null, meta.country ?? null],
+  );
+  return result.rows[0] ?? null;
+}

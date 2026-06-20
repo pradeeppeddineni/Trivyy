@@ -75,6 +75,106 @@ export async function createSession(nickname: string): Promise<SessionResponse> 
   });
 }
 
+// --- Optional accounts (spec v3 §13.1, /api/auth/*) -------------------------
+
+export interface Account {
+  readonly id: string;
+  readonly nickname: string;
+  readonly username: string;
+  readonly inviteCode: string;
+}
+
+/** Outcome of a credential submit — 'invalid' = bad creds, 'rate_limited' = 429. */
+export type AuthResult = 'ok' | 'invalid' | 'rate_limited';
+
+async function authPost(path: string, body: unknown): Promise<Response> {
+  try {
+    return await fetch(path, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+}
+
+export interface RegisterResult {
+  readonly account: Account;
+  readonly recoveryCode: string;
+}
+
+/** Register an account; returns the account + one-time recovery code. */
+export async function registerAccount(
+  username: string,
+  password: string,
+  nickname?: string,
+): Promise<RegisterResult> {
+  const res = await authPost('/api/auth/register', { username, password, nickname });
+  if (res.ok) {
+    return (await res.json()) as RegisterResult;
+  }
+  if (res.status === 409) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(
+      body.error === 'already_registered'
+        ? "You're already signed in to an account."
+        : 'That username is taken.',
+    );
+  }
+  if (res.status === 429) {
+    throw new Error('Too many attempts. Please wait a few minutes.');
+  }
+  if (res.status === 400) {
+    throw new Error('Check your username (3+ chars) and password (8+ chars).');
+  }
+  throw new Error(`Request failed (${res.status})`);
+}
+
+export async function loginAccount(username: string, password: string): Promise<AuthResult> {
+  const res = await authPost('/api/auth/login', { username, password });
+  if (res.ok) return 'ok';
+  if (res.status === 401) return 'invalid';
+  if (res.status === 429) return 'rate_limited';
+  throw new Error(`Request failed (${res.status})`);
+}
+
+/** Reset succeeds with a freshly rotated recovery code, or fails with a reason. */
+export type ResetResult = { readonly recoveryCode: string } | 'invalid' | 'rate_limited';
+
+export async function resetAccount(
+  username: string,
+  recoveryCode: string,
+  newPassword: string,
+): Promise<ResetResult> {
+  const res = await authPost('/api/auth/reset', { username, recoveryCode, newPassword });
+  if (res.ok) {
+    const data = (await res.json()) as { recoveryCode: string };
+    return { recoveryCode: data.recoveryCode };
+  }
+  if (res.status === 401) return 'invalid';
+  if (res.status === 429) return 'rate_limited';
+  throw new Error(`Request failed (${res.status})`);
+}
+
+export async function logoutAccount(): Promise<void> {
+  await authPost('/api/auth/logout', {});
+}
+
+/** The signed-in account, or null if the visitor is a guest. */
+export async function authMe(): Promise<Account | null> {
+  let res: Response;
+  try {
+    res = await fetch('/api/auth/me', { credentials: 'include' });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (!res.ok) return null;
+  const data = (await res.json()) as { account: Account };
+  return data.account;
+}
+
 export async function createSoloGame(options: SoloGameOptions): Promise<CreateSoloGameResponse> {
   return request<CreateSoloGameResponse>('/api/games', {
     method: 'POST',
