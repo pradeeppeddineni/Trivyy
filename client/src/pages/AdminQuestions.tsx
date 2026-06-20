@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Button } from '../components/Button';
 import { Chip } from '../components/Chip';
@@ -103,8 +103,12 @@ export function AdminQuestions(props: AdminQuestionsProps): JSX.Element {
 
   const onToggleStatus = async (q: AdminQuestion): Promise<void> => {
     const next = q.status === 'active' ? 'hidden' : 'active';
-    await adminSetQuestionStatus(q.id, next);
-    await load(filters);
+    try {
+      await adminSetQuestionStatus(q.id, next);
+      await load(filters);
+    } catch {
+      setMessage(`Could not ${next === 'hidden' ? 'hide' : 'unhide'} the question.`);
+    }
   };
 
   const onSave = async (): Promise<void> => {
@@ -290,13 +294,35 @@ export function AdminQuestions(props: AdminQuestionsProps): JSX.Element {
         </div>
       )}
 
-      {data && data.total > data.items.length + ((filters.page ?? 1) - 1) * 25 ? (
-        <div style={{ marginTop: '14px' }}>
+      {data && data.total > 25 ? (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: '14px',
+          }}
+        >
           <Button
-            variant="secondary"
+            variant="ghost"
+            size="sm"
+            fullWidth={false}
+            disabled={(filters.page ?? 1) <= 1}
+            onClick={() => setFilters((p) => ({ ...p, page: Math.max(1, (p.page ?? 1) - 1) }))}
+          >
+            ← Prev
+          </Button>
+          <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 700 }}>
+            Page {filters.page ?? 1} of {Math.max(1, Math.ceil(data.total / 25))}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            fullWidth={false}
+            disabled={(filters.page ?? 1) >= Math.ceil(data.total / 25)}
             onClick={() => setFilters((p) => ({ ...p, page: (p.page ?? 1) + 1 }))}
           >
-            Load next page →
+            Next →
           </Button>
         </div>
       ) : null}
@@ -324,6 +350,9 @@ function QuestionEditor(props: {
 }): JSX.Element {
   const { draft, categories, saving, message, onChange, onSave, onCancel } = props;
   const set = (patch: Partial<Draft>): void => onChange({ ...draft, ...patch });
+  const qId = useId();
+  const aId = useId();
+  const cId = useId();
 
   return (
     <main
@@ -347,8 +376,11 @@ function QuestionEditor(props: {
         {draft.id ? 'Edit question' : 'Add question'}
       </h1>
 
-      <label style={LABEL}>QUESTION</label>
+      <label htmlFor={qId} style={LABEL}>
+        QUESTION
+      </label>
       <textarea
+        id={qId}
         value={draft.text}
         onChange={(e) => set({ text: e.target.value })}
         rows={3}
@@ -356,8 +388,11 @@ function QuestionEditor(props: {
         style={{ ...INPUT, resize: 'vertical' }}
       />
 
-      <label style={LABEL}>CORRECT ANSWER</label>
+      <label htmlFor={aId} style={LABEL}>
+        CORRECT ANSWER
+      </label>
       <input
+        id={aId}
         value={draft.correctAnswer}
         onChange={(e) => set({ correctAnswer: e.target.value })}
         placeholder="The correct answer"
@@ -379,8 +414,11 @@ function QuestionEditor(props: {
         />
       ))}
 
-      <label style={LABEL}>CATEGORY</label>
+      <label htmlFor={cId} style={LABEL}>
+        CATEGORY
+      </label>
       <select
+        id={cId}
         value={draft.categorySlug}
         onChange={(e) => set({ categorySlug: e.target.value })}
         style={INPUT}

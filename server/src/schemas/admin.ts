@@ -2,6 +2,9 @@ import { z } from 'zod';
 
 /** Request validation for the admin curation endpoints (CODE-2, API-2). */
 
+/** A resource id path param (question id) must be a uuid. */
+export const uuidSchema = z.string().uuid();
+
 export const adminLoginSchema = z.object({
   username: z.string().trim().min(1).max(60),
   password: z.string().min(1, 'password is required'),

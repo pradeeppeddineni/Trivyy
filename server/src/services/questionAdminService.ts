@@ -90,7 +90,10 @@ export async function listQuestions(options: ListQuestionsOptions): Promise<List
     conditions.push(`c.slug = $${params.length}`);
   }
   if (search && search.trim()) {
-    params.push(`%${search.trim()}%`);
+    // Escape LIKE metacharacters (Postgres default escape is backslash) so a
+    // search for "100%" matches literally rather than as a wildcard.
+    const escaped = search.trim().replace(/[\\%_]/g, '\\$&');
+    params.push(`%${escaped}%`);
     conditions.push(`q.text ILIKE $${params.length}`);
   }
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';

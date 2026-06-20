@@ -20,8 +20,8 @@ import {
   questionStatusSchema,
   categorySchema,
   listQuestionsQuerySchema,
+  uuidSchema,
 } from '../schemas/admin';
-import { gameIdSchema } from '../schemas/games';
 
 const PAGE_SIZE = 25;
 
@@ -128,7 +128,7 @@ export function adminRouter(env: Env): Router {
 
   router.put('/questions/:id', requireAdmin, async (req, res, next) => {
     try {
-      const id = gameIdSchema.safeParse(req.params.id);
+      const id = uuidSchema.safeParse(req.params.id);
       const parsed = adminQuestionSchema.safeParse(req.body);
       if (!id.success || !parsed.success) {
         res.status(400).json({ error: 'invalid_request' });
@@ -142,7 +142,7 @@ export function adminRouter(env: Env): Router {
 
   router.patch('/questions/:id/status', requireAdmin, async (req, res, next) => {
     try {
-      const id = gameIdSchema.safeParse(req.params.id);
+      const id = uuidSchema.safeParse(req.params.id);
       const parsed = questionStatusSchema.safeParse(req.body);
       if (!id.success || !parsed.success) {
         res.status(400).json({ error: 'invalid_request' });
