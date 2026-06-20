@@ -56,9 +56,9 @@ export async function searchPlayers(
 async function relationBetween(
   a: string,
   b: string,
-): Promise<{ id: string; status: string } | null> {
-  const r = await pool.query<{ id: string; status: string }>(
-    `SELECT id, status FROM friendships
+): Promise<{ id: string; status: string; requester_id: string } | null> {
+  const r = await pool.query<{ id: string; status: string; requester_id: string }>(
+    `SELECT id, status, requester_id FROM friendships
       WHERE (requester_id = $1 AND addressee_id = $2)
          OR (requester_id = $2 AND addressee_id = $1)
       LIMIT 1`,
@@ -86,6 +86,13 @@ export async function sendRequest(meId: string, username: string): Promise<{ sta
   }
   const existing = await relationBetween(meId, target.id);
   if (existing) {
+    // Mutual intent: if they already sent ME a pending request, accept it now
+    // (both sides want it) rather than reporting a confusing second "pending".
+    if (existing.status === 'pending' && existing.requester_id === target.id) {
+      await pool.query(`UPDATE friendships SET status = 'accepted' WHERE id = $1`, [existing.id]);
+      logger.info('friend_request_mutual_accepted', { meId });
+      return { status: 'accepted' };
+    }
     return { status: existing.status };
   }
   await pool.query(

@@ -33,6 +33,11 @@ function accountId(req: Request): string | null {
 }
 
 const sendRequestSchema = z.object({ username: z.string().trim().min(1).max(20) });
+// Invite codes are 5 chars from the unambiguous game-code alphabet.
+const inviteCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{5}$/i);
 
 friendsRouter.get('/', async (req, res, next) => {
   try {
@@ -137,7 +142,12 @@ friendsRouter.post('/invite/:code', async (req, res, next) => {
       res.status(401).json({ error: 'not_signed_in' });
       return;
     }
-    res.json(await acceptInvite(me, req.params.code));
+    const code = inviteCodeSchema.safeParse(req.params.code);
+    if (!code.success) {
+      res.status(400).json({ error: 'invalid_request' });
+      return;
+    }
+    res.json(await acceptInvite(me, code.data));
   } catch (err) {
     sendError(res, err, next);
   }

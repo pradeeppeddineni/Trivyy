@@ -83,6 +83,19 @@ describe('friends API (integration)', () => {
     expect((await bob.post(`/api/friends/requests/${reqId}/accept`)).status).toBe(404);
   });
 
+  it('mutual requests auto-accept into a friendship', async () => {
+    const { agent: ada } = await makeAccount('ada');
+    const { agent: bob } = await makeAccount('bob');
+
+    expect((await ada.post('/api/friends/requests').send({ username: 'bob' })).body.status).toBe(
+      'pending',
+    );
+    // Bob requesting Ada back (who already requested him) accepts immediately.
+    const back = await bob.post('/api/friends/requests').send({ username: 'ada' });
+    expect(back.body.status).toBe('accepted');
+    expect((await ada.get('/api/friends')).body.friends).toHaveLength(1);
+  });
+
   it('cannot friend yourself; bad username 404s', async () => {
     const { agent: ada } = await makeAccount('ada');
     expect((await ada.post('/api/friends/requests').send({ username: 'ada' })).status).toBe(400);

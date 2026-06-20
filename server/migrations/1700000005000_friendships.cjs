@@ -25,6 +25,7 @@ exports.up = (pgm) => {
     check: 'requester_id <> addressee_id',
   });
   pgm.createIndex('friendships', 'addressee_id'); // incoming-request lookups
+  pgm.createIndex('friendships', 'requester_id'); // sent-request + symmetric lookups
 };
 
 exports.down = (pgm) => {
