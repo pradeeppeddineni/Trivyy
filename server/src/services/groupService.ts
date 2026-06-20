@@ -16,6 +16,8 @@ export interface CreateGroupOptions {
   readonly count: number;
   readonly categorySlug?: string;
   readonly difficulty?: DifficultyFilter;
+  /** Host-chosen lobby cap (including the host). Null = no cap. */
+  readonly maxPlayers?: number;
 }
 
 export interface CreateGroupResult {
@@ -25,7 +27,7 @@ export interface CreateGroupResult {
 
 /** Create a group game and seat the host; players join the open lobby next. */
 export async function createGroup(options: CreateGroupOptions): Promise<CreateGroupResult> {
-  const { playerId, count, categorySlug, difficulty } = options;
+  const { playerId, count, categorySlug, difficulty, maxPlayers } = options;
 
   const picked = await pickQuestions({ playerId, count, categorySlug, difficulty });
   if (picked.length === 0) {
@@ -43,6 +45,7 @@ export async function createGroup(options: CreateGroupOptions): Promise<CreateGr
       difficulty: normalizedDifficulty,
       questionIds,
       hostPlayerId: playerId,
+      maxPlayers: maxPlayers ?? null,
     });
     await client.query(
       `INSERT INTO game_players (game_id, player_id, role, status)
@@ -66,14 +69,14 @@ export async function createGroup(options: CreateGroupOptions): Promise<CreateGr
 
 /** Join an open group lobby by code (idempotent if already joined). */
 export async function joinGroup(code: string, playerId: string): Promise<{ gameId: string }> {
-  const game = await pool.query<{ id: string; status: string }>(
-    `SELECT id, status FROM games WHERE game_code = $1 AND mode = 'together'`,
+  const game = await pool.query<{ id: string; status: string; max_players: number | null }>(
+    `SELECT id, status, max_players FROM games WHERE game_code = $1 AND mode = 'together'`,
     [code],
   );
   if (game.rows.length === 0) {
     throw new GameError('game_not_found', 404);
   }
-  const { id: gameId, status } = game.rows[0];
+  const { id: gameId, status, max_players } = game.rows[0];
 
   const existing = await pool.query(
     `SELECT 1 FROM game_players WHERE game_id = $1 AND player_id = $2`,
@@ -84,6 +87,15 @@ export async function joinGroup(code: string, playerId: string): Promise<{ gameI
   }
   if (status !== 'open') {
     throw new GameError('lobby_closed', 409);
+  }
+  if (max_players !== null) {
+    const count = await pool.query<{ n: string }>(
+      `SELECT count(*) AS n FROM game_players WHERE game_id = $1`,
+      [gameId],
+    );
+    if (Number(count.rows[0].n) >= max_players) {
+      throw new GameError('lobby_full', 409);
+    }
   }
 
   await pool.query(
@@ -108,6 +120,7 @@ export interface LobbyPlayer {
 export interface Lobby {
   readonly code: string;
   readonly status: string;
+  readonly maxPlayers: number | null;
   readonly players: ReadonlyArray<LobbyPlayer>;
 }
 
@@ -128,15 +141,20 @@ async function assertMember(gameId: string, playerId: string): Promise<void> {
 
 /** Lobby snapshot for the host/joiners to poll (API-7). Host listed first. */
 export async function getLobby(gameId: string, playerId: string): Promise<Lobby> {
-  const game = await pool.query<{ game_code: string; status: string; host_player_id: string }>(
-    `SELECT game_code, status, host_player_id FROM games WHERE id = $1 AND mode = 'together'`,
+  const game = await pool.query<{
+    game_code: string;
+    status: string;
+    host_player_id: string;
+    max_players: number | null;
+  }>(
+    `SELECT game_code, status, host_player_id, max_players FROM games WHERE id = $1 AND mode = 'together'`,
     [gameId],
   );
   if (game.rows.length === 0) {
     throw new GameError('game_not_found', 404);
   }
   await assertMember(gameId, playerId);
-  const { game_code, status, host_player_id } = game.rows[0];
+  const { game_code, status, host_player_id, max_players } = game.rows[0];
 
   const players = await pool.query<{ player_id: string; nickname: string; status: string }>(
     `SELECT gp.player_id, p.nickname, gp.status
@@ -148,6 +166,7 @@ export async function getLobby(gameId: string, playerId: string): Promise<Lobby>
   return {
     code: game_code,
     status,
+    maxPlayers: max_players,
     players: players.rows.map((row) => ({
       nickname: row.nickname,
       status: row.status,

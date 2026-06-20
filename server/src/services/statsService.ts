@@ -57,6 +57,11 @@ export interface AdminStats {
       readonly best: number;
     }>;
   };
+  /** Coarse player location by ISO country (Cloudflare), for the admin only. */
+  readonly locations: ReadonlyArray<{
+    readonly country: string | null;
+    readonly players: number;
+  }>;
 }
 
 const num = (value: unknown): number => Number(value ?? 0);
@@ -65,26 +70,37 @@ const pct = (part: number, whole: number): number =>
 
 /** Build the full admin analytics snapshot in a handful of aggregate queries. */
 export async function getAdminStats(): Promise<AdminStats> {
-  const [games, players, questions, answers, missed, byCat, byDiff, recent, userAgg, topPlayers] =
-    await Promise.all([
-      pool.query(
-        `SELECT count(*) AS total,
+  const [
+    games,
+    players,
+    questions,
+    answers,
+    missed,
+    byCat,
+    byDiff,
+    recent,
+    userAgg,
+    topPlayers,
+    byCountry,
+  ] = await Promise.all([
+    pool.query(
+      `SELECT count(*) AS total,
               count(*) FILTER (WHERE mode = 'solo') AS solo,
               count(*) FILTER (WHERE mode = 'duel') AS duel,
               count(*) FILTER (WHERE mode = 'together') AS together,
               count(*) FILTER (WHERE status = 'complete') AS completed
          FROM games`,
-      ),
-      pool.query(`SELECT count(*) AS n FROM players`),
-      pool.query(`SELECT count(*) AS n FROM questions WHERE status = 'active'`),
-      pool.query(
-        `SELECT count(*) AS total,
+    ),
+    pool.query(`SELECT count(*) AS n FROM players`),
+    pool.query(`SELECT count(*) AS n FROM questions WHERE status = 'active'`),
+    pool.query(
+      `SELECT count(*) AS total,
               count(*) FILTER (WHERE is_correct) AS correct,
               avg(elapsed_ms) FILTER (WHERE elapsed_ms IS NOT NULL) AS avg_ms
          FROM answers`,
-      ),
-      pool.query(
-        `SELECT q.text,
+    ),
+    pool.query(
+      `SELECT q.text,
               count(*) AS attempts,
               count(*) FILTER (WHERE NOT a.is_correct) AS missed
          FROM answers a JOIN questions q ON q.id = a.question_id
@@ -92,9 +108,9 @@ export async function getAdminStats(): Promise<AdminStats> {
         ORDER BY (count(*) FILTER (WHERE NOT a.is_correct))::float / count(*) DESC,
                  attempts DESC
         LIMIT 5`,
-      ),
-      pool.query(
-        `SELECT COALESCE(c.label, 'Surprise me') AS category,
+    ),
+    pool.query(
+      `SELECT COALESCE(c.label, 'Surprise me') AS category,
               count(*) AS answers,
               count(*) FILTER (WHERE a.is_correct) AS correct
          FROM answers a
@@ -102,21 +118,20 @@ export async function getAdminStats(): Promise<AdminStats> {
          LEFT JOIN categories c ON c.id = q.category_id
         GROUP BY c.label
         ORDER BY answers DESC`,
-      ),
-      pool.query(
-        `SELECT q.difficulty,
+    ),
+    pool.query(
+      `SELECT q.difficulty,
               count(*) AS answers,
               count(*) FILTER (WHERE a.is_correct) AS correct
          FROM answers a JOIN questions q ON q.id = a.question_id
         GROUP BY q.difficulty
         ORDER BY answers DESC`,
-      ),
-      pool.query(`SELECT type, game_id, created_at FROM events ORDER BY id DESC LIMIT 10`),
-      // Per-player engagement: unique / returning / new / repeat-rate. Derived
-      // from the players + game_players tables — no IP or location data is stored
-      // (SEC-6: logs/data hold nothing beyond nicknames and gameplay).
-      pool.query(
-        `WITH per AS (
+    ),
+    pool.query(`SELECT type, game_id, created_at FROM events ORDER BY id DESC LIMIT 10`),
+    // Per-player engagement: unique / returning / new / repeat-rate. Derived
+    // from the players + game_players counts (no IP/location needed here).
+    pool.query(
+      `WITH per AS (
          SELECT p.id, p.created_at, count(gp.id) AS games
            FROM players p LEFT JOIN game_players gp ON gp.player_id = p.id
           GROUP BY p.id, p.created_at
@@ -127,15 +142,22 @@ export async function getAdminStats(): Promise<AdminStats> {
               count(*) FILTER (WHERE games > 0) AS played,
               COALESCE(avg(games) FILTER (WHERE games > 0), 0) AS avg_games
          FROM per`,
-      ),
-      pool.query(
-        `SELECT p.nickname, count(gp.id) AS games, COALESCE(max(gp.score), 0) AS best
+    ),
+    pool.query(
+      `SELECT p.nickname, count(gp.id) AS games, COALESCE(max(gp.score), 0) AS best
          FROM players p JOIN game_players gp ON gp.player_id = p.id
         GROUP BY p.id, p.nickname
         ORDER BY games DESC, best DESC
         LIMIT 5`,
-      ),
-    ]);
+    ),
+    pool.query(
+      `SELECT country, count(*) AS players
+           FROM players
+          GROUP BY country
+          ORDER BY players DESC
+          LIMIT 10`,
+    ),
+  ]);
 
   const g = games.rows[0];
   const a = answers.rows[0];
@@ -189,5 +211,9 @@ export async function getAdminStats(): Promise<AdminStats> {
         best: num(row.best),
       })),
     },
+    locations: byCountry.rows.map((row) => ({
+      country: row.country ?? null,
+      players: num(row.players),
+    })),
   };
 }

@@ -24,6 +24,17 @@ const CARD: CSSProperties = {
   padding: '14px 15px',
 };
 
+/** ISO country code → flag emoji (regional indicator letters); 🌐 if unknown. */
+function flag(country: string | null): string {
+  if (!country || country.length !== 2) {
+    return '🌐';
+  }
+  const base = 0x1f1e6;
+  return String.fromCodePoint(
+    ...[...country.toUpperCase()].map((c) => base + (c.charCodeAt(0) - 65)),
+  );
+}
+
 function Row(props: { left: ReactNode; right: ReactNode }): JSX.Element {
   return (
     <div
@@ -228,6 +239,25 @@ export function AdminDashboard(props: AdminDashboardProps): JSX.Element {
               key={d.difficulty}
               left={<span style={{ textTransform: 'capitalize' }}>{d.difficulty}</span>}
               right={`${d.answers} · ${d.accuracyPct}%`}
+            />
+          ))
+        )}
+      </div>
+
+      <p style={SECTION_TITLE}>BY LOCATION</p>
+      <div style={{ ...CARD, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {stats.locations.length === 0 ? (
+          <span style={{ fontSize: '14px', color: 'var(--muted)' }}>No location data yet.</span>
+        ) : (
+          stats.locations.map((loc) => (
+            <Row
+              key={loc.country ?? 'unknown'}
+              left={
+                <span>
+                  {flag(loc.country)} {loc.country ?? 'Unknown'}
+                </span>
+              }
+              right={`${loc.players} player${loc.players === 1 ? '' : 's'}`}
             />
           ))
         )}

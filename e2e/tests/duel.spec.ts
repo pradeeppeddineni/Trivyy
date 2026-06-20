@@ -34,7 +34,7 @@ test('two players can play an async duel to a head-to-head result', async ({ bro
   await creator.getByLabel(/your nickname/i).fill('Ada');
   await creator.getByRole('button', { name: /continue/i }).click();
   await creator.getByRole('button', { name: '5', exact: true }).click();
-  await creator.getByRole('button', { name: /start round/i }).click();
+  await creator.getByRole('button', { name: /create challenge/i }).click();
   await playFive(creator);
 
   await expect(creator.getByText(/challenge ready/i)).toBeVisible();

@@ -72,5 +72,10 @@ describe('admin analytics (integration)', () => {
     expect(stats.users.unique).toBe(1);
     expect(stats.users.avgGamesPerPlayer).toBeGreaterThanOrEqual(1);
     expect(stats.users.top[0]?.nickname).toBe('Ada');
+
+    // Location analytics shape (no CF headers in tests → the one player buckets
+    // under the unknown/null country).
+    expect(Array.isArray(stats.locations)).toBe(true);
+    expect(stats.locations.reduce((n, l) => n + l.players, 0)).toBe(1);
   });
 });

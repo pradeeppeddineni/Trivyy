@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { nicknameSchema } from '../schemas/session';
 import { getOrCreatePlayer } from '../services/playerService';
+import { clientMeta } from '../lib/clientMeta';
 
 export const sessionRouter = Router();
 
@@ -18,7 +19,7 @@ sessionRouter.post('/session', async (req, res, next) => {
       return;
     }
     req.session.nickname = parsed.data.nickname;
-    await getOrCreatePlayer(req.sessionID, parsed.data.nickname);
+    await getOrCreatePlayer(req.sessionID, parsed.data.nickname, clientMeta(req));
     res.status(200).json({ nickname: parsed.data.nickname });
   } catch (err) {
     next(err);

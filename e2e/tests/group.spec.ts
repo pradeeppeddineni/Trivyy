@@ -32,8 +32,10 @@ test('a host and a joiner can play together to a leaderboard', async ({ browser 
   await host.goto('/?group');
   await host.getByLabel(/your nickname/i).fill('Ada');
   await host.getByRole('button', { name: /continue/i }).click();
-  await host.getByRole('button', { name: '5', exact: true }).click();
-  await host.getByRole('button', { name: /start round/i }).click();
+  // Questions "5" — the QUESTIONS row renders before the PLAYERS row, which also
+  // has a "5" chip, so take the first.
+  await host.getByRole('button', { name: '5', exact: true }).first().click();
+  await host.getByRole('button', { name: /create lobby/i }).click();
 
   await expect(host.getByRole('heading', { name: /game lobby/i })).toBeVisible();
   const code = await readCode(host);
