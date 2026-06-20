@@ -1,0 +1,122 @@
+import { Router } from 'express';
+import type { Response, NextFunction } from 'express';
+import rateLimit from 'express-rate-limit';
+import { registerSchema, loginSchema, resetSchema } from '../schemas/auth';
+import { register, login, resetPassword, getAccountById } from '../services/accountService';
+import { GameError } from '../services/gameService';
+
+/**
+ * Optional player accounts (spec v3 §13.1, /api/auth/*). Username + argon2
+ * password; one-time recovery code for reset (no email). Handlers stay thin
+ * (ARC-2); login + reset are rate-limited (SEC-3a).
+ */
+export const authRouter = Router();
+
+function sendError(res: Response, err: unknown, next: NextFunction): void {
+  if (err instanceof GameError) {
+    res.status(err.status).json({ error: err.message });
+    return;
+  }
+  next(err);
+}
+
+// Generous limit for a single household, strict enough to blunt guessing.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too_many_attempts' },
+});
+
+// POST /api/auth/register — create an account (upgrades the guest row in place);
+// returns the one-time recovery code, which the client shows once.
+authRouter.post('/register', authLimiter, async (req, res, next) => {
+  try {
+    const parsed = registerSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'invalid_request' });
+      return;
+    }
+    const { account, recoveryCode } = await register(
+      req.sessionID,
+      parsed.data.username,
+      parsed.data.password,
+      parsed.data.nickname ?? req.session.nickname,
+    );
+    req.session.playerId = account.id;
+    req.session.nickname = account.nickname;
+    res.status(201).json({ account, recoveryCode });
+  } catch (err) {
+    sendError(res, err, next);
+  }
+});
+
+// POST /api/auth/login
+authRouter.post('/login', authLimiter, async (req, res, next) => {
+  try {
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'invalid_request' });
+      return;
+    }
+    const account = await login(parsed.data.username, parsed.data.password);
+    if (!account) {
+      res.status(401).json({ error: 'invalid_credentials' });
+      return;
+    }
+    req.session.playerId = account.id;
+    req.session.nickname = account.nickname;
+    res.json({ account });
+  } catch (err) {
+    sendError(res, err, next);
+  }
+});
+
+// POST /api/auth/logout — drop the account session (becomes a fresh guest).
+authRouter.post('/logout', (req, res) => {
+  req.session.playerId = undefined;
+  req.session.nickname = undefined;
+  res.json({ ok: true });
+});
+
+// POST /api/auth/reset — username + recovery code + new password.
+authRouter.post('/reset', authLimiter, async (req, res, next) => {
+  try {
+    const parsed = resetSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'invalid_request' });
+      return;
+    }
+    const ok = await resetPassword(
+      parsed.data.username,
+      parsed.data.recoveryCode,
+      parsed.data.newPassword,
+    );
+    if (!ok) {
+      res.status(401).json({ error: 'invalid_credentials' });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    sendError(res, err, next);
+  }
+});
+
+// GET /api/auth/me — the signed-in account, or 401 if a guest/none.
+authRouter.get('/me', async (req, res, next) => {
+  try {
+    if (!req.session.playerId) {
+      res.status(401).json({ error: 'not_signed_in' });
+      return;
+    }
+    const account = await getAccountById(req.session.playerId);
+    if (!account) {
+      res.status(401).json({ error: 'not_signed_in' });
+      return;
+    }
+    res.json({ account });
+  } catch (err) {
+    sendError(res, err, next);
+  }
+});

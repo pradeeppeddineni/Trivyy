@@ -10,7 +10,10 @@ export interface HomeProps {
   readonly onChallenge: () => void;
   readonly onTogether: () => void;
   readonly onJoin: () => void;
+  readonly onAccount: () => void;
   readonly onAdmin: () => void;
+  /** Display name of the signed-in account, if any (null = guest). */
+  readonly accountName?: string | null;
 }
 
 const HERO: CSSProperties = {
@@ -29,8 +32,17 @@ const HERO: CSSProperties = {
  * modes route to a "Coming soon" placeholder for now.
  */
 export function Home(props: HomeProps): JSX.Element {
-  const { nickname, onNicknameChange, onPlaySolo, onChallenge, onTogether, onJoin, onAdmin } =
-    props;
+  const {
+    nickname,
+    onNicknameChange,
+    onPlaySolo,
+    onChallenge,
+    onTogether,
+    onJoin,
+    onAccount,
+    onAdmin,
+    accountName,
+  } = props;
 
   return (
     <main
@@ -112,9 +124,26 @@ export function Home(props: HomeProps): JSX.Element {
             Have a code? Join a game →
           </button>
         </div>
+
+        <div style={{ textAlign: 'center', marginTop: '12px' }}>
+          <button
+            type="button"
+            onClick={onAccount}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              fontSize: '14px',
+              color: 'var(--accent-strong)',
+              cursor: 'pointer',
+              fontWeight: 700,
+            }}
+          >
+            {accountName ? `@${accountName}` : 'Sign in / sign up'}
+          </button>
+        </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '26px' }}>
+      <div style={{ textAlign: 'center', marginTop: '22px' }}>
         <button
           type="button"
           onClick={onAdmin}

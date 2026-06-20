@@ -14,6 +14,7 @@ import {
   submitAnswer,
   completeGame,
   getResult,
+  authMe,
   type ApiQuestion,
   type Difficulty,
   type ResultResponse,
@@ -49,6 +50,23 @@ export function SoloFlow(): JSX.Element {
   const [result, setResult] = useState<ResultResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [toast, setToast] = useState<string | null>(null);
+  const [accountName, setAccountName] = useState<string | null>(null);
+
+  // Reflect a signed-in account on the home screen (guest play needs no account).
+  useEffect(() => {
+    let active = true;
+    authMe()
+      .then((acc) => {
+        if (active && acc) {
+          setAccountName(acc.nickname);
+          setNickname((prev) => prev || acc.nickname);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const flashToast = useCallback((message: string) => {
     setToast(message);
@@ -208,6 +226,8 @@ export function SoloFlow(): JSX.Element {
             onChallenge={() => goToMode('?duel')}
             onTogether={() => goToMode('?group')}
             onJoin={() => goToMode('?join')}
+            onAccount={() => goToMode('?account')}
+            accountName={accountName}
             onAdmin={() => {
               window.location.search = '?admin';
             }}
