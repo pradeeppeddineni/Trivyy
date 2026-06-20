@@ -5,6 +5,7 @@ import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
 import { GameCodeCard } from '../components/GameCodeCard';
 import { QRCard } from '../components/QRCard';
+import { InviteActions } from '../components/InviteActions';
 import { LeaderboardRow } from '../components/LeaderboardRow';
 import { Button } from '../components/Button';
 import { Setup } from './Setup';
@@ -125,6 +126,9 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
       case 'setup':
         return (
           <Setup
+            kicker="CHALLENGE A FRIEND"
+            title="Set up the duel"
+            ctaLabel="Create challenge →"
             categorySlug={categorySlug}
             difficulty={difficulty}
             count={count}
@@ -206,6 +210,7 @@ function WaitingScreen(props: { code: string | null }): JSX.Element {
           <GameCodeCard code={props.code} label="GAME CODE">
             <QRCard value={joinUrl(props.code)} />
           </GameCodeCard>
+          <InviteActions url={joinUrl(props.code)} code={props.code} />
         </>
       ) : (
         <p style={{ fontSize: '15px', color: 'var(--muted)', margin: 0, maxWidth: '300px' }}>

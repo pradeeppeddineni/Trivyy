@@ -88,8 +88,8 @@ The non-negotiable rules for building Trivyy, the solo / duel / group trivia gam
 - **SEC-2** Access SHALL use two roles enforced at the API layer: an anonymous nickname player and an authenticated admin. The host/creator and opponent/player distinctions inside a game are per-game data, not an auth boundary. Frontend checks are UX only.
 - **SEC-3** Players SHALL need no account; a player is identified by a nickname plus a browser session cookie that persists across games.
 - **SEC-4** Game invite codes (duel and group) SHALL be single-purpose: usable only to join the one game they belong to, and unusable once that game is complete.
-- **SEC-5** The app SHALL NOT collect player personal data; nicknames are treated as untrusted input and SHALL be length-limited and filtered.
-- **SEC-6** Logs SHALL be structured and SHALL NOT contain anything beyond nicknames and gameplay events.
+- **SEC-5** The app SHALL minimise player personal data; nicknames are treated as untrusted input and SHALL be length-limited and filtered. As an explicit, owner-authorized exception, the client IP and coarse location (ISO country, from Cloudflare's edge headers) MAY be captured and stored for the single-admin analytics dashboard only; this data SHALL NOT be exposed to players or to any non-admin surface.
+- **SEC-6** Logs SHALL be structured and SHALL NOT contain anything beyond nicknames and gameplay events — in particular, IP and location SHALL be stored for analytics but SHALL NEVER be written to logs.
 - **SEC-7** Production traffic SHALL use TLS, provided by the Cloudflare Tunnel; no plaintext HTTP.
 - **SEC-8** A leaked secret SHALL be rotated immediately and removed from history.
 - **SEC-9** Dependencies SHALL be scanned for known vulnerabilities, with none left unresolved at HIGH or CRITICAL.

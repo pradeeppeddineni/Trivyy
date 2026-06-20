@@ -14,7 +14,16 @@ export interface SetupProps {
   readonly onCount: (count: number) => void;
   readonly onStart: () => void;
   readonly starting: boolean;
+  /** Section kicker + CTA label so duel/group reuse the screen with their wording. */
+  readonly kicker?: string;
+  readonly title?: string;
+  readonly ctaLabel?: string;
+  /** When provided, shows a "how many players" picker (group "play together"). */
+  readonly maxPlayers?: number;
+  readonly onMaxPlayers?: (n: number) => void;
 }
+
+const PLAYER_COUNTS: ReadonlyArray<number> = [2, 3, 4, 5, 6, 8];
 
 const KICKER: CSSProperties = {
   fontSize: '13px',
@@ -49,8 +58,21 @@ function summaryText(categorySlug: string, difficulty: Difficulty, count: number
 
 /** Setup screen: category tiles, difficulty + count chips, summary, Start. */
 export function Setup(props: SetupProps): JSX.Element {
-  const { categorySlug, difficulty, count, onCategory, onDifficulty, onCount, onStart, starting } =
-    props;
+  const {
+    categorySlug,
+    difficulty,
+    count,
+    onCategory,
+    onDifficulty,
+    onCount,
+    onStart,
+    starting,
+    kicker = 'SOLO ROUND',
+    title = 'Set up your round',
+    ctaLabel = 'Start round →',
+    maxPlayers,
+    onMaxPlayers,
+  } = props;
 
   return (
     <main
@@ -63,7 +85,7 @@ export function Setup(props: SetupProps): JSX.Element {
       }}
     >
       <div style={{ margin: '6px 0 18px' }}>
-        <p style={KICKER}>SOLO ROUND</p>
+        <p style={KICKER}>{kicker}</p>
         <h2
           style={{
             fontFamily: 'var(--font-display)',
@@ -73,7 +95,7 @@ export function Setup(props: SetupProps): JSX.Element {
             color: 'var(--ink)',
           }}
         >
-          Set up your round
+          {title}
         </h2>
       </div>
 
@@ -109,6 +131,22 @@ export function Setup(props: SetupProps): JSX.Element {
         ))}
       </div>
 
+      {onMaxPlayers ? (
+        <>
+          <p style={{ ...LABEL, margin: '22px 0 11px' }}>PLAYERS</p>
+          <div style={{ display: 'flex', gap: '9px', flexWrap: 'wrap' }}>
+            {PLAYER_COUNTS.map((n) => (
+              <Chip
+                key={n}
+                label={String(n)}
+                selected={maxPlayers === n}
+                onClick={() => onMaxPlayers(n)}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
+
       <div style={{ marginTop: 'auto', paddingTop: '24px' }}>
         <div
           style={{
@@ -134,7 +172,7 @@ export function Setup(props: SetupProps): JSX.Element {
           </span>
         </div>
         <Button variant="primary" onClick={onStart} disabled={starting}>
-          {starting ? 'Starting…' : 'Start round →'}
+          {starting ? 'Starting…' : ctaLabel}
         </Button>
       </div>
     </main>

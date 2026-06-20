@@ -7,6 +7,7 @@ import { GameCodeCard } from '../components/GameCodeCard';
 import { QRCard } from '../components/QRCard';
 import { PlayerRow, type PlayerRowStatus } from '../components/PlayerRow';
 import { LeaderboardRow } from '../components/LeaderboardRow';
+import { InviteActions } from '../components/InviteActions';
 import { Button } from '../components/Button';
 import { Setup } from './Setup';
 import { NicknamePrompt } from './NicknamePrompt';
@@ -57,6 +58,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
   const [categorySlug, setCategorySlug] = useState('any');
   const [difficulty, setDifficulty] = useState<Difficulty>('any');
   const [count, setCount] = useState(10);
+  const [maxPlayers, setMaxPlayers] = useState(4);
   const [starting, setStarting] = useState(false);
   const [gameId, setGameId] = useState(props.entry?.gameId ?? '');
   const [questions, setQuestions] = useState<ReadonlyArray<ApiQuestion>>([]);
@@ -91,6 +93,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
         count,
         categorySlug: categorySlug === 'any' ? undefined : categorySlug,
         difficulty,
+        maxPlayers,
       });
       setGameId(created.gameId);
       setScreen('lobby');
@@ -99,7 +102,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
     } finally {
       setStarting(false);
     }
-  }, [nickname, count, categorySlug, difficulty, goError]);
+  }, [nickname, count, categorySlug, difficulty, maxPlayers, goError]);
 
   const onStartGame = useCallback(async () => {
     setStarting(true);
@@ -161,9 +164,14 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
       case 'setup':
         return (
           <Setup
+            kicker="PLAY TOGETHER"
+            title="Set up the game"
+            ctaLabel="Create lobby →"
             categorySlug={categorySlug}
             difficulty={difficulty}
             count={count}
+            maxPlayers={maxPlayers}
+            onMaxPlayers={setMaxPlayers}
             onCategory={setCategorySlug}
             onDifficulty={setDifficulty}
             onCount={setCount}
@@ -250,6 +258,10 @@ function LobbyScreen(props: {
         </GameCodeCard>
       </div>
 
+      <div style={{ marginTop: '16px' }}>
+        <InviteActions url={joinUrl(lobby.code)} code={lobby.code} />
+      </div>
+
       <p
         style={{
           fontSize: '13px',
@@ -259,7 +271,8 @@ function LobbyScreen(props: {
           margin: '20px 0 10px',
         }}
       >
-        PLAYERS ({lobby.players.length})
+        PLAYERS ({lobby.players.length}
+        {lobby.maxPlayers ? ` / ${lobby.maxPlayers}` : ''})
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
         {lobby.players.map((p) => (

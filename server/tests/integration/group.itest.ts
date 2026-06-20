@@ -124,4 +124,19 @@ describe('group games API (integration)', () => {
     const res = await p.post('/api/games/join').send({ code: 'ZZZZZ' });
     expect(res.status).toBe(404);
   });
+
+  it('enforces the host-chosen player cap', async () => {
+    const host = await makePlayerAgent('Ada');
+    // maxPlayers = 2 → host + one joiner fills it; the next join is rejected.
+    const created = await host
+      .post('/api/games')
+      .send({ mode: 'together', count: 5, maxPlayers: 2 });
+    const { code } = created.body;
+
+    const p2 = await makePlayerAgent('Bob');
+    const p3 = await makePlayerAgent('Cara');
+    expect((await p2.post('/api/games/join').send({ code })).status).toBe(200);
+    const full = await p3.post('/api/games/join').send({ code });
+    expect(full.status).toBe(409);
+  });
 });

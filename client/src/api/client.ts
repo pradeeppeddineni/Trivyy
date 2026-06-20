@@ -160,7 +160,12 @@ export interface LobbyPlayer {
 export interface LobbyResponse {
   readonly code: string;
   readonly status: string;
+  readonly maxPlayers: number | null;
   readonly players: ReadonlyArray<LobbyPlayer>;
+}
+
+export interface CreateGroupOptions extends SoloGameOptions {
+  readonly maxPlayers?: number;
 }
 
 export interface LeaderboardEntry {
@@ -184,7 +189,7 @@ export async function createDuelGame(options: SoloGameOptions): Promise<CreateDu
   });
 }
 
-export async function createGroupGame(options: SoloGameOptions): Promise<CreateGroupResponse> {
+export async function createGroupGame(options: CreateGroupOptions): Promise<CreateGroupResponse> {
   return request<CreateGroupResponse>('/api/games', {
     method: 'POST',
     body: JSON.stringify({ mode: 'together', ...options }),
@@ -319,6 +324,10 @@ export interface AdminStats {
       readonly best: number;
     }>;
   };
+  readonly locations: ReadonlyArray<{
+    readonly country: string | null;
+    readonly players: number;
+  }>;
 }
 
 export async function getAdminStats(): Promise<AdminStats> {

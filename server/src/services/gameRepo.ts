@@ -15,6 +15,7 @@ export interface InsertCodedGameParams {
   readonly difficulty: string | null;
   readonly questionIds: ReadonlyArray<string>;
   readonly hostPlayerId: string | null;
+  readonly maxPlayers?: number | null;
 }
 
 const MAX_CODE_ATTEMPTS = 8;
@@ -28,16 +29,25 @@ export async function insertCodedGame(
   client: PoolClient,
   params: InsertCodedGameParams,
 ): Promise<{ gameId: string; code: string }> {
-  const { mode, category, difficulty, questionIds, hostPlayerId } = params;
+  const { mode, category, difficulty, questionIds, hostPlayerId, maxPlayers } = params;
 
   for (let attempt = 0; attempt < MAX_CODE_ATTEMPTS; attempt += 1) {
     const code = generateGameCode();
     try {
       const inserted = await client.query<{ id: string }>(
-        `INSERT INTO games (mode, game_code, category, difficulty, num_questions, question_ids, status, host_player_id)
-         VALUES ($1, $2, $3, $4, $5, $6, 'open', $7)
+        `INSERT INTO games (mode, game_code, category, difficulty, num_questions, question_ids, status, host_player_id, max_players)
+         VALUES ($1, $2, $3, $4, $5, $6, 'open', $7, $8)
          RETURNING id`,
-        [mode, code, category, difficulty, questionIds.length, questionIds, hostPlayerId],
+        [
+          mode,
+          code,
+          category,
+          difficulty,
+          questionIds.length,
+          questionIds,
+          hostPlayerId,
+          maxPlayers ?? null,
+        ],
       );
       return { gameId: inserted.rows[0].id, code };
     } catch (err) {
