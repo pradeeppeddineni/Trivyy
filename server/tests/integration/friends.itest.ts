@@ -64,6 +64,25 @@ describe('friends API (integration)', () => {
     expect(bobFriends.body.friends.map((p: { username: string }) => p.username)).toContain('ada');
   });
 
+  it('declining a request removes it and creates no friendship', async () => {
+    const { agent: ada } = await makeAccount('ada');
+    const { agent: bob } = await makeAccount('bob');
+
+    await ada.post('/api/friends/requests').send({ username: 'bob' });
+    const incoming = await bob.get('/api/friends/requests');
+    const reqId = incoming.body.requests[0].id;
+
+    expect((await bob.post(`/api/friends/requests/${reqId}/decline`)).status).toBe(200);
+
+    // Gone from requests, and neither side has a friend.
+    expect((await bob.get('/api/friends/requests')).body.requests).toHaveLength(0);
+    expect((await ada.get('/api/friends')).body.friends).toHaveLength(0);
+    expect((await bob.get('/api/friends')).body.friends).toHaveLength(0);
+
+    // The decliner can no longer act on the same request id.
+    expect((await bob.post(`/api/friends/requests/${reqId}/accept`)).status).toBe(404);
+  });
+
   it('cannot friend yourself; bad username 404s', async () => {
     const { agent: ada } = await makeAccount('ada');
     expect((await ada.post('/api/friends/requests').send({ username: 'ada' })).status).toBe(400);

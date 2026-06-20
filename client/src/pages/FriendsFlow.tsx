@@ -101,7 +101,11 @@ export function FriendsFlow(props: FriendsFlowProps): JSX.Element {
               setMessage('That invite link is no longer valid.');
             }
           }
-          await refresh();
+          try {
+            await refresh();
+          } catch {
+            setMessage('We could not load your friends. Please try again.');
+          }
         }
       } finally {
         if (active) setLoading(false);
