@@ -115,6 +115,7 @@ export interface LobbyPlayer {
   readonly nickname: string;
   readonly status: string;
   readonly isHost: boolean;
+  readonly score: number;
 }
 
 export interface Lobby {
@@ -156,8 +157,13 @@ export async function getLobby(gameId: string, playerId: string): Promise<Lobby>
   await assertMember(gameId, playerId);
   const { game_code, status, host_player_id, max_players } = game.rows[0];
 
-  const players = await pool.query<{ player_id: string; nickname: string; status: string }>(
-    `SELECT gp.player_id, p.nickname, gp.status
+  const players = await pool.query<{
+    player_id: string;
+    nickname: string;
+    status: string;
+    score: number;
+  }>(
+    `SELECT gp.player_id, p.nickname, gp.status, gp.score
        FROM game_players gp JOIN players p ON p.id = gp.player_id
       WHERE gp.game_id = $1
       ORDER BY (gp.player_id = $2) DESC, p.nickname ASC`,
@@ -171,6 +177,7 @@ export async function getLobby(gameId: string, playerId: string): Promise<Lobby>
       nickname: row.nickname,
       status: row.status,
       isHost: row.player_id === host_player_id,
+      score: row.score,
     })),
   };
 }

@@ -4,8 +4,10 @@ import { Button } from '../components/Button';
 import { Logo } from '../components/Logo';
 
 export interface AdminLoginProps {
-  readonly value: string;
-  readonly onChange: (value: string) => void;
+  readonly username: string;
+  readonly password: string;
+  readonly onUsernameChange: (value: string) => void;
+  readonly onPasswordChange: (value: string) => void;
   readonly onSubmit: () => void;
   readonly submitting: boolean;
   readonly error?: string;
@@ -30,7 +32,17 @@ const FIELD: CSSProperties = {
  * the single admin password and surfaces a precise message on a wrong one.
  */
 export function AdminLogin(props: AdminLoginProps): JSX.Element {
-  const { value, onChange, onSubmit, submitting, error, onBack } = props;
+  const {
+    username,
+    password,
+    onUsernameChange,
+    onPasswordChange,
+    onSubmit,
+    submitting,
+    error,
+    onBack,
+  } = props;
+  const userId = useId();
   const fieldId = useId();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
@@ -72,10 +84,26 @@ export function AdminLogin(props: AdminLoginProps): JSX.Element {
             lineHeight: 1.5,
           }}
         >
-          Enter the admin password to manage questions and review games.
+          Sign in to manage questions and review games.
         </p>
 
         <form onSubmit={handleSubmit} style={{ marginTop: '26px', textAlign: 'left' }}>
+          <label
+            htmlFor={userId}
+            style={{ fontSize: '13px', fontWeight: 600, color: 'var(--faint)', marginLeft: '4px' }}
+          >
+            ADMIN USERNAME
+          </label>
+          <input
+            id={userId}
+            type="text"
+            value={username}
+            onChange={(event) => onUsernameChange(event.target.value)}
+            placeholder="admin"
+            autoComplete="username"
+            autoFocus
+            style={{ ...FIELD, marginTop: '8px', marginBottom: '16px' }}
+          />
           <label
             htmlFor={fieldId}
             style={{ fontSize: '13px', fontWeight: 600, color: 'var(--faint)', marginLeft: '4px' }}
@@ -85,11 +113,10 @@ export function AdminLogin(props: AdminLoginProps): JSX.Element {
           <input
             id={fieldId}
             type="password"
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
+            value={password}
+            onChange={(event) => onPasswordChange(event.target.value)}
             placeholder="••••••••"
             autoComplete="current-password"
-            autoFocus
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? `${fieldId}-error` : undefined}
             style={{ ...FIELD, marginTop: '8px' }}
@@ -110,7 +137,11 @@ export function AdminLogin(props: AdminLoginProps): JSX.Element {
           ) : null}
 
           <div style={{ marginTop: '22px' }}>
-            <Button type="submit" variant="primary" disabled={submitting || !value.trim()}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={submitting || !username.trim() || !password.trim()}
+            >
               {submitting ? 'Signing in…' : 'Sign in'}
             </Button>
           </div>

@@ -4,10 +4,12 @@ import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
 import { AdminLogin } from './AdminLogin';
 import { AdminDashboard } from './AdminDashboard';
+import { AdminQuestions } from './AdminQuestions';
+import { AdminCategories } from './AdminCategories';
 import { adminLogin, adminLogout, adminWhoami } from '../api/client';
 
-/** Admin screen state machine: probe the session, then sign in or show the panel. */
-type Screen = 'checking' | 'login' | 'dashboard';
+/** Admin screen state machine: probe the session, then sign in or manage. */
+type Screen = 'checking' | 'login' | 'dashboard' | 'questions' | 'categories';
 
 /** Send the browser back to the solo game (query-param routing, like ?gallery). */
 function goToGame(): void {
@@ -21,6 +23,7 @@ function goToGame(): void {
  */
 export function AdminFlow(): JSX.Element {
   const [screen, setScreen] = useState<Screen>('checking');
+  const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -47,19 +50,19 @@ export function AdminFlow(): JSX.Element {
     setSubmitting(true);
     setError(undefined);
     try {
-      const result = await adminLogin(password);
+      const result = await adminLogin(username.trim(), password);
       if (result === 'ok') {
         setPassword('');
         setScreen('dashboard');
       } else {
-        setError('Incorrect password. Please try again.');
+        setError('Incorrect username or password.');
       }
-    } catch {
-      setError('We could not sign you in. Please try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'We could not sign you in. Please try again.');
     } finally {
       setSubmitting(false);
     }
-  }, [password]);
+  }, [username, password]);
 
   const onLogout = useCallback(async () => {
     try {
@@ -82,8 +85,10 @@ export function AdminFlow(): JSX.Element {
     return (
       <AppFrame>
         <AdminLogin
-          value={password}
-          onChange={setPassword}
+          username={username}
+          password={password}
+          onUsernameChange={setUsername}
+          onPasswordChange={setPassword}
           onSubmit={() => void onSubmit()}
           submitting={submitting}
           error={error}
@@ -93,10 +98,32 @@ export function AdminFlow(): JSX.Element {
     );
   }
 
+  if (screen === 'questions') {
+    return (
+      <AppFrame>
+        <PlayerHeader nickname="admin" onLogoClick={goToGame} />
+        <AdminQuestions onBack={() => setScreen('dashboard')} />
+      </AppFrame>
+    );
+  }
+
+  if (screen === 'categories') {
+    return (
+      <AppFrame>
+        <PlayerHeader nickname="admin" onLogoClick={goToGame} />
+        <AdminCategories onBack={() => setScreen('dashboard')} />
+      </AppFrame>
+    );
+  }
+
   return (
     <AppFrame>
       <PlayerHeader nickname="admin" onLogoClick={goToGame} />
-      <AdminDashboard onLogout={() => void onLogout()} />
+      <AdminDashboard
+        onLogout={() => void onLogout()}
+        onManageQuestions={() => setScreen('questions')}
+        onManageCategories={() => setScreen('categories')}
+      />
     </AppFrame>
   );
 }

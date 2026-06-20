@@ -9,18 +9,21 @@ import { test, expect } from '@playwright/test';
  */
 const ADMIN_PASSWORD = 'e2e-admin-password';
 
+const ADMIN_USERNAME = 'admin';
+
 test('an admin can sign in, see the panel, and sign out', async ({ page }) => {
   await page.goto('/?admin');
 
-  // The session probe resolves to the sign-in form.
+  // The session probe resolves to the sign-in form (username pre-filled 'admin').
   await expect(page.getByRole('heading', { name: /admin sign in/i })).toBeVisible();
+  await page.getByLabel(/admin username/i).fill(ADMIN_USERNAME);
 
   // A wrong password is rejected with a precise message (the API returns 401).
   await page.getByLabel(/admin password/i).fill('definitely-wrong');
   await page.getByRole('button', { name: /sign in/i }).click();
-  await expect(page.getByRole('alert')).toHaveText(/incorrect password/i);
+  await expect(page.getByRole('alert')).toHaveText(/incorrect username or password/i);
 
-  // The correct password reaches the analytics dashboard (OBS-3).
+  // The correct credentials reach the analytics dashboard (OBS-3).
   await page.getByLabel(/admin password/i).fill(ADMIN_PASSWORD);
   await page.getByRole('button', { name: /sign in/i }).click();
 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Gameplay, type GradeState } from './Gameplay';
 import { StatusScreen } from '../components/StatusScreen';
 import { submitAnswer, completeGame, type ApiQuestion } from '../api/client';
@@ -25,6 +25,12 @@ export function RoundPlayer(props: RoundPlayerProps): JSX.Element {
   const [score, setScore] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [completing, setCompleting] = useState(false);
+  // When the current question was first shown, for response-time stats (OBS-3).
+  const shownAt = useRef<number>(performance.now());
+
+  useEffect(() => {
+    shownAt.current = performance.now();
+  }, [index]);
 
   const onSelect = useCallback(
     async (choice: string) => {
@@ -33,7 +39,8 @@ export function RoundPlayer(props: RoundPlayerProps): JSX.Element {
       }
       setSubmitting(true);
       try {
-        const graded = await submitAnswer(gameId, questions[index].id, choice);
+        const elapsedMs = Math.round(performance.now() - shownAt.current);
+        const graded = await submitAnswer(gameId, questions[index].id, choice, elapsedMs);
         setGrade({
           selected: choice,
           correct: graded.correct,

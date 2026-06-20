@@ -10,6 +10,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   SESSION_SECRET: z.string().min(16, 'SESSION_SECRET must be at least 16 characters'),
+  // Single admin: username + argon2 password hash (spec §10, ADR 0004).
+  ADMIN_USERNAME: z.string().min(1).default('admin'),
   ADMIN_PASSWORD_HASH: z.string().min(1, 'ADMIN_PASSWORD_HASH is required'),
   CLIENT_ORIGIN: z.string().url().default('http://localhost:5173'),
 });

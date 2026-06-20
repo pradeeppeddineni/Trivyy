@@ -7,6 +7,8 @@ import { getAdminStats, type AdminStats } from '../api/client';
 
 export interface AdminDashboardProps {
   readonly onLogout: () => void;
+  readonly onManageQuestions: () => void;
+  readonly onManageCategories: () => void;
 }
 
 const SECTION_TITLE: CSSProperties = {
@@ -117,6 +119,15 @@ export function AdminDashboard(props: AdminDashboardProps): JSX.Element {
       <p style={{ fontSize: '14px', color: 'var(--muted)', margin: 0 }}>
         {stats.games.solo} solo · {stats.games.duel} duel · {stats.games.together} group
       </p>
+
+      <div style={{ display: 'flex', gap: '11px', marginTop: '16px' }}>
+        <Button variant="primary" onClick={props.onManageQuestions}>
+          Manage questions
+        </Button>
+        <Button variant="secondary" onClick={props.onManageCategories}>
+          Categories
+        </Button>
+      </div>
 
       <div
         style={{

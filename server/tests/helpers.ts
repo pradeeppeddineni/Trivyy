@@ -8,6 +8,7 @@ export function makeEnv(overrides: Partial<Env> = {}): Env {
     PORT: 3000,
     DATABASE_URL: 'postgres://localhost:5432/trivyy_test',
     SESSION_SECRET: 'test-secret-test-secret',
+    ADMIN_USERNAME: 'admin',
     ADMIN_PASSWORD_HASH: '$argon2id$v=19$m=65536,t=3,p=4$unused-in-this-test$placeholder',
     CLIENT_ORIGIN: 'http://localhost:5173',
     ...overrides,

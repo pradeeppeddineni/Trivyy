@@ -155,6 +155,7 @@ export interface LobbyPlayer {
   readonly nickname: string;
   readonly status: string;
   readonly isHost: boolean;
+  readonly score: number;
 }
 
 export interface LobbyResponse {
@@ -245,22 +246,22 @@ export async function getLeaderboard(gameId: string): Promise<LeaderboardRespons
 // boundary (server middleware/auth.ts). These helpers just collect the password
 // and reflect the session state the API reports.
 
-/** Outcome of an admin login attempt — `invalid` is a wrong password (401). */
+/** Outcome of an admin login attempt — `invalid` is bad credentials (401). */
 export type AdminLoginResult = 'ok' | 'invalid';
 
 /**
- * POST /api/admin/login. Returns 'ok' on success, 'invalid' on a wrong password
- * (so the UI can show a precise message), and throws for anything unexpected
- * (network, 500) so callers fall back to a generic error.
+ * POST /api/admin/login (username + password). Returns 'ok' on success,
+ * 'invalid' on bad credentials (401, so the UI can show a precise message), and
+ * throws for anything unexpected (network, 429, 500) for a generic fallback.
  */
-export async function adminLogin(password: string): Promise<AdminLoginResult> {
+export async function adminLogin(username: string, password: string): Promise<AdminLoginResult> {
   let res: Response;
   try {
     res = await fetch('/api/admin/login', {
       method: 'POST',
       credentials: 'include',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ username, password }),
     });
   } catch {
     throw new Error('Network error — please try again.');
@@ -270,6 +271,9 @@ export async function adminLogin(password: string): Promise<AdminLoginResult> {
   }
   if (res.status === 401) {
     return 'invalid';
+  }
+  if (res.status === 429) {
+    throw new Error('Too many attempts. Please wait a few minutes.');
   }
   throw new Error(`Request failed (${res.status})`);
 }
@@ -343,4 +347,105 @@ export async function adminWhoami(): Promise<boolean> {
     throw new Error('Network error — please try again.');
   }
   return res.ok;
+}
+
+// --- Admin curation (spec §5.5, /api/admin/questions + /categories) ---------
+
+export interface AdminQuestion {
+  readonly id: string;
+  readonly text: string;
+  readonly correctAnswer: string;
+  readonly incorrectAnswers: ReadonlyArray<string>;
+  readonly categorySlug: string | null;
+  readonly categoryLabel: string | null;
+  readonly difficulty: string;
+  readonly status: string;
+  readonly source: string;
+  readonly updatedAt: string;
+}
+
+export interface AdminQuestionInput {
+  readonly text: string;
+  readonly correctAnswer: string;
+  readonly incorrectAnswers: ReadonlyArray<string>;
+  readonly categorySlug?: string;
+  readonly difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface QuestionsPage {
+  readonly items: ReadonlyArray<AdminQuestion>;
+  readonly total: number;
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+export interface QuestionFilters {
+  readonly search?: string;
+  readonly category?: string;
+  readonly difficulty?: string;
+  readonly status?: 'active' | 'hidden' | 'all';
+  readonly page?: number;
+}
+
+export async function adminListQuestions(filters: QuestionFilters = {}): Promise<QuestionsPage> {
+  const params = new URLSearchParams();
+  if (filters.search) params.set('search', filters.search);
+  if (filters.category) params.set('category', filters.category);
+  if (filters.difficulty && filters.difficulty !== 'any')
+    params.set('difficulty', filters.difficulty);
+  if (filters.status) params.set('status', filters.status);
+  if (filters.page) params.set('page', String(filters.page));
+  const qs = params.toString();
+  return request<QuestionsPage>(`/api/admin/questions${qs ? `?${qs}` : ''}`);
+}
+
+export async function adminCreateQuestion(input: AdminQuestionInput): Promise<AdminQuestion> {
+  return request<AdminQuestion>('/api/admin/questions', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function adminUpdateQuestion(
+  id: string,
+  input: AdminQuestionInput,
+): Promise<AdminQuestion> {
+  return request<AdminQuestion>(`/api/admin/questions/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function adminSetQuestionStatus(
+  id: string,
+  status: 'active' | 'hidden',
+): Promise<void> {
+  await request<{ ok: true }>(`/api/admin/questions/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export interface AdminCategory {
+  readonly slug: string;
+  readonly label: string;
+  readonly icon: string;
+  readonly status: string;
+  readonly questionCount: number;
+}
+
+export async function adminListCategories(): Promise<ReadonlyArray<AdminCategory>> {
+  const data = await request<{ categories: ReadonlyArray<AdminCategory> }>('/api/admin/categories');
+  return data.categories;
+}
+
+export async function adminCreateCategory(input: {
+  slug: string;
+  label: string;
+  icon: string;
+}): Promise<AdminCategory> {
+  return request<AdminCategory>('/api/admin/categories', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
 }
