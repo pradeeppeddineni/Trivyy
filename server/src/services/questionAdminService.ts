@@ -151,7 +151,9 @@ export async function createQuestion(input: QuestionInput): Promise<AdminQuestio
       input.text,
       input.correctAnswer,
       input.incorrectAnswers,
-      input.categorySlug ?? null,
+      // Legacy `category` text column is NOT NULL; the FK `category_id` carries
+      // the real mapping (null = Surprise me).
+      input.categorySlug ?? '',
       categoryId,
       input.difficulty,
     ],
@@ -178,7 +180,7 @@ export async function updateQuestion(id: string, input: QuestionInput): Promise<
       input.text,
       input.correctAnswer,
       input.incorrectAnswers,
-      input.categorySlug ?? null,
+      input.categorySlug ?? '',
       categoryId,
       input.difficulty,
     ],

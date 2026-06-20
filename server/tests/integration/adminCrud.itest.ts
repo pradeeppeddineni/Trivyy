@@ -70,6 +70,16 @@ describe('admin curation (integration)', () => {
     expect(edited.incorrectAnswers).toHaveLength(2);
   });
 
+  it('creates a question with no category (Surprise me)', async () => {
+    const created = await createQuestion({
+      text: 'Q-admin: no-category question?',
+      correctAnswer: 'Yes',
+      incorrectAnswers: ['No'],
+      difficulty: 'easy',
+    });
+    expect(created.categorySlug).toBeNull();
+  });
+
   it('rejects an unknown category on create', async () => {
     await expect(
       createQuestion({
