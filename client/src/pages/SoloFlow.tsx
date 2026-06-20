@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
@@ -109,6 +109,12 @@ export function SoloFlow(): JSX.Element {
     }
   }, [nickname, count, categorySlug, difficulty, flashToast, goError]);
 
+  // When the current question was shown, for response-time stats (OBS-3).
+  const shownAt = useRef<number>(performance.now());
+  useEffect(() => {
+    shownAt.current = performance.now();
+  }, [game?.index, screen]);
+
   const onSelect = useCallback(
     async (choice: string) => {
       if (!game || game.grade) {
@@ -117,7 +123,8 @@ export function SoloFlow(): JSX.Element {
       setSubmitting(true);
       try {
         const current = game.questions[game.index];
-        const graded = await submitAnswer(game.gameId, current.id, choice);
+        const elapsedMs = Math.round(performance.now() - shownAt.current);
+        const graded = await submitAnswer(game.gameId, current.id, choice, elapsedMs);
         setGame((prev) =>
           prev
             ? {

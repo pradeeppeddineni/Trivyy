@@ -130,6 +130,27 @@ export function Home(props: HomeProps): JSX.Element {
           Admin
         </button>
       </div>
+
+      <footer
+        style={{
+          textAlign: 'center',
+          marginTop: '14px',
+          fontSize: '11.5px',
+          color: 'var(--faint-soft)',
+          lineHeight: 1.5,
+        }}
+      >
+        Questions from the{' '}
+        <a
+          href="https://opentdb.com"
+          target="_blank"
+          rel="noreferrer noopener"
+          style={{ color: 'var(--faint)', fontWeight: 600 }}
+        >
+          Open Trivia Database
+        </a>
+        , licensed CC BY-SA 4.0.
+      </footer>
     </main>
   );
 }

@@ -282,6 +282,7 @@ function LobbyScreen(props: {
             isYou={p.nickname === nickname}
             status={rowStatus(p.status)}
             statusText={p.isHost ? 'Host' : p.status === 'done' ? 'Finished' : 'Ready'}
+            scoreText={p.status === 'done' ? `${p.score}` : undefined}
           />
         ))}
       </div>
