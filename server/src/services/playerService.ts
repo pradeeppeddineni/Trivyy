@@ -55,7 +55,7 @@ export async function getPlayerById(id: string, meta: PlayerMeta = {}): Promise<
         SET ip = COALESCE($2, ip),
             country = COALESCE($3, country),
             last_seen_at = now()
-      WHERE id = $1
+      WHERE id = $1 AND is_registered = true
       RETURNING id, nickname`,
     [id, meta.ip ?? null, meta.country ?? null],
   );
