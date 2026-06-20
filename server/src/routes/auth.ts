@@ -27,6 +27,25 @@ function regenerateSession(req: Request): Promise<void> {
   });
 }
 
+/** Persist the session before responding, so the client's next request sees it. */
+function saveSession(req: Request): Promise<void> {
+  return new Promise((resolve, reject) => {
+    req.session.save((err) => (err ? reject(err) : resolve()));
+  });
+}
+
+/** Regenerate, set the signed-in identity, and persist — used by register + login. */
+async function startSignedInSession(
+  req: Request,
+  playerId: string,
+  nickname: string,
+): Promise<void> {
+  await regenerateSession(req);
+  req.session.playerId = playerId;
+  req.session.nickname = nickname;
+  await saveSession(req);
+}
+
 // Generous limit for a single household, strict enough to blunt guessing.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -52,9 +71,7 @@ authRouter.post('/register', authLimiter, async (req, res, next) => {
       parsed.data.password,
       parsed.data.nickname ?? req.session.nickname,
     );
-    await regenerateSession(req);
-    req.session.playerId = account.id;
-    req.session.nickname = account.nickname;
+    await startSignedInSession(req, account.id, account.nickname);
     res.status(201).json({ account, recoveryCode });
   } catch (err) {
     sendError(res, err, next);
@@ -74,9 +91,7 @@ authRouter.post('/login', authLimiter, async (req, res, next) => {
       res.status(401).json({ error: 'invalid_credentials' });
       return;
     }
-    await regenerateSession(req);
-    req.session.playerId = account.id;
-    req.session.nickname = account.nickname;
+    await startSignedInSession(req, account.id, account.nickname);
     res.json({ account });
   } catch (err) {
     sendError(res, err, next);

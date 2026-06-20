@@ -66,6 +66,17 @@ export async function register(
 ): Promise<RegisterResult> {
   const uname = username.trim().toLowerCase();
 
+  // Cheap guard before any expensive hashing: reject re-registering an
+  // already-registered session up front.
+  const existing = await pool.query<AccountRow>(
+    `SELECT id, nickname, username, invite_code, is_registered
+       FROM players WHERE session_token = $1`,
+    [sessionId],
+  );
+  if (existing.rows.length > 0 && existing.rows[0].is_registered) {
+    throw new GameError('already_registered', 409);
+  }
+
   // No username pre-check: we rely solely on the unique index + the 23505 catch
   // below. That keeps one code path and avoids a timing oracle for "does this
   // username exist" (usernames are searchable in Phase B, but the write path
@@ -75,18 +86,9 @@ export async function register(
   const recoveryHash = await argon2.hash(recoveryCode);
   const inviteCode = await allocateInviteCode();
 
-  const existing = await pool.query<AccountRow>(
-    `SELECT id, nickname, username, invite_code, is_registered
-       FROM players WHERE session_token = $1`,
-    [sessionId],
-  );
-
   let row: AccountRow;
   try {
     if (existing.rows.length > 0) {
-      if (existing.rows[0].is_registered) {
-        throw new GameError('already_registered', 409);
-      }
       const updated = await pool.query<AccountRow>(
         `UPDATE players
             SET username = $2, password_hash = $3, recovery_code_hash = $4,
