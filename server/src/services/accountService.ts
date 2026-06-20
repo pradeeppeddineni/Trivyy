@@ -66,11 +66,10 @@ export async function register(
 ): Promise<RegisterResult> {
   const uname = username.trim().toLowerCase();
 
-  const taken = await pool.query(`SELECT 1 FROM players WHERE username = $1`, [uname]);
-  if (taken.rows.length > 0) {
-    throw new GameError('username_taken', 409);
-  }
-
+  // No username pre-check: we rely solely on the unique index + the 23505 catch
+  // below. That keeps one code path and avoids a timing oracle for "does this
+  // username exist" (usernames are searchable in Phase B, but the write path
+  // shouldn't be a faster existence probe than the search endpoint).
   const passwordHash = await argon2.hash(password);
   const recoveryCode = generateRecoveryCode();
   const recoveryHash = await argon2.hash(recoveryCode);
@@ -116,8 +115,20 @@ export async function register(
     throw err;
   }
 
+  await recordAccountEvent('account_registered', row.id);
   logger.info('account_registered', { playerId: row.id });
   return { account: toAccount(row), recoveryCode };
+}
+
+/**
+ * Append an account-lifecycle event to the audit trail the admin dashboard reads
+ * (DB-5/OBS-3). game_id is NULL — these are player events, not game events.
+ */
+async function recordAccountEvent(type: string, playerId: string): Promise<void> {
+  await pool.query(`INSERT INTO events (game_id, type, payload) VALUES (NULL, $1, $2)`, [
+    type,
+    JSON.stringify({ playerId }),
+  ]);
 }
 
 /** Verify username + password; returns the account or null (no reason leaked). */
@@ -167,6 +178,7 @@ export async function resetPassword(
     newPasswordHash,
     newCodeHash,
   ]);
+  await recordAccountEvent('account_password_reset', row.id);
   logger.info('account_password_reset', { playerId: row.id });
   return { recoveryCode: newCode };
 }
