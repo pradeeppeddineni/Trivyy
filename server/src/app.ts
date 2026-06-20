@@ -6,6 +6,7 @@ import type { Env } from './config/env';
 import { healthRouter } from './routes/health';
 import { sessionRouter } from './routes/session';
 import { authRouter } from './routes/auth';
+import { friendsRouter } from './routes/friends';
 import { gamesRouter } from './routes/games';
 import { adminRouter } from './routes/admin';
 import { errorHandler } from './middleware/error';
@@ -56,6 +57,7 @@ export function createApp(env: Env): express.Express {
   app.use('/api', healthRouter);
   app.use('/api', sessionRouter);
   app.use('/api/auth', authRouter);
+  app.use('/api/friends', friendsRouter);
   app.use('/api/games', gamesRouter);
   app.use('/api/admin', adminRouter(env));
 

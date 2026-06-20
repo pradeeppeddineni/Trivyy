@@ -162,6 +162,71 @@ export async function logoutAccount(): Promise<void> {
   await authPost('/api/auth/logout', {});
 }
 
+// --- Friends (spec v3 §13.2, /api/friends/*) -------------------------------
+
+export interface PlayerSummary {
+  readonly id: string;
+  readonly username: string;
+  readonly nickname: string;
+}
+
+export interface FriendRequest {
+  readonly id: string;
+  readonly from: PlayerSummary;
+}
+
+export interface FriendLeaderboardEntry {
+  readonly rank: number;
+  readonly nickname: string;
+  readonly username: string;
+  readonly points: number;
+  readonly games: number;
+  readonly isMe: boolean;
+}
+
+export async function listFriends(): Promise<ReadonlyArray<PlayerSummary>> {
+  const d = await request<{ friends: ReadonlyArray<PlayerSummary> }>('/api/friends');
+  return d.friends;
+}
+
+export async function listFriendRequests(): Promise<ReadonlyArray<FriendRequest>> {
+  const d = await request<{ requests: ReadonlyArray<FriendRequest> }>('/api/friends/requests');
+  return d.requests;
+}
+
+export async function searchPlayers(q: string): Promise<ReadonlyArray<PlayerSummary>> {
+  const d = await request<{ players: ReadonlyArray<PlayerSummary> }>(
+    `/api/friends/search?q=${encodeURIComponent(q)}`,
+  );
+  return d.players;
+}
+
+export async function sendFriendRequest(username: string): Promise<{ status: string }> {
+  return request<{ status: string }>('/api/friends/requests', {
+    method: 'POST',
+    body: JSON.stringify({ username }),
+  });
+}
+
+export async function respondFriendRequest(id: string, accept: boolean): Promise<void> {
+  await request<{ ok: true }>(`/api/friends/requests/${id}/${accept ? 'accept' : 'decline'}`, {
+    method: 'POST',
+  });
+}
+
+export async function acceptFriendInvite(code: string): Promise<void> {
+  await request<{ ok: true }>(`/api/friends/invite/${encodeURIComponent(code)}`, {
+    method: 'POST',
+  });
+}
+
+export async function getFriendsLeaderboard(): Promise<ReadonlyArray<FriendLeaderboardEntry>> {
+  const d = await request<{ entries: ReadonlyArray<FriendLeaderboardEntry> }>(
+    '/api/friends/leaderboard',
+  );
+  return d.entries;
+}
+
 /** The signed-in account, or null if the visitor is a guest. */
 export async function authMe(): Promise<Account | null> {
   let res: Response;
