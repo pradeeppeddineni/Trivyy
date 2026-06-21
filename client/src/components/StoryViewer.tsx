@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { CSSProperties } from 'react';
 
 // ---- Types ------------------------------------------------------------------
@@ -7,15 +8,19 @@ export interface StoryViewerProps {
   readonly label: string;
   readonly detail?: string | null;
   readonly onClose: () => void;
+  /** Auto-advance duration in ms; the progress bar fills over this time. */
+  readonly durationMs?: number;
 }
+
+const STORY_DURATION_MS = 5000;
 
 // ---- Inline SVG icons -------------------------------------------------------
 
 function CloseIcon(): JSX.Element {
   return (
     <svg
-      width="16"
-      height="16"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -33,12 +38,12 @@ function CloseIcon(): JSX.Element {
 function TrophyIcon(): JSX.Element {
   return (
     <svg
-      width="32"
-      height="32"
+      width="56"
+      height="56"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -56,159 +61,216 @@ function TrophyIcon(): JSX.Element {
 // ---- Styles -----------------------------------------------------------------
 
 /**
- * Backdrop: a fixed overlay that closes the modal when clicked.
- * aria-hidden keeps it out of the accessibility tree; the visible scrim is
- * purely decorative. The dialog itself is a sibling, not a child, so it is
- * never hidden from AT by this attribute.
+ * Backdrop: a plain dark fill behind the story panel (kept as a separate first
+ * child so the existing two-child structure and outside-click handling hold).
  */
 const backdropSt: CSSProperties = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(0,0,0,0.55)',
+  background: '#000',
   zIndex: 1000,
 };
 
-/**
- * Centering shell: sits on top of the backdrop (higher z-index) and provides
- * the flex container that centres the card. It does NOT have aria-hidden so
- * screen readers can reach the dialog within it.
- */
-const centreShellSt: CSSProperties = {
+/** Full-screen shell. Tapping it (outside the panel content) closes the story. */
+const shellSt: CSSProperties = {
   position: 'fixed',
   inset: 0,
+  zIndex: 1001,
+  display: 'flex',
+  justifyContent: 'center',
+};
+
+/** The full-bleed story panel — an Instagram-style vertical, edge-to-edge view. */
+const panelSt: CSSProperties = {
+  position: 'relative',
+  width: '100%',
+  maxWidth: 'var(--app-width)',
+  height: '100dvh',
+  background: 'linear-gradient(160deg, var(--accent) 0%, #7a3df1 55%, #e0489c 100%)',
+  color: '#fff',
+  display: 'flex',
+  flexDirection: 'column',
+  padding: 'calc(14px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom))',
+  boxSizing: 'border-box',
+  overflow: 'hidden',
+};
+
+const progressTrackSt: CSSProperties = {
+  height: '3px',
+  borderRadius: '999px',
+  background: 'rgba(255,255,255,0.35)',
+  overflow: 'hidden',
+  flexShrink: 0,
+};
+
+const headerSt: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  marginTop: '16px',
+  flexShrink: 0,
+};
+
+const avatarSt: CSSProperties = {
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  background: 'rgba(255,255,255,0.2)',
+  border: '2px solid rgba(255,255,255,0.85)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 1001,
-};
-
-const cardSt: CSSProperties = {
-  position: 'relative',
-  maxWidth: '320px',
-  width: '100%',
-  padding: '28px',
-  borderRadius: 'var(--radius-xl)',
-  background: 'var(--card)',
-  boxShadow: 'var(--shadow-toast)',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '12px',
+  fontFamily: 'var(--font-display)',
+  fontWeight: 700,
+  fontSize: '18px',
+  flexShrink: 0,
 };
 
 const closeBtnSt: CSSProperties = {
-  position: 'absolute',
-  top: '12px',
-  right: '12px',
-  width: '28px',
-  height: '28px',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-md)',
-  background: 'var(--surface-muted)',
-  color: 'var(--muted)',
+  marginLeft: 'auto',
+  width: '36px',
+  height: '36px',
+  border: 'none',
+  borderRadius: '50%',
+  background: 'rgba(255,255,255,0.18)',
+  color: '#fff',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   padding: 0,
+  flexShrink: 0,
 };
 
-const ringWrapSt: CSSProperties = {
-  width: '64px',
-  height: '64px',
+const badgeRingSt: CSSProperties = {
+  width: '132px',
+  height: '132px',
   borderRadius: '50%',
-  background: 'var(--warning-soft)',
-  border: '2px solid var(--warning)',
+  background: 'rgba(255,255,255,0.16)',
+  border: '3px solid rgba(255,255,255,0.6)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: 'var(--warning)',
-  flexShrink: 0,
+  boxShadow: '0 16px 40px rgba(0,0,0,0.25)',
 };
 
 // ---- Main component ---------------------------------------------------------
 
 /**
- * Presentational modal that shows one friend's badge story.
- * No comment input, no reaction buttons — display only.
+ * Full-page (Instagram-style) story viewer for one friend's badge.
+ * Display only: no comment input, no reactions. Auto-advances (closes) after
+ * `durationMs`; the user can also tap the close button or outside the panel.
  *
- * Structure:
- *   backdrop div (aria-hidden, onClick=onClose)
- *   centering shell div (onClick=onClose)
- *     dialog card (role="dialog", onClick stops propagation)
+ * Structure (preserved across the redesign):
+ *   backdrop div (aria-hidden)            <- container.children[0]
+ *   shell div (onClick=onClose)           <- container.children[1]
+ *     panel (onClick stops propagation)
  */
 export function StoryViewer(props: StoryViewerProps): JSX.Element {
-  const { nickname, label, detail, onClose } = props;
+  const { nickname, label, detail, onClose, durationMs = STORY_DURATION_MS } = props;
+
+  // Auto-advance: close when the progress bar completes. Cleared on unmount.
+  useEffect(() => {
+    const t = setTimeout(onClose, durationMs);
+    return () => clearTimeout(t);
+  }, [onClose, durationMs]);
 
   function stopPropagation(e: React.MouseEvent): void {
     e.stopPropagation();
   }
 
+  const initial = nickname.charAt(0).toUpperCase();
+
   return (
     <>
-      {/* Decorative scrim — aria-hidden so AT ignores it */}
+      {/* Dark backing fill */}
       <div style={backdropSt} aria-hidden="true" />
 
-      {/* Centering shell — clicking outside the card closes the modal */}
-      <div style={centreShellSt} onClick={onClose}>
+      {/* Full-screen shell — tapping outside the panel closes */}
+      <div style={shellSt} onClick={onClose}>
         <div
           role="dialog"
           aria-modal="true"
           aria-label={`${nickname}'s story`}
-          style={cardSt}
+          style={panelSt}
           onClick={stopPropagation}
         >
-          {/* Close button */}
-          <button type="button" style={closeBtnSt} onClick={onClose} aria-label="Close story">
-            <CloseIcon />
-          </button>
+          <style>
+            {`@keyframes trivyyStoryFill { from { transform: translateX(-100%); } to { transform: translateX(0); } }`}
+          </style>
 
-          {/* Nickname heading */}
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '20px',
-              fontWeight: 700,
-              color: 'var(--ink)',
-              margin: 0,
-              textAlign: 'center',
-            }}
+          {/* Progress bar (fills over durationMs) */}
+          <div
+            style={progressTrackSt}
+            role="progressbar"
+            aria-label="Story progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
           >
-            {nickname}
-          </h2>
-
-          {/* Trophy icon with badge ring */}
-          <div style={ringWrapSt}>
-            <TrophyIcon />
+            <div
+              style={{
+                height: '100%',
+                background: '#fff',
+                borderRadius: '999px',
+                animation: `trivyyStoryFill ${durationMs}ms linear forwards`,
+              }}
+            />
           </div>
 
-          {/* Badge label */}
-          <span
+          {/* Header: avatar + name + close */}
+          <div style={headerSt}>
+            <span style={avatarSt} aria-hidden="true">
+              {initial}
+            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+              <h2
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  margin: 0,
+                  color: '#fff',
+                }}
+              >
+                {nickname}
+              </h2>
+              <span style={{ fontSize: '12px', opacity: 0.85 }}>shared a badge</span>
+            </div>
+            <button type="button" style={closeBtnSt} onClick={onClose} aria-label="Close story">
+              <CloseIcon />
+            </button>
+          </div>
+
+          {/* Centered badge */}
+          <div
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '18px',
-              fontWeight: 700,
-              color: 'var(--ink-deep)',
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '18px',
               textAlign: 'center',
             }}
           >
-            {label}
-          </span>
-
-          {/* Optional detail text */}
-          {detail != null && detail !== '' ? (
-            <p
+            <div style={badgeRingSt}>
+              <TrophyIcon />
+            </div>
+            <span
               style={{
-                fontSize: '14px',
-                color: 'var(--muted)',
-                textAlign: 'center',
-                margin: 0,
-                marginTop: '8px',
+                fontFamily: 'var(--font-display)',
+                fontSize: '26px',
+                fontWeight: 700,
               }}
             >
-              {detail}
-            </p>
-          ) : null}
+              {label}
+            </span>
+            {detail != null && detail !== '' ? (
+              <p style={{ fontSize: '15px', opacity: 0.9, margin: 0, maxWidth: '260px' }}>
+                {detail}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     </>

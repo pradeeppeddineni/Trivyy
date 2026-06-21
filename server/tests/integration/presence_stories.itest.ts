@@ -68,7 +68,15 @@ describe('presence + stories API (integration)', () => {
   it('POST /api/presence/ping sets last_seen_at and friend shows online', async () => {
     const { a, b } = await makeFriends('ping_ada', 'ping_bob');
 
-    // Before ping: ada's last_seen_at is null → bob should see her as offline.
+    // `players.last_seen_at` defaults to now() (migration 1700000003000), so a
+    // fresh account is "online" by default. Force ada stale first so the
+    // before/after of the ping is deterministic.
+    await testPool.query(
+      `UPDATE players SET last_seen_at = now() - interval '10 minutes' WHERE id = $1`,
+      [a.account.id],
+    );
+
+    // Before ping: ada is stale → bob should see her as offline.
     const beforeFriends = await b.agent.get('/api/friends');
     expect(beforeFriends.status).toBe(200);
     const adaBefore = beforeFriends.body.friends.find(
