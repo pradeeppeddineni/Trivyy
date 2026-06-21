@@ -1,88 +1,226 @@
-import { useEffect, useState } from 'react';
-import type { CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
-import { ScoreStat } from '../components/ScoreStat';
-import { getMyStats, type ProfileStats } from '../api/client';
-
-const SECTION: CSSProperties = {
-  fontSize: '13px',
-  fontWeight: 700,
-  color: 'var(--faint)',
-  letterSpacing: '0.5px',
-  margin: '22px 0 10px',
-};
-
-const CARD: CSSProperties = {
-  border: '1px solid var(--border-soft)',
-  borderRadius: 'var(--radius-md)',
-  background: 'var(--card)',
-  padding: '12px 14px',
-};
+import { AvatarPicker } from '../components/AvatarPicker';
+import type { AvatarPresetKey } from '../components/AvatarPicker';
+import { ProfileView } from '../components/ProfileView';
+import { getMyStats, uploadAvatar, setAvatarPreset, type ProfileStats } from '../api/client';
 
 function goHome(): void {
   window.location.href = '/';
 }
 
-const MODE_LABEL: Record<string, string> = {
-  solo: 'Solo',
-  duel: 'Duel',
-  together: 'Group',
-};
+/** Fetch the session nickname from /api/me (returns null when no session). */
+async function fetchNickname(): Promise<string | null> {
+  let res: Response;
+  try {
+    res = await fetch('/api/me', { credentials: 'include' });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  const data = (await res.json()) as { nickname: string };
+  return data.nickname;
+}
+
+// ---- Modal overlay for the avatar picker ------------------------------------
+
+interface PickerModalProps {
+  readonly activePreset: AvatarPresetKey | null;
+  readonly onPickPreset: (key: AvatarPresetKey) => void;
+  readonly onUploadFile: (file: File) => void;
+  readonly onClose: () => void;
+}
+
+function PickerModal(props: PickerModalProps): JSX.Element {
+  const { activePreset, onPickPreset, onUploadFile, onClose } = props;
+
+  const overlay = {
+    position: 'fixed' as const,
+    inset: 0,
+    background: 'rgba(35,31,59,0.6)',
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    zIndex: 100,
+  };
+
+  const sheet = {
+    width: '100%',
+    maxWidth: 'var(--app-width)',
+    background: 'var(--surface)',
+    borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
+    padding: '20px 20px 32px',
+    boxShadow: 'var(--shadow-toast)',
+  };
+
+  return (
+    <div
+      style={overlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit avatar"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div style={sheet}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '16px',
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '20px',
+              color: 'var(--ink)',
+              margin: 0,
+            }}
+          >
+            Edit avatar
+          </h2>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              fontSize: '22px',
+              color: 'var(--faint)',
+              cursor: 'pointer',
+              lineHeight: 1,
+              padding: '4px 8px',
+            }}
+          >
+            ×
+          </button>
+        </div>
+        <AvatarPicker
+          activePreset={activePreset}
+          onPickPreset={onPickPreset}
+          onUploadFile={onUploadFile}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ---- Main flow --------------------------------------------------------------
 
 /**
- * "My stats" — the current player's own play history (spec v3 §13), a
- * player-scoped view of the admin analytics: games, points, accuracy, accuracy
- * by category, and recent games. Works for guests and registered players.
+ * Profile screen — fetches /api/me + /api/me/stats in parallel and renders
+ * <ProfileView>. The camera button opens <AvatarPicker>; on preset/upload the
+ * API is called then stats are refetched. Handles loading/error states.
  */
 export function ProfileFlow(): JSX.Element {
   const [stats, setStats] = useState<ProfileStats | null>(null);
-  const [state, setState] = useState<'loading' | 'ready' | 'none' | 'error'>('loading');
+  const [nickname, setNickname] = useState<string | null>(null);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'none' | 'error'>('loading');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const activeRef = useRef(true);
 
-  useEffect(() => {
-    let active = true;
-    getMyStats()
-      .then((s) => {
-        if (!active) return;
-        if (!s) {
-          setState('none');
+  const fetchAll = useCallback((): void => {
+    Promise.all([getMyStats(), fetchNickname()])
+      .then(([s, nick]) => {
+        if (!activeRef.current) return;
+        if (!s || !nick) {
+          setLoadState('none');
           return;
         }
         setStats(s);
-        setState('ready');
+        setNickname(nick);
+        setLoadState('ready');
       })
-      .catch(() => active && setState('error'));
-    return () => {
-      active = false;
-    };
+      .catch(() => {
+        if (activeRef.current) setLoadState('error');
+      });
   }, []);
 
-  if (state === 'loading') {
+  useEffect(() => {
+    activeRef.current = true;
+    fetchAll();
+    return () => {
+      activeRef.current = false;
+    };
+  }, [fetchAll]);
+
+  const handlePickPreset = useCallback(
+    (key: AvatarPresetKey): void => {
+      setSaving(true);
+      setSaveError(null);
+      setAvatarPreset(key)
+        .then(() => {
+          setPickerOpen(false);
+          fetchAll();
+        })
+        .catch((err: unknown) => {
+          setSaveError(err instanceof Error ? err.message : 'Could not save avatar.');
+        })
+        .finally(() => {
+          setSaving(false);
+        });
+    },
+    [fetchAll],
+  );
+
+  const handleUploadFile = useCallback(
+    (file: File): void => {
+      setSaving(true);
+      setSaveError(null);
+      uploadAvatar(file)
+        .then(() => {
+          setPickerOpen(false);
+          fetchAll();
+        })
+        .catch((err: unknown) => {
+          setSaveError(err instanceof Error ? err.message : 'Could not upload avatar.');
+        })
+        .finally(() => {
+          setSaving(false);
+        });
+    },
+    [fetchAll],
+  );
+
+  // ---- Loading / error states ------------------------------------------------
+
+  if (loadState === 'loading') {
     return (
       <AppFrame>
-        <StatusScreen title="Loading your stats…" />
+        <StatusScreen title="Loading your profile…" />
       </AppFrame>
     );
   }
-  if (state === 'none') {
+
+  if (loadState === 'none') {
     return (
       <AppFrame>
         <PlayerHeader onLogoClick={goHome} />
         <StatusScreen
           title="No stats yet"
-          message="Play a game and your stats will show up here."
+          message="Play a game and your profile will appear here."
           actionLabel="Play"
           onAction={goHome}
         />
       </AppFrame>
     );
   }
-  if (state === 'error' || !stats) {
+
+  if (loadState === 'error' || !stats || !nickname) {
     return (
       <AppFrame>
         <StatusScreen
-          title="Could not load your stats"
+          title="Could not load your profile"
           tone="error"
           actionLabel="Back"
           onAction={goHome}
@@ -91,117 +229,104 @@ export function ProfileFlow(): JSX.Element {
     );
   }
 
+  // ---- Active preset for the picker (derived from stats) ---------------------
+
+  const activePreset: AvatarPresetKey | null =
+    stats.avatar.kind === 'preset' && stats.avatar.preset
+      ? (stats.avatar.preset as AvatarPresetKey)
+      : null;
+
   return (
     <AppFrame>
-      <PlayerHeader onLogoClick={goHome} />
-      <main
+      <PlayerHeader nickname={nickname} onLogoClick={goHome} />
+
+      <div
         style={{
-          flex: 1,
           display: 'flex',
-          flexDirection: 'column',
-          padding: '8px 20px 28px',
-          overflowY: 'auto',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 20px 0',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '26px',
-              margin: '8px 0',
-              color: 'var(--ink)',
-            }}
-          >
-            My stats
-          </h1>
-          <button
-            type="button"
-            onClick={goHome}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              fontSize: '14px',
-              color: 'var(--accent-strong)',
-              cursor: 'pointer',
-              fontWeight: 700,
-            }}
-          >
-            ← Back
-          </button>
-        </div>
-
-        <div
+        <h1
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-            marginTop: '12px',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 700,
+            fontSize: '20px',
+            margin: 0,
+            color: 'var(--ink)',
           }}
         >
-          <ScoreStat label="Games played" value={stats.games} icon={<span aria-hidden>🎮</span>} />
-          <ScoreStat label="Points" value={stats.points} icon={<span aria-hidden>⭐</span>} />
-          <ScoreStat label="Answers" value={stats.answers} icon={<span aria-hidden>✍️</span>} />
-          <ScoreStat
-            label="Accuracy"
-            value={`${stats.accuracyPct}%`}
-            icon={<span aria-hidden>🎯</span>}
-          />
-        </div>
+          My Profile
+        </h1>
+        <button
+          type="button"
+          onClick={goHome}
+          style={{
+            border: 'none',
+            background: 'transparent',
+            fontSize: '14px',
+            color: 'var(--accent-strong)',
+            cursor: 'pointer',
+            fontWeight: 700,
+          }}
+        >
+          Back
+        </button>
+      </div>
 
-        <p style={SECTION}>ACCURACY BY CATEGORY</p>
-        {stats.byCategory.length === 0 ? (
-          <span style={{ fontSize: '14px', color: 'var(--muted)' }}>No answers yet.</span>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {stats.byCategory.map((c) => (
-              <div
-                key={c.category}
-                style={{
-                  ...CARD,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink)' }}>
-                  {c.category}
-                </span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--muted)' }}>
-                  {c.accuracyPct}% · {c.answers}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+      {saveError ? (
+        <p
+          style={{
+            margin: '8px 20px 0',
+            fontSize: '13px',
+            color: 'var(--danger)',
+            fontWeight: 600,
+          }}
+          role="alert"
+        >
+          {saveError}
+        </p>
+      ) : null}
 
-        <p style={SECTION}>RECENT GAMES</p>
-        {stats.recent.length === 0 ? (
-          <span style={{ fontSize: '14px', color: 'var(--muted)' }}>Nothing yet.</span>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {stats.recent.map((r, i) => (
-              <div
-                key={i}
-                style={{
-                  ...CARD,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink)' }}>
-                  {MODE_LABEL[r.mode] ?? r.mode}
-                </span>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--accent)' }}>
-                  {r.score}
-                  <span style={{ fontSize: '12px', color: 'var(--score-total)' }}>/{r.total}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
+      {saving ? (
+        <p
+          style={{
+            margin: '8px 20px 0',
+            fontSize: '13px',
+            color: 'var(--faint)',
+            fontWeight: 600,
+          }}
+          aria-live="polite"
+        >
+          Saving…
+        </p>
+      ) : null}
+
+      <div style={{ overflowY: 'auto', flex: 1 }}>
+        <ProfileView
+          nickname={nickname}
+          level={stats.level}
+          stats={{
+            games: stats.games,
+            points: stats.points,
+            accuracyPct: stats.accuracyPct,
+            recent: stats.recent,
+          }}
+          achievements={stats.achievements}
+          avatar={stats.avatar}
+          onEditAvatar={() => setPickerOpen(true)}
+        />
+      </div>
+
+      {pickerOpen ? (
+        <PickerModal
+          activePreset={activePreset}
+          onPickPreset={handlePickPreset}
+          onUploadFile={handleUploadFile}
+          onClose={() => setPickerOpen(false)}
+        />
+      ) : null}
     </AppFrame>
   );
 }

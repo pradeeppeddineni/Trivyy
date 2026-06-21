@@ -95,6 +95,25 @@ export interface ProfileStats {
     readonly total: number;
     readonly at: string;
   }>;
+  /** Avatar state — kind + preset key (or null). Added in Phase 1. */
+  readonly avatar: {
+    readonly kind: 'none' | 'preset' | 'upload';
+    readonly preset: string | null;
+  };
+  /** Derived level + XP progress. Added in Phase 1. */
+  readonly level: {
+    readonly level: number;
+    readonly into: number;
+    readonly span: number;
+    readonly pct: number;
+  };
+  /** Derived achievement catalog. Added in Phase 1. */
+  readonly achievements: ReadonlyArray<{
+    readonly key: string;
+    readonly label: string;
+    readonly description: string;
+    readonly earned: boolean;
+  }>;
 }
 
 /** The current player's own stats, or null if there's no session yet. */
@@ -108,6 +127,67 @@ export async function getMyStats(): Promise<ProfileStats | null> {
   if (res.status === 401) return null;
   if (!res.ok) throw new Error(`Request failed (${res.status})`);
   return (await res.json()) as ProfileStats;
+}
+
+// --- Avatar endpoints (Phase 1, POST /api/me/avatar, /api/me/avatar/preset) --
+
+/**
+ * Upload a player avatar image. Sends multipart/form-data with field `image`.
+ * The server resizes and converts to 256×256 WebP. Throws on failure.
+ */
+export async function uploadAvatar(file: File): Promise<void> {
+  const form = new FormData();
+  form.append('image', file);
+  let res: Response;
+  try {
+    res = await fetch('/api/me/avatar', {
+      method: 'POST',
+      credentials: 'include',
+      body: form,
+      // No Content-Type header — browser sets multipart boundary automatically.
+    });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (res.status === 400) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(
+      body.error === 'unsupported_mime_type'
+        ? 'Unsupported file type. Please use PNG, JPEG, or WebP.'
+        : 'Invalid image.',
+    );
+  }
+  if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+}
+
+/**
+ * Set a colour-preset avatar for the current player.
+ * Throws on unknown preset (400) or network/server errors.
+ */
+export async function setAvatarPreset(key: string): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch('/api/me/avatar/preset', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ preset: key }),
+    });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (res.status === 400) {
+    throw new Error('Unknown avatar preset.');
+  }
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+}
+
+/**
+ * Build the URL for a player's avatar image. Returns the path to the image
+ * endpoint; the server serves the processed WebP with Cache-Control: private.
+ */
+export function avatarUrl(playerId: string): string {
+  return `/api/players/${playerId}/avatar`;
 }
 
 // --- Optional accounts (spec v3 §13.1, /api/auth/*) -------------------------

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { AnswerPill } from '../components/AnswerPill';
+import { AvatarPicker } from '../components/AvatarPicker';
 import { Button } from '../components/Button';
 import { CategoryTile } from '../components/CategoryTile';
 import { Chip } from '../components/Chip';
@@ -10,6 +11,7 @@ import { LeaderboardRow } from '../components/LeaderboardRow';
 import { NicknameInput } from '../components/NicknameInput';
 import { PlayerHeader } from '../components/PlayerHeader';
 import { PlayerRow } from '../components/PlayerRow';
+import { ProfileView } from '../components/ProfileView';
 import { ProgressBar } from '../components/ProgressBar';
 import { QRCard } from '../components/QRCard';
 import { QuestionCard } from '../components/QuestionCard';
@@ -193,6 +195,110 @@ function StatsSection(): JSX.Element {
   );
 }
 
+// ---- Phase 1: Profile + Avatar mock data -----------------------------------
+
+const MOCK_ACHIEVEMENTS = [
+  {
+    key: 'first_game',
+    label: 'First Game',
+    description: 'Complete your first trivia game.',
+    earned: true,
+  },
+  {
+    key: 'ten_games',
+    label: 'Dedicated Player',
+    description: 'Complete 10 trivia games.',
+    earned: true,
+  },
+  {
+    key: 'centurion',
+    label: 'Centurion',
+    description: 'Answer 100 questions correctly.',
+    earned: true,
+  },
+  {
+    key: 'sharpshooter',
+    label: 'Sharpshooter',
+    description: 'Reach 90% accuracy across at least 20 answers.',
+    earned: false,
+  },
+  {
+    key: 'high_scorer',
+    label: 'High Scorer',
+    description: 'Accumulate 1,000 points.',
+    earned: true,
+  },
+  {
+    key: 'marathoner',
+    label: 'Marathoner',
+    description: 'Complete 50 trivia games.',
+    earned: false,
+  },
+] as const;
+
+const MOCK_RECENT = [
+  { mode: 'solo', score: 9, total: 10, at: '2026-06-20T18:00:00Z' },
+  { mode: 'duel', score: 7, total: 10, at: '2026-06-19T14:30:00Z' },
+  { mode: 'together', score: 8, total: 10, at: '2026-06-18T20:00:00Z' },
+] as const;
+
+function ProfileSection(): JSX.Element {
+  const [activePreset, setActivePreset] = useState<
+    'blue' | 'green' | 'pink' | 'amber' | 'violet' | 'teal'
+  >('blue');
+  const [pickedFile, setPickedFile] = useState<string | null>(null);
+
+  return (
+    <>
+      <p style={CAPTION}>PROFILE VIEW (preset avatar)</p>
+      <div
+        style={{
+          border: '1px solid var(--border-soft)',
+          borderRadius: 'var(--radius-lg)',
+          overflow: 'hidden',
+        }}
+      >
+        <ProfileView
+          nickname="Pradeep"
+          level={{ level: 12, into: 640, span: 1100, pct: 64 }}
+          stats={{
+            games: 248,
+            points: 5120,
+            accuracyPct: 81,
+            recent: [...MOCK_RECENT],
+          }}
+          achievements={[...MOCK_ACHIEVEMENTS]}
+          avatar={{ kind: 'preset', preset: activePreset }}
+        />
+      </div>
+
+      <p style={{ ...CAPTION, marginTop: '18px' }}>AVATAR PICKER</p>
+      <AvatarPicker
+        activePreset={activePreset}
+        onPickPreset={(key) => {
+          setActivePreset(key);
+          setPickedFile(null);
+        }}
+        onUploadFile={(file) => {
+          setPickedFile(file.name);
+        }}
+      />
+      {pickedFile ? (
+        <p
+          style={{
+            fontSize: '12px',
+            color: 'var(--success-ink)',
+            marginTop: '8px',
+            fontWeight: 600,
+          }}
+        >
+          Selected: {pickedFile}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 const PAGE: CSSProperties = {
   position: 'relative',
   zIndex: 1,
@@ -244,6 +350,9 @@ export function Gallery(): JSX.Element {
         </Section>
         <Section title="Leaderboard">
           <LeaderboardSection />
+        </Section>
+        <Section title="Profile + Avatar (Phase 1)">
+          <ProfileSection />
         </Section>
         <Section title="Admin stats">
           <StatsSection />
