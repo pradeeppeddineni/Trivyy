@@ -10,7 +10,7 @@ test('a player can play a solo game from start to review', async ({ page }) => {
 
   // Home: pick a nickname, then start a solo game.
   await page.getByLabel(/your nickname/i).fill('E2EPlayer');
-  await page.getByRole('button', { name: /play solo/i }).click();
+  await page.getByRole('button', { name: /play as guest/i }).click();
 
   // Setup: keep the defaults (Surprise me / Any) but use a small count so the
   // fixture bank always satisfies it, then start.
