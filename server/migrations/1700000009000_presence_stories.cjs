@@ -1,18 +1,12 @@
 /* eslint-disable */
 /**
- * Schema v11 — presence + stories (spec Phase 2 UI overhaul). Adds
- * `last_seen_at` to players for online-presence derived from ping frequency,
- * and a `stories` table for 24-hour trivia-badge shares visible to friends.
- * Both additions are purely additive (DB-2).
+ * Schema v11 — stories (spec Phase 2 UI overhaul). Adds a `stories` table for
+ * 24-hour trivia-badge shares visible to friends. Online-presence reuses the
+ * existing `players.last_seen_at` column (added in 1700000003000), so this
+ * migration does not touch `players`. Purely additive (DB-2).
  */
 
 exports.up = (pgm) => {
-  // Track when each player last interacted with the API (pinged). Nullable:
-  // existing players start with no recorded presence.
-  pgm.addColumn('players', {
-    last_seen_at: { type: 'timestamptz' },
-  });
-
   pgm.createTable('stories', {
     id: { type: 'uuid', primaryKey: true, default: pgm.func('gen_random_uuid()') },
     player_id: { type: 'uuid', notNull: true, references: 'players', onDelete: 'CASCADE' },
@@ -35,5 +29,4 @@ exports.up = (pgm) => {
 
 exports.down = (pgm) => {
   pgm.dropTable('stories');
-  pgm.dropColumn('players', 'last_seen_at');
 };
