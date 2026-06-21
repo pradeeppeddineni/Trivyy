@@ -6,6 +6,7 @@ import { StatusScreen } from '../components/StatusScreen';
 import { GameCodeCard } from '../components/GameCodeCard';
 import { QRCard } from '../components/QRCard';
 import { PlayerRow, type PlayerRowStatus } from '../components/PlayerRow';
+import { ResultsScreen } from '../components/ResultsScreen';
 import { LeaderboardRow } from '../components/LeaderboardRow';
 import { InviteActions } from '../components/InviteActions';
 import { Button } from '../components/Button';
@@ -319,6 +320,31 @@ function LeaderboardScreen(props: {
     return <StatusScreen title="Tallying scores…" />;
   }
   const done = board.status === 'complete';
+
+  const entries = board.entries.map((e) => ({
+    rank: e.rank,
+    name: e.nickname === nickname ? `${e.nickname} (you)` : e.nickname,
+    score: e.score,
+    total: e.total,
+    detail: e.done ? undefined : 'playing…',
+  }));
+
+  const me = board.entries.find((e) => e.nickname === nickname);
+  const meRank = me?.rank;
+
+  if (done) {
+    return (
+      <ResultsScreen
+        entries={entries}
+        meRank={meRank}
+        onPlayAgain={onHome}
+        playAgainLabel="Back to home"
+      />
+    );
+  }
+
+  // Game still in progress — show a live leaderboard without the celebratory
+  // screen so players can see who is still playing.
   return (
     <main style={PAD}>
       <h2
@@ -336,18 +362,18 @@ function LeaderboardScreen(props: {
       <p
         style={{ textAlign: 'center', fontSize: '14px', color: 'var(--muted)', margin: '0 0 16px' }}
       >
-        {done ? 'Final standings' : 'Live — players still finishing…'}
+        Live — players still finishing…
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
-        {board.entries.map((e) => (
+        {entries.map((e) => (
           <LeaderboardRow
-            key={e.nickname}
+            key={e.name}
             rank={e.rank}
-            name={e.nickname === nickname ? `${e.nickname} (you)` : e.nickname}
+            name={e.name}
             score={e.score}
             total={e.total}
-            detail={e.done ? undefined : 'playing…'}
-            isWinner={done && e.rank === 1}
+            detail={e.detail}
+            isWinner={false}
           />
         ))}
       </div>

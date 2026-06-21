@@ -10,7 +10,81 @@ export interface LeaderboardRowProps {
   readonly isWinner?: boolean;
 }
 
-const MEDALS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+// ---- Rank badge (replaces emoji medals) -------------------------------------
+
+interface RankBadgeProps {
+  readonly rank: number;
+}
+
+const MEDAL_STYLES: Record<number, { bg: string; border: string; color: string; label: string }> = {
+  1: {
+    bg: 'var(--gold-bg)',
+    border: 'var(--gold-border)',
+    color: 'var(--gold)',
+    label: '1st place',
+  },
+  2: {
+    bg: 'var(--silver-bg)',
+    border: 'var(--silver-border)',
+    color: 'var(--silver)',
+    label: '2nd place',
+  },
+  3: {
+    bg: 'var(--bronze-bg)',
+    border: 'var(--bronze-border)',
+    color: 'var(--bronze)',
+    label: '3rd place',
+  },
+};
+
+function RankBadge({ rank }: RankBadgeProps): JSX.Element {
+  const medal = MEDAL_STYLES[rank];
+
+  if (medal) {
+    const disc: CSSProperties = {
+      width: '28px',
+      height: '28px',
+      borderRadius: '50%',
+      display: 'grid',
+      placeItems: 'center',
+      background: medal.bg,
+      border: `2px solid ${medal.border}`,
+      flexShrink: 0,
+    };
+    const num: CSSProperties = {
+      fontFamily: 'var(--font-display)',
+      fontWeight: 700,
+      fontSize: '13px',
+      color: medal.color,
+      lineHeight: 1,
+    };
+    return (
+      <div style={disc} aria-label={medal.label}>
+        <span style={num} aria-hidden="true">
+          {rank}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <span
+      style={{
+        fontFamily: 'var(--font-display)',
+        fontWeight: 700,
+        fontSize: '18px',
+        width: '28px',
+        textAlign: 'center',
+        color: 'var(--faint-soft)',
+        flexShrink: 0,
+      }}
+    >
+      {rank}
+    </span>
+  );
+}
+
+// ---- Main component ---------------------------------------------------------
 
 /** Ranked leaderboard entry; the winner row gets the success highlight. */
 export function LeaderboardRow(props: LeaderboardRowProps): JSX.Element {
@@ -43,18 +117,7 @@ export function LeaderboardRow(props: LeaderboardRowProps): JSX.Element {
 
   return (
     <div style={row}>
-      <span
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 700,
-          fontSize: '18px',
-          width: '26px',
-          textAlign: 'center',
-          color: isWinner ? 'var(--success)' : 'var(--faint-soft)',
-        }}
-      >
-        {rank}
-      </span>
+      <RankBadge rank={rank} />
       <div style={avatar}>{name ? name.charAt(0).toUpperCase() : '?'}</div>
       <div style={{ flex: 1 }}>
         <p
@@ -65,7 +128,7 @@ export function LeaderboardRow(props: LeaderboardRowProps): JSX.Element {
             margin: 0,
           }}
         >
-          {name} {MEDALS[rank] ?? ''}
+          {name}
         </p>
         {detail ? (
           <p
