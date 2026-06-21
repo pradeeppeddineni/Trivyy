@@ -332,6 +332,59 @@ export interface LobbyResponse {
 
 export interface CreateGroupOptions extends SoloGameOptions {
   readonly maxPlayers?: number;
+  /** Persistent group this round belongs to (standings). */
+  readonly groupId?: string;
+}
+
+// --- Persistent groups (spec v3 §13.3, /api/groups/*) -----------------------
+
+export interface Group {
+  readonly id: string;
+  readonly name: string;
+  readonly code: string;
+  readonly memberCount: number;
+  readonly isOwner: boolean;
+}
+
+export interface GroupMember {
+  readonly nickname: string;
+  readonly username: string | null;
+  readonly isOwner: boolean;
+}
+
+export interface GroupDetail extends Group {
+  readonly members: ReadonlyArray<GroupMember>;
+}
+
+export interface GroupStanding {
+  readonly rank: number;
+  readonly nickname: string;
+  readonly points: number;
+  readonly games: number;
+}
+
+export async function createGroupClub(
+  name: string,
+): Promise<{ id: string; name: string; code: string }> {
+  return request('/api/groups', { method: 'POST', body: JSON.stringify({ name }) });
+}
+
+export async function joinGroupClub(code: string): Promise<{ groupId: string }> {
+  return request('/api/groups/join', { method: 'POST', body: JSON.stringify({ code }) });
+}
+
+export async function listGroups(): Promise<ReadonlyArray<Group>> {
+  const d = await request<{ groups: ReadonlyArray<Group> }>('/api/groups');
+  return d.groups;
+}
+
+export async function getGroupDetail(id: string): Promise<GroupDetail> {
+  return request<GroupDetail>(`/api/groups/${id}`);
+}
+
+export async function getGroupStandings(id: string): Promise<ReadonlyArray<GroupStanding>> {
+  const d = await request<{ entries: ReadonlyArray<GroupStanding> }>(`/api/groups/${id}/standings`);
+  return d.entries;
 }
 
 export interface LeaderboardEntry {

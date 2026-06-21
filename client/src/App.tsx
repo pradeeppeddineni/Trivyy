@@ -1,6 +1,7 @@
 import { AdminFlow } from './pages/AdminFlow';
 import { AccountFlow } from './pages/AccountFlow';
 import { FriendsFlow } from './pages/FriendsFlow';
+import { GroupsFlow } from './pages/GroupsFlow';
 import { DuelFlow } from './pages/DuelFlow';
 import { GroupFlow } from './pages/GroupFlow';
 import { JoinFlow } from './pages/JoinFlow';
@@ -35,6 +36,12 @@ export function App(): JSX.Element {
   if (params.has('friends')) {
     return <FriendsFlow />;
   }
+  if (params.has('gjoin')) {
+    return <GroupsFlow autoJoinCode={params.get('gjoin') ?? ''} />;
+  }
+  if (params.has('groups')) {
+    return <GroupsFlow />;
+  }
   if (params.has('join')) {
     return <JoinFlow code={params.get('join') ?? ''} />;
   }
@@ -42,7 +49,7 @@ export function App(): JSX.Element {
     return <DuelFlow />;
   }
   if (params.has('group')) {
-    return <GroupFlow />;
+    return <GroupFlow groupId={params.get('for') ?? undefined} />;
   }
   return params.has('gallery') ? <Gallery /> : <SoloFlow />;
 }
