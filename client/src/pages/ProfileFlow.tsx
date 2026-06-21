@@ -303,21 +303,19 @@ export function ProfileFlow(): JSX.Element {
         </p>
       ) : null}
 
-      <div style={{ overflowY: 'auto', flex: 1 }}>
-        <ProfileView
-          nickname={nickname}
-          level={stats.level}
-          stats={{
-            games: stats.games,
-            points: stats.points,
-            accuracyPct: stats.accuracyPct,
-            recent: stats.recent,
-          }}
-          achievements={stats.achievements}
-          avatar={stats.avatar}
-          onEditAvatar={() => setPickerOpen(true)}
-        />
-      </div>
+      <ProfileView
+        nickname={nickname}
+        level={stats.level}
+        stats={{
+          games: stats.games,
+          points: stats.points,
+          accuracyPct: stats.accuracyPct,
+          recent: stats.recent,
+        }}
+        achievements={stats.achievements}
+        avatar={stats.avatar}
+        onEditAvatar={() => setPickerOpen(true)}
+      />
 
       {pickerOpen ? (
         <PickerModal
