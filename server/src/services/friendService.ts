@@ -1,6 +1,7 @@
 import { pool } from '../db/pool';
 import { logger } from '../lib/logger';
 import { GameError } from './gameService';
+import { isOnline } from './presenceService';
 
 /**
  * Friends (spec v3 §13.2). A friendship is one row; accepted friendship is
@@ -12,6 +13,16 @@ export interface PlayerSummary {
   readonly id: string;
   readonly username: string;
   readonly nickname: string;
+}
+
+/** Extended summary returned by listFriends (Phase 2 UI overhaul). */
+export interface FriendSummary extends PlayerSummary {
+  readonly online: boolean;
+  readonly hasStory: boolean;
+  readonly avatar: {
+    readonly kind: 'none' | 'preset' | 'upload';
+    readonly preset: string | null;
+  };
 }
 
 export interface FriendRequest {
@@ -156,10 +167,27 @@ export async function acceptInvite(meId: string, inviteCode: string): Promise<{ 
   return { ok: true };
 }
 
-/** Accepted friends (symmetric). */
-export async function listFriends(meId: string): Promise<ReadonlyArray<PlayerSummary>> {
-  const result = await pool.query<PlayerRow>(
-    `SELECT p.id, p.username, p.nickname
+interface FriendRow extends PlayerRow {
+  last_seen_at: string | null;
+  avatar_preset: string | null;
+  has_image: boolean;
+  has_story: boolean;
+}
+
+/**
+ * Accepted friends (symmetric), extended with presence, story, and avatar data
+ * (Phase 2 UI overhaul). Uses a single query with LEFT JOINs to avoid N+1.
+ */
+export async function listFriends(meId: string): Promise<ReadonlyArray<FriendSummary>> {
+  const result = await pool.query<FriendRow>(
+    `SELECT p.id, p.username, p.nickname,
+            p.last_seen_at::text AS last_seen_at,
+            p.avatar_preset,
+            (p.avatar_image IS NOT NULL) AS has_image,
+            EXISTS (
+              SELECT 1 FROM stories s
+               WHERE s.player_id = p.id AND s.expires_at > now()
+            ) AS has_story
        FROM friendships f
        JOIN players p
          ON p.id = CASE WHEN f.requester_id = $1 THEN f.addressee_id ELSE f.requester_id END
@@ -167,7 +195,18 @@ export async function listFriends(meId: string): Promise<ReadonlyArray<PlayerSum
       ORDER BY p.nickname`,
     [meId],
   );
-  return result.rows.map(toSummary);
+
+  return result.rows.map((r) => ({
+    id: r.id,
+    username: r.username ?? '',
+    nickname: r.nickname,
+    online: isOnline(r.last_seen_at),
+    hasStory: Boolean(r.has_story),
+    avatar: {
+      kind: r.has_image ? 'upload' : r.avatar_preset ? 'preset' : ('none' as const),
+      preset: r.avatar_preset,
+    },
+  }));
 }
 
 /** Incoming pending requests (I am the addressee). */

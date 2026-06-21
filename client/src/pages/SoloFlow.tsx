@@ -3,6 +3,9 @@ import { AppFrame } from '../components/AppFrame';
 import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
 import { Toast } from '../components/Toast';
+import { FriendsBar } from '../components/FriendsBar';
+import { StoryViewer } from '../components/StoryViewer';
+import { ShareBadgeSheet } from '../components/ShareBadgeSheet';
 import { Home } from './Home';
 import { Setup } from './Setup';
 import { setStoredNickname } from '../lib/nickname';
@@ -15,10 +18,18 @@ import {
   completeGame,
   getResult,
   authMe,
+  listFriends,
+  listFriendStories,
+  pingPresence,
+  postStory,
+  getMyStats,
   type ApiQuestion,
   type Difficulty,
   type ResultResponse,
+  type FriendSummary,
+  type FriendStory,
 } from '../api/client';
+import type { FriendItem } from '../components/FriendsBar';
 
 /** The screens the solo flow moves through (the state machine). */
 type Screen = 'home' | 'setup' | 'loading' | 'game' | 'completing' | 'results' | 'error';
@@ -53,6 +64,14 @@ export function SoloFlow(): JSX.Element {
   const [toast, setToast] = useState<string | null>(null);
   const [accountName, setAccountName] = useState<string | null>(null);
 
+  // --- Social state (Phase 2) -------------------------------------------------
+  const [friends, setFriends] = useState<ReadonlyArray<FriendSummary>>([]);
+  const [openStory, setOpenStory] = useState<FriendStory | null>(null);
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const [earnedAchievements, setEarnedAchievements] = useState<
+    ReadonlyArray<{ key: string; label: string; description: string }>
+  >([]);
+
   // Reflect a signed-in account on the home screen (guest play needs no account).
   useEffect(() => {
     let active = true;
@@ -67,6 +86,69 @@ export function SoloFlow(): JSX.Element {
     return () => {
       active = false;
     };
+  }, []);
+
+  // Fetch friends list for the friends bar (Phase 2). Silently hides on 401/error.
+  useEffect(() => {
+    if (!accountName) return;
+    let active = true;
+    listFriends()
+      .then((list) => {
+        if (active) setFriends(list);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [accountName]);
+
+  // Presence ping every 60 s while mounted (Phase 2). Only for registered players.
+  useEffect(() => {
+    if (!accountName) return;
+    void pingPresence();
+    const id = window.setInterval(() => void pingPresence(), 60_000);
+    return () => window.clearInterval(id);
+  }, [accountName]);
+
+  // Fetch earned achievements for the share sheet (Phase 2).
+  useEffect(() => {
+    if (!accountName) return;
+    let active = true;
+    getMyStats()
+      .then((stats) => {
+        if (!active || !stats) return;
+        const earned = stats.achievements
+          .filter((a) => a.earned)
+          .map((a) => ({ key: a.key, label: a.label, description: a.description }));
+        setEarnedAchievements(earned);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [accountName]);
+
+  const handleOpenStory = useCallback((friend: FriendItem) => {
+    // Find the first active story for this friend from a fresh fetch.
+    listFriendStories()
+      .then((stories) => {
+        const story = stories.find((s) => s.playerId === friend.id) ?? null;
+        if (story) setOpenStory(story);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const handleShareBadge = useCallback(async (badge: { label: string; detail: string }) => {
+    try {
+      await postStory({ label: badge.label, detail: badge.detail });
+      setShowShareSheet(false);
+      // Refresh friends list so story ring appears immediately.
+      listFriends()
+        .then((list) => setFriends(list))
+        .catch(() => undefined);
+    } catch {
+      // Non-fatal: share failure silently ignored.
+    }
   }, []);
 
   const flashToast = useCallback((message: string) => {
@@ -214,6 +296,21 @@ export function SoloFlow(): JSX.Element {
       ) : null}
       {renderScreen()}
       {toast ? <Toast message={toast} /> : null}
+      {openStory ? (
+        <StoryViewer
+          nickname={openStory.nickname}
+          label={openStory.label}
+          detail={openStory.detail}
+          onClose={() => setOpenStory(null)}
+        />
+      ) : null}
+      {showShareSheet ? (
+        <ShareBadgeSheet
+          achievements={earnedAchievements}
+          onShare={(badge) => void handleShareBadge(badge)}
+          onClose={() => setShowShareSheet(false)}
+        />
+      ) : null}
     </AppFrame>
   );
 
@@ -221,22 +318,31 @@ export function SoloFlow(): JSX.Element {
     switch (screen) {
       case 'home':
         return (
-          <Home
-            nickname={nickname}
-            onNicknameChange={setNickname}
-            onPlaySolo={onPlaySolo}
-            onChallenge={() => goToMode('?duel')}
-            onTogether={() => goToMode('?group')}
-            onJoin={() => goToMode('?join')}
-            onAccount={() => goToMode('?account')}
-            onFriends={() => goToMode('?friends')}
-            onGroups={() => goToMode('?groups')}
-            onStats={() => goToMode('?me')}
-            accountName={accountName}
-            onAdmin={() => {
-              window.location.search = '?admin';
-            }}
-          />
+          <>
+            {accountName && friends.length > 0 ? (
+              <FriendsBar
+                friends={friends}
+                onAddStory={() => setShowShareSheet(true)}
+                onOpenStory={handleOpenStory}
+              />
+            ) : null}
+            <Home
+              nickname={nickname}
+              onNicknameChange={setNickname}
+              onPlaySolo={onPlaySolo}
+              onChallenge={() => goToMode('?duel')}
+              onTogether={() => goToMode('?group')}
+              onJoin={() => goToMode('?join')}
+              onAccount={() => goToMode('?account')}
+              onFriends={() => goToMode('?friends')}
+              onGroups={() => goToMode('?groups')}
+              onStats={() => goToMode('?me')}
+              accountName={accountName}
+              onAdmin={() => {
+                window.location.search = '?admin';
+              }}
+            />
+          </>
         );
       case 'setup':
         return (

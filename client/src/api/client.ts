@@ -299,8 +299,18 @@ export interface FriendLeaderboardEntry {
   readonly isMe: boolean;
 }
 
-export async function listFriends(): Promise<ReadonlyArray<PlayerSummary>> {
-  const d = await request<{ friends: ReadonlyArray<PlayerSummary> }>('/api/friends');
+/** Extended friend summary returned by GET /api/friends (Phase 2). */
+export interface FriendSummary extends PlayerSummary {
+  readonly online: boolean;
+  readonly hasStory: boolean;
+  readonly avatar: {
+    readonly kind: 'none' | 'preset' | 'upload';
+    readonly preset: string | null;
+  };
+}
+
+export async function listFriends(): Promise<ReadonlyArray<FriendSummary>> {
+  const d = await request<{ friends: ReadonlyArray<FriendSummary> }>('/api/friends');
   return d.friends;
 }
 
@@ -340,6 +350,61 @@ export async function getFriendsLeaderboard(): Promise<ReadonlyArray<FriendLeade
     '/api/friends/leaderboard',
   );
   return d.entries;
+}
+
+// --- Presence (Phase 2, POST /api/presence/ping) ----------------------------
+
+/**
+ * Ping the presence endpoint so the server records the player as online.
+ * Call every 60 s while the app is open. Silently swallows errors so a failed
+ * ping never surfaces to the user.
+ */
+export async function pingPresence(): Promise<void> {
+  try {
+    await request<{ ok: true }>('/api/presence/ping', { method: 'POST' });
+  } catch {
+    // Presence ping failure is non-fatal; ignore silently.
+  }
+}
+
+// --- Stories (Phase 2, /api/stories) ----------------------------------------
+
+export interface FriendStory {
+  readonly id: string;
+  readonly playerId: string;
+  readonly nickname: string;
+  readonly label: string;
+  readonly detail: string | null;
+  readonly createdAt: string;
+  readonly avatarKind: 'none' | 'preset' | 'upload';
+  readonly avatarPreset: string | null;
+}
+
+/**
+ * Post a badge story for the current player. `label` is the achievement label;
+ * `detail` is the achievement description (optional).
+ */
+export async function postStory(data: {
+  readonly label: string;
+  readonly detail?: string;
+}): Promise<void> {
+  await request<{ story: unknown }>('/api/stories', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * Fetch active stories from the current player and their accepted friends.
+ * Returns an empty array if the request fails (resilient — non-fatal).
+ */
+export async function listFriendStories(): Promise<ReadonlyArray<FriendStory>> {
+  try {
+    const d = await request<{ stories: ReadonlyArray<FriendStory> }>('/api/stories/friends');
+    return d.stories;
+  } catch {
+    return [];
+  }
 }
 
 /** The signed-in account, or null if the visitor is a guest. */
