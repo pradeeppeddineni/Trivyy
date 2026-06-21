@@ -23,6 +23,7 @@ import {
   pingPresence,
   postStory,
   getMyStats,
+  logoutAccount,
   type ApiQuestion,
   type Difficulty,
   type ResultResponse,
@@ -281,6 +282,14 @@ export function SoloFlow(): JSX.Element {
     setScreen('home');
   }, []);
 
+  const onSignOut = useCallback(() => {
+    logoutAccount()
+      .catch(() => undefined)
+      .finally(() => {
+        window.location.href = '/';
+      });
+  }, []);
+
   const onPlayAgain = useCallback(() => {
     setResult(null);
     setGame(null);
@@ -314,6 +323,9 @@ export function SoloFlow(): JSX.Element {
             nickname={nickname.trim() || undefined}
             onLogoClick={onQuit}
             lightText={isLoggedInHome}
+            onProfile={accountName ? () => goToMode('?me') : undefined}
+            onSettings={accountName ? () => goToMode('?settings') : undefined}
+            onSignOut={accountName ? onSignOut : undefined}
           />
         ) : null}
         {renderScreen()}
@@ -347,6 +359,7 @@ export function SoloFlow(): JSX.Element {
                 friends={friends}
                 onAddStory={() => setShowShareSheet(true)}
                 onOpenStory={handleOpenStory}
+                onDark={true}
               />
             ) : null}
             <Home

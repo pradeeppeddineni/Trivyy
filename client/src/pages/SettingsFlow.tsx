@@ -1,8 +1,10 @@
+import { useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { Switch } from '../components/Switch';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useFeedbackPrefs } from '../feedback/prefs';
+import { logoutAccount } from '../api/client';
 
 const WRAP: CSSProperties = {
   padding: 'var(--space-5)',
@@ -32,6 +34,14 @@ const LINK: CSSProperties = { ...ROW, textDecoration: 'none', cursor: 'pointer' 
 
 export function SettingsFlow(): JSX.Element {
   const [prefs, setPrefs] = useFeedbackPrefs();
+
+  const handleSignOut = useCallback(() => {
+    logoutAccount()
+      .catch(() => undefined)
+      .finally(() => {
+        window.location.href = '/';
+      });
+  }, []);
 
   return (
     <AppFrame>
@@ -66,6 +76,22 @@ export function SettingsFlow(): JSX.Element {
         <a style={{ ...LINK, color: 'var(--danger)' }} href="?">
           Back to home
         </a>
+        <button
+          type="button"
+          style={{
+            ...ROW,
+            color: 'var(--danger, #e02020)',
+            cursor: 'pointer',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            font: 'inherit',
+            textAlign: 'left',
+          }}
+          aria-label="Sign out"
+          onClick={handleSignOut}
+        >
+          Sign out
+        </button>
       </div>
     </AppFrame>
   );
