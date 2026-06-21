@@ -5,6 +5,7 @@ import { AvatarPicker } from '../components/AvatarPicker';
 import { Button } from '../components/Button';
 import { CategoryTile } from '../components/CategoryTile';
 import { Chip } from '../components/Chip';
+import { FriendsBar } from '../components/FriendsBar';
 import { GameCodeCard } from '../components/GameCodeCard';
 import { GradeBanner } from '../components/GradeBanner';
 import { LeaderboardRow } from '../components/LeaderboardRow';
@@ -16,6 +17,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { QRCard } from '../components/QRCard';
 import { QuestionCard } from '../components/QuestionCard';
 import { ScoreStat } from '../components/ScoreStat';
+import { StoryViewer } from '../components/StoryViewer';
 import { Toast } from '../components/Toast';
 
 const SECTION_LABEL: CSSProperties = {
@@ -242,6 +244,70 @@ const MOCK_RECENT = [
   { mode: 'together', score: 8, total: 10, at: '2026-06-18T20:00:00Z' },
 ] as const;
 
+// ---- Phase 2: FriendsBar + StoryViewer mock data ----------------------------
+
+const MOCK_FRIENDS = [
+  {
+    id: 'p1',
+    nickname: 'Alice',
+    username: 'alice',
+    online: true,
+    hasStory: true,
+    avatar: { kind: 'preset' as const, preset: 'blue' },
+  },
+  {
+    id: 'p2',
+    nickname: 'Bob',
+    username: 'bob',
+    online: false,
+    hasStory: false,
+    avatar: { kind: 'preset' as const, preset: 'green' },
+  },
+  {
+    id: 'p3',
+    nickname: 'Cara',
+    username: 'cara',
+    online: true,
+    hasStory: true,
+    avatar: { kind: 'preset' as const, preset: 'violet' },
+  },
+  {
+    id: 'p4',
+    nickname: 'Dev',
+    username: 'dev',
+    online: false,
+    hasStory: false,
+    avatar: { kind: 'none' as const, preset: null },
+  },
+];
+
+function SocialSection(): JSX.Element {
+  const [viewerOpen, setViewerOpen] = useState(false);
+
+  return (
+    <>
+      <p style={CAPTION}>FRIENDS BAR (mixed online / story states)</p>
+      <FriendsBar
+        friends={MOCK_FRIENDS}
+        onAddStory={() => setViewerOpen(true)}
+        onOpenStory={() => setViewerOpen(true)}
+      />
+      <p style={{ ...CAPTION, marginTop: '18px' }}>STORY VIEWER MODAL (mock badge)</p>
+      <Button variant="secondary" fullWidth={false} onClick={() => setViewerOpen(true)}>
+        Open story viewer
+      </Button>
+      {viewerOpen ? (
+        <StoryViewer
+          nickname="Alice"
+          label="Centurion"
+          detail="Answered 100 questions correctly."
+          onClose={() => setViewerOpen(false)}
+        />
+      ) : null}
+    </>
+  );
+}
+
 function ProfileSection(): JSX.Element {
   const [activePreset, setActivePreset] = useState<
     'blue' | 'green' | 'pink' | 'amber' | 'violet' | 'teal'
@@ -353,6 +419,9 @@ export function Gallery(): JSX.Element {
         </Section>
         <Section title="Profile + Avatar (Phase 1)">
           <ProfileSection />
+        </Section>
+        <Section title="Social bar + Stories (Phase 2)">
+          <SocialSection />
         </Section>
         <Section title="Admin stats">
           <StatsSection />
