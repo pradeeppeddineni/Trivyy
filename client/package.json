@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "@fontsource/fredoka": "^5.1.0",
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^2.1.8",
     "jsdom": "^25.0.1",
+    "sharp": "^0.33.5",
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
     "vitest": "^2.1.8"
