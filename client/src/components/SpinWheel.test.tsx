@@ -107,4 +107,34 @@ describe('SpinWheel', () => {
     expect(handler).toHaveBeenCalledWith('tech');
     vi.useRealTimers();
   });
+
+  it('calls onResult immediately (no timer advance) when reduced-motion is preferred (pickIndex=3 → music)', async () => {
+    // framer-motion caches its matchMedia query at module level on first import,
+    // so we must use vi.doMock (non-hoisted) + resetModules to get a fresh module
+    // that sees useReducedMotion return true.
+    vi.resetModules();
+    vi.doMock('framer-motion', async () => {
+      const actual = await vi.importActual<typeof import('framer-motion')>('framer-motion');
+      return { ...actual, useReducedMotion: () => true };
+    });
+
+    const { SpinWheel: SpinWheelRM } = await import('./SpinWheel');
+
+    const handler = vi.fn();
+
+    act(() => {
+      render(<SpinWheelRM segments={SEGMENTS} onResult={handler} pickIndex={3} />);
+    });
+
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: /spin the wheel/i }));
+    });
+
+    // onResult must have been called synchronously — no timer advance needed.
+    expect(handler).toHaveBeenCalledOnce();
+    expect(handler).toHaveBeenCalledWith('music'); // index 3
+
+    vi.doUnmock('framer-motion');
+    vi.resetModules();
+  });
 });

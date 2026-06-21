@@ -194,7 +194,7 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
               avatar: { kind: 'none', preset: null },
             }}
             onStart={() => setScreen('playing')}
-            autoStartMs={2500}
+            autoStartMs={1500}
           />
         );
       case 'playing':

@@ -32,16 +32,6 @@ function buildConicGradient(segments: ReadonlyArray<WheelSegment>): string {
   );
 }
 
-/** Find the segment index for a given total rotation (in degrees). */
-function segmentAtAngle(totalDeg: number, count: number): number {
-  const step = 360 / count;
-  // Normalise to [0, 360); the pointer is at top (0°), wheel rotates clockwise.
-  // The segment at the top after rotation: top corresponds to (-totalDeg) on
-  // the original wheel, which is equivalent to (360 - (totalDeg % 360)).
-  const normalised = (((360 - (totalDeg % 360)) % 360) + 360) % 360;
-  return Math.floor(normalised / step) % count;
-}
-
 // ---- Component --------------------------------------------------------------
 
 const WHEEL_SIZE = 260;
@@ -261,6 +251,3 @@ export function SpinWheel(props: SpinWheelProps): JSX.Element {
     </div>
   );
 }
-
-// Re-export helper for tests
-export { segmentAtAngle };
