@@ -16,7 +16,15 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text'],
-      include: ['src/lib/**', 'src/components/Logo.tsx'],
+      include: [
+        'src/lib/**',
+        'src/components/Logo.tsx',
+        'src/components/ThemeToggle.tsx',
+        'src/components/BottomNav.tsx',
+        'src/components/PageTransition.tsx',
+        'src/theme/**',
+        'src/nav.ts',
+      ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },
