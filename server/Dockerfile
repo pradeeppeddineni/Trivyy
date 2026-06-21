@@ -12,6 +12,9 @@ RUN npm install --workspace server --include-workspace-root
 
 COPY tsconfig.base.json ./
 COPY server ./server
+# Operational seed scripts (npm run seed / seed:region / seed:india) read from
+# scripts/; include them so seeds run inside the container against the live DB.
+COPY scripts ./scripts
 
 EXPOSE 3000
 CMD ["npm", "run", "start", "--workspace", "server"]
