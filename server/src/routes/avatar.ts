@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { resolveCurrentPlayer } from './currentPlayer';
+import { uuidSchema } from '../schemas/admin';
 import {
   setUploadedAvatar,
   setPresetAvatar,
@@ -23,6 +24,30 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB raw
 });
+
+/**
+ * Wrap multer's single-file middleware so that MulterErrors (e.g. LIMIT_FILE_SIZE)
+ * are converted to a 400 response instead of falling through to the 500 central
+ * handler. This makes the contract explicit: multipart validation failures are
+ * client errors, not server errors (API-3).
+ */
+function uploadSingle(field: string): RequestHandler {
+  const middleware = upload.single(field);
+  return (req, res, next) => {
+    middleware(req, res, (err) => {
+      if (!err) {
+        next();
+        return;
+      }
+      if (err instanceof multer.MulterError) {
+        const message = err.code === 'LIMIT_FILE_SIZE' ? 'file_too_large' : 'invalid_upload';
+        res.status(400).json({ error: message });
+        return;
+      }
+      next(err);
+    });
+  };
+}
 
 // Same window/max as the auth rate-limiter — generous for a household, stops abuse.
 const avatarLimiter = rateLimit({
@@ -64,7 +89,7 @@ async function requirePlayer(req: Request, res: Response): Promise<{ id: string 
 avatarRouter.post(
   '/me/avatar',
   avatarLimiter,
-  upload.single('image'),
+  uploadSingle('image'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const player = await requirePlayer(req, res);
@@ -116,7 +141,14 @@ avatarRouter.post(
  */
 avatarRouter.get('/players/:id/avatar', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const avatar = await getAvatar(req.params.id);
+    const parsed = uuidSchema.safeParse(req.params.id);
+    if (!parsed.success) {
+      // Treat an unparseable id the same as "no such avatar" — not a server error.
+      res.status(404).json({ error: 'no_avatar' });
+      return;
+    }
+
+    const avatar = await getAvatar(parsed.data);
     if (!avatar) {
       res.status(404).json({ error: 'no_avatar' });
       return;
