@@ -36,6 +36,8 @@ export const openapiDocument = {
     { name: 'games' },
     { name: 'admin' },
     { name: 'meta' },
+    { name: 'presence', description: 'Online-presence pings (Phase 2 UI overhaul)' },
+    { name: 'stories', description: '24-hour trivia-badge stories (Phase 2 UI overhaul)' },
   ],
   components: {
     securitySchemes: {
@@ -173,9 +175,11 @@ export const openapiDocument = {
     '/api/friends': {
       get: {
         tags: ['friends'],
-        summary: 'My accepted friends',
+        summary: 'My accepted friends (extended: online, hasStory, avatar per friend)',
+        description:
+          'Returns each accepted friend with `online` (active within 2 min), `hasStory` (has at least one non-expired story), and `avatar { kind, preset }`. Phase 2 UI overhaul.',
         security: SESSION,
-        responses: { '200': json('Friends'), '401': ERR },
+        responses: { '200': json('Friends with online/hasStory/avatar'), '401': ERR },
       },
     },
     '/api/friends/requests': {
@@ -469,6 +473,40 @@ export const openapiDocument = {
         summary: 'Add a category',
         security: SESSION,
         responses: { '201': json('Category'), '400': ERR, '401': ERR, '409': ERR },
+      },
+    },
+
+    // --- Presence (account required) ---
+    '/api/presence/ping': {
+      post: {
+        tags: ['presence'],
+        summary: 'Record that the signed-in player is currently active',
+        description:
+          'Sets `last_seen_at = now()` on the players row. The client should call this periodically (~10 s). Online is derived as `last_seen_at > now() - 2 minutes`. Rate-limited at 30 req/min.',
+        security: SESSION,
+        responses: { '200': json('{ ok: true }'), '401': ERR, '429': ERR },
+      },
+    },
+
+    // --- Stories (account required) ---
+    '/api/stories': {
+      post: {
+        tags: ['stories'],
+        summary: 'Share a badge story (visible to friends for 24 hours)',
+        description:
+          'Body: `{ label: string (1..80), detail?: string (<=200) }`. Re-sharing the same label replaces the existing active entry for that label so the feed never shows duplicates. kind is always "badge".',
+        security: SESSION,
+        responses: { '201': json('{ story }'), '400': ERR, '401': ERR },
+      },
+    },
+    '/api/stories/friends': {
+      get: {
+        tags: ['stories'],
+        summary: 'Active stories from me + accepted friends, newest first',
+        description:
+          "Each entry includes the poster's nickname, avatarKind, and avatarPreset alongside the story fields. Expired stories (past expires_at) are excluded.",
+        security: SESSION,
+        responses: { '200': json('{ stories }'), '401': ERR },
       },
     },
   },
