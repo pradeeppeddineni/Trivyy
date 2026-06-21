@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
 import { AppFrame } from '../components/AppFrame';
+import { Switch } from '../components/Switch';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { useFeedbackPrefs } from '../feedback/prefs';
 
 const WRAP: CSSProperties = {
   padding: 'var(--space-5)',
@@ -29,6 +31,8 @@ const LABEL: CSSProperties = { flex: 1 };
 const LINK: CSSProperties = { ...ROW, textDecoration: 'none', cursor: 'pointer' };
 
 export function SettingsFlow(): JSX.Element {
+  const [prefs, setPrefs] = useFeedbackPrefs();
+
   return (
     <AppFrame>
       <div style={WRAP}>
@@ -36,6 +40,22 @@ export function SettingsFlow(): JSX.Element {
         <div style={ROW}>
           <span style={LABEL}>Dark mode</span>
           <ThemeToggle />
+        </div>
+        <div style={ROW}>
+          <span style={LABEL}>Sound</span>
+          <Switch
+            checked={prefs.sound}
+            onChange={(on) => setPrefs({ ...prefs, sound: on })}
+            label="Sound"
+          />
+        </div>
+        <div style={ROW}>
+          <span style={LABEL}>Haptics</span>
+          <Switch
+            checked={prefs.haptics}
+            onChange={(on) => setPrefs({ ...prefs, haptics: on })}
+            label="Haptics"
+          />
         </div>
         <a style={LINK} href="?me">
           Edit profile &amp; avatar

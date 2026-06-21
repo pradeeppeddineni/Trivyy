@@ -1,7 +1,7 @@
 # Trivyy UI Overhaul — Design
 
 **Date:** 2026-06-21
-**Status:** Approved direction; Phase 0 ready for implementation planning.
+**Status:** Implemented. Phases 0-5 all built, reviewed, and merged to `main`.
 
 ## Context
 

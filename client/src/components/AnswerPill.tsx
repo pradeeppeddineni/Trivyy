@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 
 export type AnswerState = 'idle' | 'selected' | 'correct' | 'incorrect';
 
@@ -54,11 +54,35 @@ const THEMES: Record<AnswerState, PillTheme> = {
   },
 };
 
+function useReducedMotionPref(): boolean {
+  const [reduced, setReduced] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const handler = (e: MediaQueryListEvent): void => setReduced(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  return reduced;
+}
+
 /** Answer choice button with idle / selected / correct / incorrect states. */
 export function AnswerPill(props: AnswerPillProps): JSX.Element {
   const { index, text, state = 'idle', dimmed = false, onClick } = props;
   const theme = THEMES[state];
   const badge = theme.badge ?? String.fromCharCode(65 + index);
+  const reducedMotion = useReducedMotionPref();
+
+  let animation: string | undefined;
+  if (!reducedMotion) {
+    if (state === 'correct') animation = 'okpulse 0.7s ease-out';
+    else if (state === 'incorrect') animation = 'shake 0.45s ease-out';
+  }
 
   const card: CSSProperties = {
     display: 'flex',
@@ -75,6 +99,7 @@ export function AnswerPill(props: AnswerPillProps): JSX.Element {
     background: theme.cardBg,
     color: theme.cardColor,
     opacity: dimmed ? 0.5 : 1,
+    animation,
   };
 
   const letter: CSSProperties = {
@@ -92,7 +117,7 @@ export function AnswerPill(props: AnswerPillProps): JSX.Element {
   };
 
   return (
-    <button type="button" onClick={onClick} style={card}>
+    <button type="button" onClick={onClick} style={card} data-answer-state={state}>
       <span style={letter}>{badge}</span>
       <span
         style={{
