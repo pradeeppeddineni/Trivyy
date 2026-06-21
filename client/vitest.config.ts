@@ -22,6 +22,8 @@ export default defineConfig({
         'src/components/ThemeToggle.tsx',
         'src/components/BottomNav.tsx',
         'src/components/PageTransition.tsx',
+        'src/components/ProfileView.tsx',
+        'src/components/AvatarPicker.tsx',
         'src/theme/**',
         'src/nav.ts',
       ],
