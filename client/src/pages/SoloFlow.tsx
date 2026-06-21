@@ -288,13 +288,36 @@ export function SoloFlow(): JSX.Element {
   }, []);
 
   const showHeader = HEADER_SCREENS.includes(screen);
+  // When the logged-in user is on the home screen we wrap the scrollable area
+  // in the immersive blue→violet gradient so it covers the full home content
+  // (header, stories strip, and the Home component itself).
+  const isLoggedInHome = screen === 'home' && Boolean(accountName);
 
   return (
     <AppFrame>
-      {showHeader ? (
-        <PlayerHeader nickname={nickname.trim() || undefined} onLogoClick={onQuit} />
-      ) : null}
-      {renderScreen()}
+      <div
+        style={
+          isLoggedInHome
+            ? {
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                background:
+                  'radial-gradient(120% 70% at 50% -10%, #4f9dff 0%, #1f6bff 35%, #4b1fb8 100%)',
+                color: '#fff',
+              }
+            : { flex: 1, display: 'flex', flexDirection: 'column' }
+        }
+      >
+        {showHeader ? (
+          <PlayerHeader
+            nickname={nickname.trim() || undefined}
+            onLogoClick={onQuit}
+            lightText={isLoggedInHome}
+          />
+        ) : null}
+        {renderScreen()}
+      </div>
       {toast ? <Toast message={toast} /> : null}
       {openStory ? (
         <StoryViewer
