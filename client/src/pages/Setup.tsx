@@ -3,6 +3,7 @@ import { Button } from '../components/Button';
 import { CategoryTile } from '../components/CategoryTile';
 import { Chip } from '../components/Chip';
 import { SETUP_CATEGORIES } from '../game/categories';
+import { REGIONS } from '../game/regions';
 import type { Difficulty } from '../api/client';
 
 export interface SetupProps {
@@ -21,6 +22,9 @@ export interface SetupProps {
   /** When provided, shows a "how many players" picker (group "play together"). */
   readonly maxPlayers?: number;
   readonly onMaxPlayers?: (n: number) => void;
+  /** When provided, shows a region filter (spec §5.6). */
+  readonly region?: string;
+  readonly onRegion?: (code: string) => void;
 }
 
 const PLAYER_COUNTS: ReadonlyArray<number> = [2, 3, 4, 5, 6, 8];
@@ -72,6 +76,8 @@ export function Setup(props: SetupProps): JSX.Element {
     ctaLabel = 'Start round →',
     maxPlayers,
     onMaxPlayers,
+    region,
+    onRegion,
   } = props;
 
   return (
@@ -111,6 +117,23 @@ export function Setup(props: SetupProps): JSX.Element {
           />
         ))}
       </div>
+
+      {onRegion ? (
+        <>
+          <p style={{ ...LABEL, margin: '22px 0 11px' }}>REGION</p>
+          <div style={{ display: 'flex', gap: '9px', flexWrap: 'wrap' }}>
+            {REGIONS.map((r) => (
+              <Chip
+                key={r.code}
+                label={r.label}
+                selected={(region ?? 'any') === r.code}
+                onClick={() => onRegion(r.code)}
+                flex={false}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
 
       <p style={{ ...LABEL, margin: '22px 0 11px' }}>DIFFICULTY</p>
       <div style={{ display: 'flex', gap: '9px' }}>

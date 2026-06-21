@@ -43,6 +43,7 @@ export function SoloFlow(): JSX.Element {
   const [nickname, setNickname] = useState('');
   const [categorySlug, setCategorySlug] = useState('any');
   const [difficulty, setDifficulty] = useState<Difficulty>('any');
+  const [region, setRegion] = useState('any');
   const [count, setCount] = useState(10);
   const [starting, setStarting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -106,6 +107,7 @@ export function SoloFlow(): JSX.Element {
         count,
         categorySlug: categorySlug === 'any' ? undefined : categorySlug,
         difficulty,
+        region: region === 'any' ? undefined : region,
       });
       if (created.questions.length === 0) {
         setScreen('setup');
@@ -125,7 +127,7 @@ export function SoloFlow(): JSX.Element {
     } finally {
       setStarting(false);
     }
-  }, [nickname, count, categorySlug, difficulty, flashToast, goError]);
+  }, [nickname, count, categorySlug, difficulty, region, flashToast, goError]);
 
   // When the current question was shown, for response-time stats (OBS-3).
   const shownAt = useRef<number>(performance.now());
@@ -241,9 +243,11 @@ export function SoloFlow(): JSX.Element {
             categorySlug={categorySlug}
             difficulty={difficulty}
             count={count}
+            region={region}
             onCategory={setCategorySlug}
             onDifficulty={setDifficulty}
             onCount={setCount}
+            onRegion={setRegion}
             onStart={() => void onStart()}
             starting={starting}
           />

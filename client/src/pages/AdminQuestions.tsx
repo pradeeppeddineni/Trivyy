@@ -27,6 +27,7 @@ interface Draft {
   incorrect: string[];
   categorySlug: string;
   difficulty: Difficulty;
+  region: string;
 }
 
 const INPUT: CSSProperties = {
@@ -63,6 +64,7 @@ function emptyDraft(): Draft {
     incorrect: ['', '', ''],
     categorySlug: '',
     difficulty: 'easy',
+    region: '',
   };
 }
 
@@ -127,6 +129,7 @@ export function AdminQuestions(props: AdminQuestionsProps): JSX.Element {
         incorrectAnswers: incorrect,
         categorySlug: draft.categorySlug || undefined,
         difficulty: draft.difficulty,
+        region: draft.region.trim() || undefined,
       };
       if (draft.id) {
         await adminUpdateQuestion(draft.id, input);
@@ -255,6 +258,7 @@ export function AdminQuestions(props: AdminQuestionsProps): JSX.Element {
               </p>
               <p style={{ fontSize: '12.5px', color: 'var(--muted)', margin: '0 0 9px' }}>
                 {q.categoryLabel ?? 'Surprise me'} · {q.difficulty}
+                {q.region ? ` · ${q.region}` : ''}
                 {q.status === 'hidden' ? ' · hidden' : ''} · ✓ {q.correctAnswer}
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -272,6 +276,7 @@ export function AdminQuestions(props: AdminQuestionsProps): JSX.Element {
                       difficulty: (['easy', 'medium', 'hard'].includes(q.difficulty)
                         ? q.difficulty
                         : 'easy') as Difficulty,
+                      region: q.region ?? '',
                     })
                   }
                 >
@@ -353,6 +358,7 @@ function QuestionEditor(props: {
   const qId = useId();
   const aId = useId();
   const cId = useId();
+  const rId = useId();
 
   return (
     <main
@@ -430,6 +436,17 @@ function QuestionEditor(props: {
           </option>
         ))}
       </select>
+
+      <label htmlFor={rId} style={LABEL}>
+        REGION (optional, ISO code e.g. IN)
+      </label>
+      <input
+        id={rId}
+        value={draft.region}
+        onChange={(e) => set({ region: e.target.value.toUpperCase().slice(0, 2) })}
+        placeholder="Blank = global"
+        style={INPUT}
+      />
 
       <label style={LABEL}>DIFFICULTY</label>
       <div style={{ display: 'flex', gap: '8px' }}>

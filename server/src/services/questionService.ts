@@ -27,6 +27,8 @@ export interface PickQuestionsOptions {
   readonly categorySlug?: string;
   /** 'any' (or undefined) means no difficulty filter. */
   readonly difficulty?: DifficultyFilter;
+  /** ISO-3166 alpha-2 region (e.g. 'IN'); undefined/'any' = no region filter. */
+  readonly region?: string;
 }
 
 /**
@@ -38,7 +40,7 @@ export interface PickQuestionsOptions {
 export async function pickQuestions(
   options: PickQuestionsOptions,
 ): Promise<ReadonlyArray<QuestionRow>> {
-  const { playerId, count, categorySlug, difficulty } = options;
+  const { playerId, count, categorySlug, difficulty, region } = options;
 
   const conditions: string[] = ["q.status = 'active'"];
   const params: unknown[] = [playerId];
@@ -50,6 +52,10 @@ export async function pickQuestions(
   if (difficulty && difficulty !== 'any') {
     params.push(difficulty);
     conditions.push(`q.difficulty = $${params.length}`);
+  }
+  if (region && region !== 'any') {
+    params.push(region.toUpperCase());
+    conditions.push(`q.region = $${params.length}`);
   }
   params.push(count);
   const limitParam = `$${params.length}`;

@@ -23,6 +23,7 @@ export interface CreateDuelOptions {
   readonly count: number;
   readonly categorySlug?: string;
   readonly difficulty?: DifficultyFilter;
+  readonly region?: string;
 }
 
 export interface CreateDuelResult {
@@ -33,9 +34,9 @@ export interface CreateDuelResult {
 
 /** Create a duel: lock the question set, mint a code, seat the creator. */
 export async function createDuel(options: CreateDuelOptions): Promise<CreateDuelResult> {
-  const { playerId, count, categorySlug, difficulty } = options;
+  const { playerId, count, categorySlug, difficulty, region } = options;
 
-  const picked = await pickQuestions({ playerId, count, categorySlug, difficulty });
+  const picked = await pickQuestions({ playerId, count, categorySlug, difficulty, region });
   if (picked.length === 0) {
     throw new GameError('no_questions_available', 422);
   }

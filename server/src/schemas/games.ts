@@ -15,6 +15,13 @@ export const createGameSchema = z.object({
   categorySlug: z.string().trim().min(1).max(40).optional(),
   difficulty: difficultySchema.optional(),
   count: z.coerce.number().int().min(1).max(50),
+  // Optional region filter (ISO-3166 alpha-2, e.g. 'IN'); omitted = anywhere.
+  region: z
+    .string()
+    .trim()
+    .length(2)
+    .regex(/^[a-zA-Z]{2}$/)
+    .optional(),
   // Group ("together") only: host-chosen lobby size. Ignored for solo/duel.
   maxPlayers: z.coerce.number().int().min(2).max(10).optional(),
   // Together only: the persistent group this round belongs to (standings).

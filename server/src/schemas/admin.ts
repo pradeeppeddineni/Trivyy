@@ -16,6 +16,13 @@ export const adminQuestionSchema = z.object({
   incorrectAnswers: z.array(z.string().trim().min(1).max(300)).min(1).max(5),
   categorySlug: z.string().trim().min(1).max(40).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']),
+  // Optional ISO-3166 alpha-2 region (e.g. 'IN'); blank/absent = global.
+  region: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z]{2}$/)
+    .optional()
+    .or(z.literal('')),
 });
 
 export type AdminQuestionInput = z.infer<typeof adminQuestionSchema>;

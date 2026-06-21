@@ -20,6 +20,7 @@ export interface CreateGroupOptions {
   readonly maxPlayers?: number;
   /** Persistent group this round belongs to, for standings (spec v3 §13.3). */
   readonly groupId?: string;
+  readonly region?: string;
 }
 
 export interface CreateGroupResult {
@@ -29,9 +30,9 @@ export interface CreateGroupResult {
 
 /** Create a group game and seat the host; players join the open lobby next. */
 export async function createGroup(options: CreateGroupOptions): Promise<CreateGroupResult> {
-  const { playerId, count, categorySlug, difficulty, maxPlayers, groupId } = options;
+  const { playerId, count, categorySlug, difficulty, maxPlayers, groupId, region } = options;
 
-  const picked = await pickQuestions({ playerId, count, categorySlug, difficulty });
+  const picked = await pickQuestions({ playerId, count, categorySlug, difficulty, region });
   if (picked.length === 0) {
     throw new GameError('no_questions_available', 422);
   }
