@@ -231,6 +231,7 @@ export function SoloFlow(): JSX.Element {
             onAccount={() => goToMode('?account')}
             onFriends={() => goToMode('?friends')}
             onGroups={() => goToMode('?groups')}
+            onStats={() => goToMode('?me')}
             accountName={accountName}
             onAdmin={() => {
               window.location.search = '?admin';

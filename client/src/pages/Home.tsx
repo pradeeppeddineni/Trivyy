@@ -13,6 +13,7 @@ export interface HomeProps {
   readonly onAccount: () => void;
   readonly onFriends: () => void;
   readonly onGroups: () => void;
+  readonly onStats: () => void;
   readonly onAdmin: () => void;
   /** Display name of the signed-in account, if any (null = guest). */
   readonly accountName?: string | null;
@@ -44,6 +45,7 @@ export function Home(props: HomeProps): JSX.Element {
     onAccount,
     onFriends,
     onGroups,
+    onStats,
     onAdmin,
     accountName,
   } = props;
@@ -178,6 +180,21 @@ export function Home(props: HomeProps): JSX.Element {
               </button>
             </>
           ) : null}
+          <span style={{ color: 'var(--faint-soft)', margin: '0 8px' }}>·</span>
+          <button
+            type="button"
+            onClick={onStats}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              fontSize: '14px',
+              color: 'var(--accent-strong)',
+              cursor: 'pointer',
+              fontWeight: 700,
+            }}
+          >
+            My stats
+          </button>
         </div>
       </div>
 

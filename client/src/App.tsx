@@ -2,6 +2,7 @@ import { AdminFlow } from './pages/AdminFlow';
 import { AccountFlow } from './pages/AccountFlow';
 import { FriendsFlow } from './pages/FriendsFlow';
 import { GroupsFlow } from './pages/GroupsFlow';
+import { ProfileFlow } from './pages/ProfileFlow';
 import { DuelFlow } from './pages/DuelFlow';
 import { GroupFlow } from './pages/GroupFlow';
 import { JoinFlow } from './pages/JoinFlow';
@@ -41,6 +42,9 @@ export function App(): JSX.Element {
   }
   if (params.has('groups')) {
     return <GroupsFlow />;
+  }
+  if (params.has('me')) {
+    return <ProfileFlow />;
   }
   if (params.has('join')) {
     return <JoinFlow code={params.get('join') ?? ''} />;

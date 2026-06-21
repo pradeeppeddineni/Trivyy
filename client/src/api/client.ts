@@ -77,6 +77,39 @@ export async function createSession(nickname: string): Promise<SessionResponse> 
   });
 }
 
+// --- My profile stats (spec v3 §13, GET /api/me/stats) ----------------------
+
+export interface ProfileStats {
+  readonly games: number;
+  readonly points: number;
+  readonly answers: number;
+  readonly accuracyPct: number;
+  readonly byCategory: ReadonlyArray<{
+    readonly category: string;
+    readonly answers: number;
+    readonly accuracyPct: number;
+  }>;
+  readonly recent: ReadonlyArray<{
+    readonly mode: string;
+    readonly score: number;
+    readonly total: number;
+    readonly at: string;
+  }>;
+}
+
+/** The current player's own stats, or null if there's no session yet. */
+export async function getMyStats(): Promise<ProfileStats | null> {
+  let res: Response;
+  try {
+    res = await fetch('/api/me/stats', { credentials: 'include' });
+  } catch {
+    throw new Error('Network error — please try again.');
+  }
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  return (await res.json()) as ProfileStats;
+}
+
 // --- Optional accounts (spec v3 §13.1, /api/auth/*) -------------------------
 
 export interface Account {

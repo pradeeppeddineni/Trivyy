@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { nicknameSchema } from '../schemas/session';
 import { getOrCreatePlayer } from '../services/playerService';
 import { clientMeta } from '../lib/clientMeta';
+import { resolveCurrentPlayer } from './currentPlayer';
+import { getPlayerStats } from '../services/profileService';
 
 export const sessionRouter = Router();
 
@@ -33,4 +35,18 @@ sessionRouter.get('/me', (req, res) => {
     return;
   }
   res.json({ nickname: req.session.nickname });
+});
+
+/** The current player's own profile stats (spec v3 §13; derived, API-8). */
+sessionRouter.get('/me/stats', async (req, res, next) => {
+  try {
+    const player = await resolveCurrentPlayer(req);
+    if (!player) {
+      res.status(401).json({ error: 'no_session' });
+      return;
+    }
+    res.json(await getPlayerStats(player.id));
+  } catch (err) {
+    next(err);
+  }
 });
