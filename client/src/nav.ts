@@ -3,13 +3,11 @@ export interface TabItem {
   readonly key: string;
   readonly label: string;
   readonly search: string;
-  readonly primary?: boolean;
 }
 
 export const TAB_ITEMS: ReadonlyArray<TabItem> = [
   { key: 'home', label: 'Home', search: '' },
   { key: 'friends', label: 'Friends', search: '?friends' },
-  { key: 'play', label: 'Play', search: '?solo', primary: true },
   { key: 'boards', label: 'Boards', search: '?groups' },
   { key: 'you', label: 'You', search: '?me' },
 ];

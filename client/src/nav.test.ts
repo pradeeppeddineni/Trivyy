@@ -6,7 +6,9 @@ describe('activeTab', () => {
     expect(activeTab(new URLSearchParams(''))).toBe('home');
     expect(activeTab(new URLSearchParams('?solo'))).toBe('home');
     expect(activeTab(new URLSearchParams('?friends'))).toBe('friends');
+    expect(activeTab(new URLSearchParams('?friend'))).toBe('friends');
     expect(activeTab(new URLSearchParams('?groups'))).toBe('boards');
+    expect(activeTab(new URLSearchParams('?gjoin'))).toBe('boards');
     expect(activeTab(new URLSearchParams('?me'))).toBe('you');
   });
 
@@ -15,9 +17,17 @@ describe('activeTab', () => {
     expect(activeTab(new URLSearchParams('?admin'))).toBeNull();
     expect(activeTab(new URLSearchParams('?join=ABCDE'))).toBeNull();
     expect(activeTab(new URLSearchParams('?account'))).toBeNull();
+    expect(activeTab(new URLSearchParams('?settings'))).toBeNull();
   });
 
-  it('exposes five tab items in order', () => {
-    expect(TAB_ITEMS.map((t) => t.key)).toEqual(['home', 'friends', 'play', 'boards', 'you']);
+  it('exposes four tab items in order', () => {
+    expect(TAB_ITEMS.map((t) => t.key)).toEqual(['home', 'friends', 'boards', 'you']);
+  });
+
+  it('no tab item has a primary flag (center play removed)', () => {
+    const primaries = TAB_ITEMS.filter(
+      (t) => 'primary' in t && (t as { primary?: boolean }).primary,
+    );
+    expect(primaries).toHaveLength(0);
   });
 });
