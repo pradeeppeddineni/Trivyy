@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
+import { Podium } from '../components/Podium';
+import { ResultsScreen } from '../components/ResultsScreen';
 import { AnswerPill } from '../components/AnswerPill';
 import { AvatarPicker } from '../components/AvatarPicker';
 import { Button } from '../components/Button';
@@ -368,6 +370,51 @@ function ProfileSection(): JSX.Element {
   );
 }
 
+// ---- Phase 4: Podium + ResultsScreen -----------------------------------------
+
+const PODIUM_MOCK = [
+  { name: 'Alice', score: 9, total: 10, avatar: 'blue' },
+  { name: 'Bob', score: 7, total: 10, avatar: 'green' },
+  { name: 'Cara', score: 5, total: 10, avatar: 'pink' },
+] as const;
+
+const RESULTS_MOCK = [
+  { rank: 1, name: 'Alice', score: 9, total: 10, detail: '90%', avatar: 'blue' },
+  { rank: 2, name: 'Bob', score: 7, total: 10, detail: '70%', avatar: 'green' },
+  { rank: 3, name: 'Cara', score: 5, total: 10, detail: '50%', avatar: 'pink' },
+  { rank: 4, name: 'Dev', score: 4, total: 10, detail: '40%' },
+] as const;
+
+function Phase4Section(): JSX.Element {
+  const [confettiKey, setConfettiKey] = useState(0);
+
+  return (
+    <>
+      <p style={CAPTION}>PODIUM (3 players)</p>
+      <Podium entries={[...PODIUM_MOCK]} />
+
+      <p style={{ ...CAPTION, marginTop: '24px' }}>
+        RESULTS SCREEN (mock — click to replay confetti)
+      </p>
+      <div
+        key={confettiKey}
+        style={{
+          border: '1px solid var(--border-soft)',
+          borderRadius: 'var(--radius-lg)',
+          overflow: 'hidden',
+        }}
+      >
+        <ResultsScreen
+          entries={[...RESULTS_MOCK]}
+          meRank={1}
+          onPlayAgain={() => setConfettiKey((n) => n + 1)}
+          playAgainLabel="Replay confetti"
+        />
+      </div>
+    </>
+  );
+}
+
 // ---- Phase 3: VS Intro + Spin Wheel + Rematch --------------------------------
 
 const SPIN_SEGMENTS = [
@@ -499,6 +546,9 @@ export function Gallery(): JSX.Element {
         </Section>
         <Section title="VS Intro + Spin Wheel + Rematch (Phase 3)">
           <DuelPhase3Section />
+        </Section>
+        <Section title="Podium + Results Screen (Phase 4)">
+          <Phase4Section />
         </Section>
         <Section title="Toast">
           <Button
