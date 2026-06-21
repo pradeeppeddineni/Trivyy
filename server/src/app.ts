@@ -2,7 +2,9 @@ import express from 'express';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import type { Env } from './config/env';
+import { openapiDocument } from './openapi';
 import { healthRouter } from './routes/health';
 import { sessionRouter } from './routes/session';
 import { authRouter } from './routes/auth';
@@ -54,6 +56,13 @@ export function createApp(env: Env): express.Express {
     });
   }
   app.use(session(sessionOptions));
+
+  // OpenAPI contract (API-1): the JSON spec is always available; the browsable
+  // Swagger UI is mounted only outside production.
+  app.get('/api/openapi.json', (_req, res) => res.json(openapiDocument));
+  if (env.NODE_ENV !== 'production') {
+    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapiDocument));
+  }
 
   app.use('/api', healthRouter);
   app.use('/api', sessionRouter);
