@@ -39,7 +39,7 @@ Claude Design prototype at `design/Trivyy.dc.html`), self-hosted fonts via
 
 | Phase               | Scope                                                                                        | New persistence                               |
 | ------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| **0 · Foundation**  | Blue rebrand, dark mode, bottom nav, PWA / full-screen, Framer Motion foundation             | none                                          |
+| **0 · Foundation**  | Blue rebrand, dark mode, bottom nav, PWA / full-screen, Framer Motion foundation             | none — **implemented**                        |
 | **1 · Profiles**    | Profile redesign, avatar (upload + presets), level / XP, achievement badges                  | `players` avatar + xp columns; `achievements` |
 | **2 · Social**      | Friends bar, online presence (last-seen), shareable completion-badge "stories" (no comments) | `presence`, `stories`                         |
 | **3 · Duel polish** | Animated VS intro, spin-the-wheel category picker (3D), rematch                              | optional `games.wheel_state`                  |
