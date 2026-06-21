@@ -8,6 +8,8 @@ import { QRCard } from '../components/QRCard';
 import { InviteActions } from '../components/InviteActions';
 import { LeaderboardRow } from '../components/LeaderboardRow';
 import { Button } from '../components/Button';
+import { VSIntro } from '../components/VSIntro';
+import { RematchButton } from '../components/RematchButton';
 import { Setup } from './Setup';
 import { NicknamePrompt } from './NicknamePrompt';
 import { RoundPlayer } from './RoundPlayer';
@@ -20,6 +22,7 @@ import {
   type ApiQuestion,
   type Difficulty,
   type DuelResultResponse,
+  type SoloGameOptions,
 } from '../api/client';
 
 export interface DuelFlowProps {
@@ -27,7 +30,7 @@ export interface DuelFlowProps {
   readonly entry?: { readonly gameId: string; readonly questions: ReadonlyArray<ApiQuestion> };
 }
 
-type Screen = 'nickname' | 'setup' | 'playing' | 'waiting' | 'result' | 'error';
+type Screen = 'nickname' | 'setup' | 'vsintro' | 'playing' | 'waiting' | 'result' | 'error';
 
 function joinUrl(code: string): string {
   return `${window.location.origin}/?join=${code}`;
@@ -42,8 +45,9 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
   const isCreator = !props.entry;
   const stored = getStoredNickname();
 
+  // Opponent enters directly into vsintro (they know their nickname from the join flow).
   const [screen, setScreen] = useState<Screen>(
-    isCreator ? (stored ? 'setup' : 'nickname') : 'playing',
+    isCreator ? (stored ? 'setup' : 'nickname') : 'vsintro',
   );
   const [nickname, setNickname] = useState(stored);
   const [categorySlug, setCategorySlug] = useState('any');
@@ -58,6 +62,8 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
   const [code, setCode] = useState('');
   const [result, setResult] = useState<DuelResultResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  /** Nickname of the opponent (visible after game completes, from result). */
+  const [opponentNickname, setOpponentNickname] = useState<string | null>(null);
 
   const goHome = useCallback(() => {
     window.location.href = '/';
@@ -81,6 +87,7 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
       setGameId(created.gameId);
       setCode(created.code);
       setQuestions(created.questions);
+      // Creator plays first — no VS intro (opponent hasn't joined yet).
       setScreen('playing');
     } catch {
       goError('We could not create your challenge. Please try again.');
@@ -89,11 +96,42 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
     }
   }, [nickname, count, categorySlug, difficulty, region, goError]);
 
+  const currentOptions: SoloGameOptions = {
+    count,
+    categorySlug: categorySlug === 'any' ? undefined : categorySlug,
+    difficulty,
+    region: region === 'any' ? undefined : region,
+  };
+
+  const onRematch = useCallback(
+    async (options: SoloGameOptions) => {
+      setStarting(true);
+      try {
+        await createSession(nickname.trim());
+        const created = await createDuelGame(options);
+        setGameId(created.gameId);
+        setCode(created.code);
+        setQuestions(created.questions);
+        setResult(null);
+        setOpponentNickname(null);
+        setScreen('vsintro');
+      } catch {
+        goError('We could not create the rematch. Please try again.');
+      } finally {
+        setStarting(false);
+      }
+    },
+    [nickname, goError],
+  );
+
   // Poll the head-to-head result while waiting for the other player to finish.
   usePolling(
     async () => {
       const r = await getDuelResult(gameId);
       if (r.status === 'complete') {
+        if (r.opponent?.nickname) {
+          setOpponentNickname(r.opponent.nickname);
+        }
         setResult(r);
         setScreen('result');
       }
@@ -141,6 +179,22 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
             onRegion={setRegion}
             onStart={() => void onCreate()}
             starting={starting}
+            showSpinOption
+          />
+        );
+      case 'vsintro':
+        return (
+          <VSIntro
+            left={{
+              nickname: nickname.trim() || 'You',
+              avatar: { kind: 'none', preset: null },
+            }}
+            right={{
+              nickname: opponentNickname ?? '?',
+              avatar: { kind: 'none', preset: null },
+            }}
+            onStart={() => setScreen('playing')}
+            autoStartMs={1500}
           />
         );
       case 'playing':
@@ -162,7 +216,14 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
         if (!result) {
           return <StatusScreen title="Loading…" />;
         }
-        return <DuelResult result={result} onHome={goHome} />;
+        return (
+          <DuelResult
+            result={result}
+            onHome={goHome}
+            onRematch={isCreator ? () => void onRematch(currentOptions) : undefined}
+            rematchDisabled={starting}
+          />
+        );
       case 'error':
         return (
           <StatusScreen
@@ -226,14 +287,21 @@ function WaitingScreen(props: { code: string | null }): JSX.Element {
   );
 }
 
+interface DuelResultProps {
+  readonly result: DuelResultResponse;
+  readonly onHome: () => void;
+  readonly onRematch?: () => void;
+  readonly rematchDisabled?: boolean;
+}
+
 /** Head-to-head result from the requesting player's perspective. */
-function DuelResult(props: { result: DuelResultResponse; onHome: () => void }): JSX.Element {
-  const { result, onHome } = props;
+function DuelResult(props: DuelResultProps): JSX.Element {
+  const { result, onHome, onRematch, rematchDisabled } = props;
   const youScore = result.you.score ?? 0;
   const oppScore = result.opponent?.score ?? 0;
   const youWon = result.outcome === 'win';
   const draw = result.outcome === 'draw';
-  const headline = draw ? "It's a draw!" : youWon ? 'You win! 🏆' : 'You lost';
+  const headline = draw ? "It's a draw!" : youWon ? 'You win!' : 'You lost';
 
   return (
     <main style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 22px 28px' }}>
@@ -267,8 +335,15 @@ function DuelResult(props: { result: DuelResultResponse; onHome: () => void }): 
           />
         ) : null}
       </div>
-      <div style={{ marginTop: '24px' }}>
-        <Button variant="primary" onClick={onHome}>
+      <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {onRematch ? (
+          <RematchButton
+            options={{ count: result.total }}
+            onRematch={() => onRematch()}
+            disabled={rematchDisabled}
+          />
+        ) : null}
+        <Button variant="ghost" onClick={onHome}>
           Back to home
         </Button>
       </div>
