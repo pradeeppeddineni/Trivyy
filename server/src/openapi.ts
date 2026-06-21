@@ -30,6 +30,7 @@ export const openapiDocument = {
   tags: [
     { name: 'session' },
     { name: 'accounts' },
+    { name: 'avatars' },
     { name: 'friends' },
     { name: 'groups' },
     { name: 'games' },
@@ -79,9 +80,53 @@ export const openapiDocument = {
     '/api/me/stats': {
       get: {
         tags: ['session'],
-        summary: "The current player's own stats (games, points, accuracy, recent)",
+        summary:
+          "The current player's own stats: games, points, accuracy, recent, avatar summary, derived level + XP, and achievement badges",
         security: SESSION,
-        responses: { '200': json('Profile stats'), '401': ERR },
+        responses: {
+          '200': json('Profile stats including avatar, level, and achievements'),
+          '401': ERR,
+        },
+      },
+    },
+
+    // --- Avatars ---
+    '/api/me/avatar': {
+      post: {
+        tags: ['avatars'],
+        summary: 'Upload a new avatar (multipart, field `image`, max 2 MB, png/jpeg/webp)',
+        description:
+          'Processes the image with sharp (256×256 cover-crop + webp conversion, metadata stripped) before storing as bytea. Clears any preset. Rate-limited.',
+        security: SESSION,
+        responses: { '200': json('{ ok: true }'), '400': ERR, '401': ERR, '429': ERR },
+      },
+    },
+    '/api/me/avatar/preset': {
+      post: {
+        tags: ['avatars'],
+        summary: 'Set a colour-preset avatar',
+        description:
+          'Valid preset keys: blue, green, pink, amber, violet, teal. Clears any uploaded image. Rate-limited.',
+        security: SESSION,
+        responses: { '200': json('{ ok: true }'), '400': ERR, '401': ERR, '429': ERR },
+      },
+    },
+    '/api/players/{id}/avatar': {
+      get: {
+        tags: ['avatars'],
+        summary: 'Serve the stored webp avatar for any player',
+        description:
+          'Returns the image with `Cache-Control: private, max-age=300`. 404 when no avatar is set.',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: {
+          '200': {
+            description: 'WebP image',
+            content: { 'image/webp': { schema: { type: 'string', format: 'binary' } } },
+          },
+          '404': ERR,
+        },
       },
     },
 

@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Critical-flow E2E (TEST-4, spec v3 §13): a player finishes a solo game, then
- * opens "My stats" and sees their games + a recent game.
+ * Critical-flow E2E (TEST-4, spec §13): a player finishes a solo game, then
+ * opens their profile and sees the redesigned ProfileView (Phase 1) with their
+ * name, stats, and a recent game.
  */
 test('my stats reflects a finished solo game', async ({ page }) => {
   await page.goto('/');
@@ -18,10 +19,10 @@ test('my stats reflects a finished solo game', async ({ page }) => {
   }
   await expect(page.getByText(/^REVIEW$/)).toBeVisible();
 
-  // Open My stats (same session) — the game is counted.
+  // Open the profile (same session) — the game is counted.
   await page.goto('/?me');
-  await expect(page.getByRole('heading', { name: /my stats/i })).toBeVisible();
-  await expect(page.getByText(/games played/i)).toBeVisible();
+  await expect(page.getByRole('heading', { name: /statsplayer/i })).toBeVisible();
+  await expect(page.getByText('Accuracy')).toBeVisible();
   await expect(page.getByText(/recent games/i)).toBeVisible();
 
   await test.info().attach('my-stats', {

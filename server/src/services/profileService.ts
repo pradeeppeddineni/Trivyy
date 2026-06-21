@@ -1,4 +1,7 @@
 import { pool } from '../db/pool';
+import { levelForPoints } from '../domain/level';
+import { computeAchievements } from '../domain/achievements';
+import { getAvatarMeta } from './avatarService';
 
 /**
  * Per-player profile stats (spec v3 §13) — the player's own view of their play,
@@ -22,6 +25,22 @@ export interface ProfileStats {
     readonly total: number;
     readonly at: string;
   }>;
+  readonly avatar: {
+    readonly kind: 'none' | 'preset' | 'upload';
+    readonly preset: string | null;
+  };
+  readonly level: {
+    readonly level: number;
+    readonly into: number;
+    readonly span: number;
+    readonly pct: number;
+  };
+  readonly achievements: ReadonlyArray<{
+    readonly key: string;
+    readonly label: string;
+    readonly description: string;
+    readonly earned: boolean;
+  }>;
 }
 
 const num = (v: unknown): number => Number(v ?? 0);
@@ -30,7 +49,7 @@ const pct = (part: number, whole: number): number =>
 
 /** Build the profile snapshot for one player. */
 export async function getPlayerStats(playerId: string): Promise<ProfileStats> {
-  const [totals, answers, byCat, recent] = await Promise.all([
+  const [totals, answers, byCat, recent, avatarMeta] = await Promise.all([
     pool.query(
       `SELECT count(*) FILTER (WHERE status = 'done') AS games,
               COALESCE(SUM(score), 0) AS points
@@ -62,14 +81,21 @@ export async function getPlayerStats(playerId: string): Promise<ProfileStats> {
         LIMIT 5`,
       [playerId],
     ),
+    getAvatarMeta(playerId),
   ]);
 
   const a = answers.rows[0];
+  const games = num(totals.rows[0].games);
+  const points = num(totals.rows[0].points);
+  const totalAnswers = num(a.total);
+  const correctAnswers = num(a.correct);
+  const accuracyPct = pct(correctAnswers, totalAnswers);
+
   return {
-    games: num(totals.rows[0].games),
-    points: num(totals.rows[0].points),
-    answers: num(a.total),
-    accuracyPct: pct(num(a.correct), num(a.total)),
+    games,
+    points,
+    answers: totalAnswers,
+    accuracyPct,
     byCategory: byCat.rows.map((row) => ({
       category: row.category,
       answers: num(row.answers),
@@ -84,5 +110,14 @@ export async function getPlayerStats(playerId: string): Promise<ProfileStats> {
           ? row.completed_at.toISOString()
           : String(row.completed_at ?? ''),
     })),
+    avatar: avatarMeta,
+    level: levelForPoints(points),
+    achievements: computeAchievements({
+      games,
+      points,
+      answers: totalAnswers,
+      correct: correctAnswers,
+      accuracyPct,
+    }),
   };
 }
