@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Button } from '../components/Button';
 import { CategoryTile } from '../components/CategoryTile';
 import { Chip } from '../components/Chip';
-import { SETUP_CATEGORIES } from '../game/categories';
+import { SpinWheel } from '../components/SpinWheel';
+import { SETUP_CATEGORIES, CATEGORIES } from '../game/categories';
 import { REGIONS } from '../game/regions';
 import type { Difficulty } from '../api/client';
 
@@ -25,9 +27,21 @@ export interface SetupProps {
   /** When provided, shows a region filter (spec §5.6). */
   readonly region?: string;
   readonly onRegion?: (code: string) => void;
+  /** When true, shows a "Spin for it" toggle to use the SpinWheel for category selection. */
+  readonly showSpinOption?: boolean;
 }
 
 const PLAYER_COUNTS: ReadonlyArray<number> = [2, 3, 4, 5, 6, 8];
+
+/** Color palette for the SpinWheel category segments. */
+const CATEGORY_COLORS: ReadonlyArray<string> = [
+  '#1f6bff',
+  '#16a765',
+  '#e91e8c',
+  '#f5a623',
+  '#7c3aed',
+  '#0f9fa5',
+];
 
 const KICKER: CSSProperties = {
   fontSize: '13px',
@@ -78,7 +92,16 @@ export function Setup(props: SetupProps): JSX.Element {
     onMaxPlayers,
     region,
     onRegion,
+    showSpinOption = false,
   } = props;
+
+  const [showWheel, setShowWheel] = useState(false);
+
+  const wheelSegments = CATEGORIES.map((c, i) => ({
+    key: c.slug,
+    label: c.label,
+    color: CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? '#1f6bff',
+  }));
 
   return (
     <main
@@ -105,18 +128,59 @@ export function Setup(props: SetupProps): JSX.Element {
         </h2>
       </div>
 
-      <p style={{ ...LABEL, margin: '0 0 11px' }}>CATEGORY</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '11px' }}>
-        {SETUP_CATEGORIES.map((c) => (
-          <CategoryTile
-            key={c.slug}
-            icon={c.icon}
-            label={c.label}
-            selected={categorySlug === c.slug}
-            onClick={() => onCategory(c.slug)}
-          />
-        ))}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          margin: '0 0 11px',
+        }}
+      >
+        <p style={{ ...LABEL, margin: 0 }}>CATEGORY</p>
+        {showSpinOption ? (
+          <button
+            type="button"
+            onClick={() => setShowWheel((v) => !v)}
+            style={{
+              fontSize: '12px',
+              fontWeight: 700,
+              color: 'var(--accent-strong)',
+              border: '1.5px solid var(--border-accent)',
+              borderRadius: 'var(--radius-pill)',
+              background: showWheel ? 'var(--accent-soft)' : 'transparent',
+              padding: '4px 12px',
+              cursor: 'pointer',
+            }}
+            aria-pressed={showWheel}
+          >
+            Spin for it
+          </button>
+        ) : null}
       </div>
+
+      {showSpinOption && showWheel ? (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <SpinWheel
+            segments={wheelSegments}
+            onResult={(key) => {
+              onCategory(key);
+              setShowWheel(false);
+            }}
+          />
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '11px' }}>
+          {SETUP_CATEGORIES.map((c) => (
+            <CategoryTile
+              key={c.slug}
+              icon={c.icon}
+              label={c.label}
+              selected={categorySlug === c.slug}
+              onClick={() => onCategory(c.slug)}
+            />
+          ))}
+        </div>
+      )}
 
       {onRegion ? (
         <>
