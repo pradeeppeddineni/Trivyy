@@ -1,5 +1,6 @@
 import { AdminFlow } from './pages/AdminFlow';
 import { AccountFlow } from './pages/AccountFlow';
+import { FriendsFlow } from './pages/FriendsFlow';
 import { DuelFlow } from './pages/DuelFlow';
 import { GroupFlow } from './pages/GroupFlow';
 import { JoinFlow } from './pages/JoinFlow';
@@ -27,6 +28,12 @@ export function App(): JSX.Element {
   }
   if (params.has('account')) {
     return <AccountFlow />;
+  }
+  if (params.has('friend')) {
+    return <FriendsFlow inviteCode={params.get('friend') ?? ''} />;
+  }
+  if (params.has('friends')) {
+    return <FriendsFlow />;
   }
   if (params.has('join')) {
     return <JoinFlow code={params.get('join') ?? ''} />;

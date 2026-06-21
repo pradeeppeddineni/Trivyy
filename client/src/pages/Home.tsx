@@ -11,6 +11,7 @@ export interface HomeProps {
   readonly onTogether: () => void;
   readonly onJoin: () => void;
   readonly onAccount: () => void;
+  readonly onFriends: () => void;
   readonly onAdmin: () => void;
   /** Display name of the signed-in account, if any (null = guest). */
   readonly accountName?: string | null;
@@ -40,6 +41,7 @@ export function Home(props: HomeProps): JSX.Element {
     onTogether,
     onJoin,
     onAccount,
+    onFriends,
     onAdmin,
     accountName,
   } = props;
@@ -140,6 +142,25 @@ export function Home(props: HomeProps): JSX.Element {
           >
             {accountName ? `@${accountName}` : 'Sign in / sign up'}
           </button>
+          {accountName ? (
+            <>
+              <span style={{ color: 'var(--faint-soft)', margin: '0 8px' }}>·</span>
+              <button
+                type="button"
+                onClick={onFriends}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: '14px',
+                  color: 'var(--accent-strong)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                Friends
+              </button>
+            </>
+          ) : null}
         </div>
       </div>
 
