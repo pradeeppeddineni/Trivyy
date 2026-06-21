@@ -9,6 +9,7 @@ import { JoinFlow } from './pages/JoinFlow';
 import { Gallery } from './pages/Gallery';
 import { SoloFlow } from './pages/SoloFlow';
 import { BottomNav } from './components/BottomNav';
+import { PageTransition } from './components/PageTransition';
 import { SettingsFlow } from './pages/SettingsFlow';
 import { activeTab } from './nav';
 
@@ -35,23 +36,27 @@ export function App(): JSX.Element {
 
   const tab = activeTab(params);
 
-  let screen: JSX.Element;
-  if (params.has('admin')) screen = <AdminFlow />;
-  else if (params.has('account')) screen = <AccountFlow />;
-  else if (params.has('friend')) screen = <FriendsFlow inviteCode={params.get('friend') ?? ''} />;
-  else if (params.has('friends')) screen = <FriendsFlow />;
-  else if (params.has('gjoin')) screen = <GroupsFlow autoJoinCode={params.get('gjoin') ?? ''} />;
-  else if (params.has('groups')) screen = <GroupsFlow />;
-  else if (params.has('me')) screen = <ProfileFlow />;
-  else if (params.has('join')) screen = <JoinFlow code={params.get('join') ?? ''} />;
-  else if (params.has('duel')) screen = <DuelFlow />;
-  else if (params.has('group')) screen = <GroupFlow groupId={params.get('for') ?? undefined} />;
-  else if (params.has('gallery')) screen = <Gallery />;
-  else screen = <SoloFlow />;
+  // Non-tab screens: no bottom nav, no page transition (game flows, admin, etc.)
+  if (params.has('admin')) return <AdminFlow />;
+  if (params.has('account')) return <AccountFlow />;
+  if (params.has('join')) return <JoinFlow code={params.get('join') ?? ''} />;
+  if (params.has('duel')) return <DuelFlow />;
+  if (params.has('group')) return <GroupFlow groupId={params.get('for') ?? undefined} />;
+  if (params.has('gallery')) return <Gallery />;
+
+  // Tab screens: wrapped in PageTransition keyed on the active tab so the
+  // fade-and-rise plays when navigating between tabs, not within a flow.
+  let tabScreen: JSX.Element;
+  if (params.has('friend')) tabScreen = <FriendsFlow inviteCode={params.get('friend') ?? ''} />;
+  else if (params.has('friends')) tabScreen = <FriendsFlow />;
+  else if (params.has('gjoin')) tabScreen = <GroupsFlow autoJoinCode={params.get('gjoin') ?? ''} />;
+  else if (params.has('groups')) tabScreen = <GroupsFlow />;
+  else if (params.has('me')) tabScreen = <ProfileFlow />;
+  else tabScreen = <SoloFlow />;
 
   return (
     <>
-      {screen}
+      <PageTransition key={tab ?? 'home'}>{tabScreen}</PageTransition>
       {tab !== null && <BottomNav active={tab} />}
     </>
   );
