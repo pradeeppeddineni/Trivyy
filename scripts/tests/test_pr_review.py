@@ -32,6 +32,16 @@ def test_detect_verdict_uses_last_heading():
     assert pr_review._detect_verdict(body) == "REQUEST_CHANGES"
 
 
+def test_critical_count_reads_the_section_header():
+    assert pr_review._critical_count("## CRITICAL (0)\n## HIGH (3)") == 0
+    assert pr_review._critical_count("## CRITICAL (2)\n") == 2
+    assert pr_review._critical_count("no critical section") == 0
+
+
+def test_critical_count_is_case_insensitive():
+    assert pr_review._critical_count("## Critical (1)") == 1
+
+
 def test_truncate_diff_short_passthrough():
     diff, note = pr_review._truncate_diff("small diff")
     assert diff == "small diff"
