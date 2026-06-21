@@ -68,6 +68,7 @@ gamesRouter.post('/', async (req, res, next) => {
       count: parsed.data.count,
       categorySlug: parsed.data.categorySlug,
       difficulty: parsed.data.difficulty,
+      region: parsed.data.region,
     };
 
     if (parsed.data.mode === 'duel') {

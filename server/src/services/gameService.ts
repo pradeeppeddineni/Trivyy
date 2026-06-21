@@ -25,6 +25,7 @@ export interface CreateSoloGameOptions {
   readonly count: number;
   readonly categorySlug?: string;
   readonly difficulty?: DifficultyFilter;
+  readonly region?: string;
 }
 
 export interface CreateSoloGameResult {
@@ -39,9 +40,9 @@ export interface CreateSoloGameResult {
 export async function createSoloGame(
   options: CreateSoloGameOptions,
 ): Promise<CreateSoloGameResult> {
-  const { playerId, count, categorySlug, difficulty } = options;
+  const { playerId, count, categorySlug, difficulty, region } = options;
 
-  const picked = await pickQuestions({ playerId, count, categorySlug, difficulty });
+  const picked = await pickQuestions({ playerId, count, categorySlug, difficulty, region });
   if (picked.length === 0) {
     throw new GameError('no_questions_available', 422);
   }

@@ -19,6 +19,7 @@ export interface AdminQuestion {
   readonly difficulty: string;
   readonly status: string;
   readonly source: string;
+  readonly region: string | null;
   readonly updatedAt: string;
 }
 
@@ -32,6 +33,7 @@ interface QuestionDbRow {
   difficulty: string;
   status: string;
   source: string;
+  region: string | null;
   updated_at: Date | string;
 }
 
@@ -46,6 +48,7 @@ function toAdminQuestion(row: QuestionDbRow): AdminQuestion {
     difficulty: row.difficulty,
     status: row.status,
     source: row.source,
+    region: row.region,
     updatedAt:
       row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
   };
@@ -67,7 +70,7 @@ export interface ListQuestionsResult {
 }
 
 const SELECT_COLS = `q.id, q.text, q.correct_answer, q.incorrect_answers, q.difficulty,
-       q.status, q.source, q.updated_at,
+       q.status, q.source, q.region, q.updated_at,
        c.slug AS category_slug, c.label AS category_label`;
 
 /** Search/filter the bank for the admin questions screen. */
@@ -126,7 +129,12 @@ export interface QuestionInput {
   readonly incorrectAnswers: ReadonlyArray<string>;
   readonly categorySlug?: string | null;
   readonly difficulty: string;
+  /** ISO-3166 alpha-2 region, or null/undefined for global. */
+  readonly region?: string | null;
 }
+
+const normRegion = (region: string | null | undefined): string | null =>
+  region && region.trim() ? region.trim().toUpperCase() : null;
 
 async function resolveCategory(slug: string | null | undefined): Promise<string | null> {
   if (!slug) {
@@ -144,8 +152,8 @@ export async function createQuestion(input: QuestionInput): Promise<AdminQuestio
   const categoryId = await resolveCategory(input.categorySlug);
   const result = await pool.query<QuestionDbRow>(
     `WITH inserted AS (
-       INSERT INTO questions (text, correct_answer, incorrect_answers, category, category_id, difficulty, source, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'admin', 'active')
+       INSERT INTO questions (text, correct_answer, incorrect_answers, category, category_id, difficulty, region, source, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'admin', 'active')
        RETURNING *
      )
      SELECT ${SELECT_COLS}
@@ -159,6 +167,7 @@ export async function createQuestion(input: QuestionInput): Promise<AdminQuestio
       input.categorySlug ?? '',
       categoryId,
       input.difficulty,
+      normRegion(input.region),
     ],
   );
   logger.info('admin_question_created', { questionId: result.rows[0].id });
@@ -172,7 +181,7 @@ export async function updateQuestion(id: string, input: QuestionInput): Promise<
     `WITH updated AS (
        UPDATE questions
           SET text = $2, correct_answer = $3, incorrect_answers = $4,
-              category = $5, category_id = $6, difficulty = $7, updated_at = now()
+              category = $5, category_id = $6, difficulty = $7, region = $8, updated_at = now()
         WHERE id = $1
         RETURNING *
      )
@@ -186,6 +195,7 @@ export async function updateQuestion(id: string, input: QuestionInput): Promise<
       input.categorySlug ?? '',
       categoryId,
       input.difficulty,
+      normRegion(input.region),
     ],
   );
   if (result.rows.length === 0) {

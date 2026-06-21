@@ -60,6 +60,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
   const [categorySlug, setCategorySlug] = useState('any');
   const [difficulty, setDifficulty] = useState<Difficulty>('any');
   const [count, setCount] = useState(10);
+  const [region, setRegion] = useState('any');
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [starting, setStarting] = useState(false);
   const [gameId, setGameId] = useState(props.entry?.gameId ?? '');
@@ -95,6 +96,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
         count,
         categorySlug: categorySlug === 'any' ? undefined : categorySlug,
         difficulty,
+        region: region === 'any' ? undefined : region,
         maxPlayers,
         groupId: props.groupId,
       });
@@ -105,7 +107,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
     } finally {
       setStarting(false);
     }
-  }, [nickname, count, categorySlug, difficulty, maxPlayers, props.groupId, goError]);
+  }, [nickname, count, categorySlug, difficulty, region, maxPlayers, props.groupId, goError]);
 
   const onStartGame = useCallback(async () => {
     setStarting(true);
@@ -173,11 +175,13 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
             categorySlug={categorySlug}
             difficulty={difficulty}
             count={count}
+            region={region}
             maxPlayers={maxPlayers}
             onMaxPlayers={setMaxPlayers}
             onCategory={setCategorySlug}
             onDifficulty={setDifficulty}
             onCount={setCount}
+            onRegion={setRegion}
             onStart={() => void onCreate()}
             starting={starting}
           />

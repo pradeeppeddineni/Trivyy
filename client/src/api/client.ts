@@ -48,6 +48,8 @@ export interface SoloGameOptions {
   readonly count: number;
   readonly categorySlug?: string;
   readonly difficulty?: Difficulty;
+  /** ISO-3166 alpha-2 region filter (e.g. 'IN'); omitted = anywhere. */
+  readonly region?: string;
 }
 
 /** Shared fetch helper: JSON body, credentials, and a friendly error on failure. */
@@ -579,6 +581,7 @@ export interface AdminQuestion {
   readonly difficulty: string;
   readonly status: string;
   readonly source: string;
+  readonly region: string | null;
   readonly updatedAt: string;
 }
 
@@ -588,6 +591,7 @@ export interface AdminQuestionInput {
   readonly incorrectAnswers: ReadonlyArray<string>;
   readonly categorySlug?: string;
   readonly difficulty: 'easy' | 'medium' | 'hard';
+  readonly region?: string;
 }
 
 export interface QuestionsPage {

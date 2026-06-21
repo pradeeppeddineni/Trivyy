@@ -48,6 +48,7 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
   const [nickname, setNickname] = useState(stored);
   const [categorySlug, setCategorySlug] = useState('any');
   const [difficulty, setDifficulty] = useState<Difficulty>('any');
+  const [region, setRegion] = useState('any');
   const [count, setCount] = useState(10);
   const [starting, setStarting] = useState(false);
   const [gameId, setGameId] = useState(props.entry?.gameId ?? '');
@@ -75,6 +76,7 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
         count,
         categorySlug: categorySlug === 'any' ? undefined : categorySlug,
         difficulty,
+        region: region === 'any' ? undefined : region,
       });
       setGameId(created.gameId);
       setCode(created.code);
@@ -85,7 +87,7 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
     } finally {
       setStarting(false);
     }
-  }, [nickname, count, categorySlug, difficulty, goError]);
+  }, [nickname, count, categorySlug, difficulty, region, goError]);
 
   // Poll the head-to-head result while waiting for the other player to finish.
   usePolling(
@@ -132,9 +134,11 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
             categorySlug={categorySlug}
             difficulty={difficulty}
             count={count}
+            region={region}
             onCategory={setCategorySlug}
             onDifficulty={setDifficulty}
             onCount={setCount}
+            onRegion={setRegion}
             onStart={() => void onCreate()}
             starting={starting}
           />
