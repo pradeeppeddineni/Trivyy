@@ -3,6 +3,9 @@ import type { CSSProperties } from 'react';
 export interface PlayerHeaderProps {
   readonly nickname?: string;
   readonly onLogoClick?: () => void;
+  /** When true the header sits on the dark gradient; use white text and a
+   *  translucent background instead of the default light surface. */
+  readonly lightText?: boolean;
 }
 
 const BAR: CSSProperties = {
@@ -51,8 +54,17 @@ const NICK_CHIP: CSSProperties = {
 
 /** Sticky top bar with the Trivyy logo and the active player's nickname chip. */
 export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
-  const { nickname, onLogoClick } = props;
+  const { nickname, onLogoClick, lightText = false } = props;
   const initial = nickname ? nickname.charAt(0).toUpperCase() : '';
+
+  const barStyle: CSSProperties = lightText
+    ? {
+        ...BAR,
+        background: 'rgba(0,0,0,0.12)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255,255,255,0.15)',
+      }
+    : BAR;
 
   const logoMark = (
     <>
@@ -75,7 +87,7 @@ export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
           fontWeight: 600,
           fontSize: '21px',
           letterSpacing: '0.3px',
-          color: 'var(--ink)',
+          color: lightText ? '#fff' : 'var(--ink)',
         }}
       >
         Trivyy
@@ -83,8 +95,16 @@ export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
     </>
   );
 
+  const nickChipStyle: CSSProperties = lightText
+    ? {
+        ...NICK_CHIP,
+        background: 'rgba(255,255,255,0.16)',
+        border: '1px solid rgba(255,255,255,0.3)',
+      }
+    : NICK_CHIP;
+
   return (
-    <div style={BAR}>
+    <div style={barStyle}>
       {onLogoClick ? (
         <button type="button" onClick={onLogoClick} aria-label="Go to home" style={LOGO_GROUP}>
           {logoMark}
@@ -93,13 +113,13 @@ export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
         <div style={{ ...LOGO_GROUP, cursor: 'default' }}>{logoMark}</div>
       )}
       {nickname ? (
-        <div style={NICK_CHIP}>
+        <div style={nickChipStyle}>
           <div
             style={{
               width: '24px',
               height: '24px',
               borderRadius: '50%',
-              background: 'var(--accent)',
+              background: lightText ? 'rgba(255,255,255,0.3)' : 'var(--accent)',
               color: '#fff',
               display: 'grid',
               placeItems: 'center',
@@ -113,7 +133,7 @@ export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
             style={{
               fontSize: '13.5px',
               fontWeight: 600,
-              color: 'var(--accent-strong)',
+              color: lightText ? '#fff' : 'var(--accent-strong)',
             }}
           >
             {nickname}

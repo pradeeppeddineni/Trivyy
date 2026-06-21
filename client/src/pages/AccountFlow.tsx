@@ -200,13 +200,53 @@ export function AccountFlow(): JSX.Element {
     setScreen('login');
   }, []);
 
+  /**
+   * Branded page shell for all account screens: gradient page-top strip with the
+   * Trivyy logo, then a white card holding the form content. All functionality is
+   * unchanged; only the shell visuals are updated.
+   */
   const wrap = (children: JSX.Element): JSX.Element => (
     <AppFrame>
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '8px 24px 32px' }}>
-        <div style={{ margin: '14px auto 18px' }}>
-          <Logo size={64} />
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Branded top strip */}
+        <div
+          style={{
+            background:
+              'radial-gradient(120% 80% at 50% -20%, #4f9dff 0%, #1f6bff 40%, #4b1fb8 100%)',
+            padding: '32px 24px 48px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '10px',
+          }}
+        >
+          <Logo size={56} />
+          <span
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '22px',
+              color: '#fff',
+              letterSpacing: '0.3px',
+            }}
+          >
+            Trivyy
+          </span>
         </div>
-        {children}
+
+        {/* Card pulled up over the strip */}
+        <div
+          style={{
+            flex: 1,
+            background: 'var(--surface)',
+            borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
+            marginTop: '-24px',
+            padding: '28px 24px 32px',
+            boxShadow: '0 -4px 24px rgba(43,38,74,0.12)',
+          }}
+        >
+          {children}
+        </div>
       </main>
     </AppFrame>
   );
@@ -217,7 +257,7 @@ export function AccountFlow(): JSX.Element {
         fontFamily: 'var(--font-display)',
         fontWeight: 700,
         fontSize: '26px',
-        margin: 0,
+        margin: '0 0 4px',
         textAlign: 'center',
         color: 'var(--ink)',
       }}
