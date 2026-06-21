@@ -1,0 +1,768 @@
+[
+  {
+    "category": "geography",
+    "difficulty": "easy",
+    "text": "What is the capital of India?",
+    "correctAnswer": "New Delhi",
+    "incorrectAnswers": ["Mumbai", "Kolkata", "Chennai"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "easy",
+    "text": "Which is the longest river in India?",
+    "correctAnswer": "Ganga",
+    "incorrectAnswers": ["Yamuna", "Godavari", "Narmada"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "easy",
+    "text": "Which Indian state has the largest area?",
+    "correctAnswer": "Rajasthan",
+    "incorrectAnswers": ["Madhya Pradesh", "Maharashtra", "Uttar Pradesh"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "easy",
+    "text": "The Thar Desert is located mainly in which Indian state?",
+    "correctAnswer": "Rajasthan",
+    "incorrectAnswers": ["Gujarat", "Haryana", "Punjab"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "easy",
+    "text": "Which city is known as the 'Pink City' of India?",
+    "correctAnswer": "Jaipur",
+    "incorrectAnswers": ["Udaipur", "Jodhpur", "Bikaner"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "easy",
+    "text": "Which is the southernmost tip of mainland India?",
+    "correctAnswer": "Kanyakumari",
+    "incorrectAnswers": ["Rameswaram", "Kochi", "Thiruvananthapuram"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "What is the capital of the Indian state of Kerala?",
+    "correctAnswer": "Thiruvananthapuram",
+    "incorrectAnswers": ["Kochi", "Kozhikode", "Thrissur"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which mountain range separates India from China to the north?",
+    "correctAnswer": "Himalayas",
+    "incorrectAnswers": ["Western Ghats", "Aravalli Range", "Vindhya Range"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which is the largest freshwater lake in India?",
+    "correctAnswer": "Wular Lake",
+    "incorrectAnswers": ["Dal Lake", "Chilika Lake", "Loktak Lake"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "The Sundarbans mangrove forest is located in which Indian state?",
+    "correctAnswer": "West Bengal",
+    "incorrectAnswers": ["Odisha", "Tamil Nadu", "Kerala"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which Indian state is the largest producer of tea?",
+    "correctAnswer": "Assam",
+    "incorrectAnswers": ["West Bengal", "Kerala", "Tamil Nadu"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which river is known as the 'Sorrow of Bihar'?",
+    "correctAnswer": "Kosi",
+    "incorrectAnswers": ["Ganga", "Son", "Gandak"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which country does NOT share a land border with India?",
+    "correctAnswer": "Afghanistan",
+    "incorrectAnswers": ["Nepal", "Bhutan", "Myanmar"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which is the highest mountain peak entirely within India?",
+    "correctAnswer": "Kangchenjunga",
+    "incorrectAnswers": ["Nanda Devi", "Mount Everest", "K2"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "The city of Varanasi is situated on the banks of which river?",
+    "correctAnswer": "Ganga",
+    "incorrectAnswers": ["Yamuna", "Saraswati", "Gomti"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "medium",
+    "text": "Which Indian state has the longest coastline?",
+    "correctAnswer": "Gujarat",
+    "incorrectAnswers": ["Andhra Pradesh", "Tamil Nadu", "Maharashtra"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "hard",
+    "text": "Which two rivers meet at the Triveni Sangam in Prayagraj along with the mythical Saraswati?",
+    "correctAnswer": "Ganga and Yamuna",
+    "incorrectAnswers": ["Ganga and Son", "Yamuna and Chambal", "Ganga and Gomti"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "hard",
+    "text": "Which is the only active volcano in India?",
+    "correctAnswer": "Barren Island",
+    "incorrectAnswers": ["Narcondam", "Baratang", "Dhinodhar"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "hard",
+    "text": "The Loktak Lake, famous for its floating phumdis, is located in which state?",
+    "correctAnswer": "Manipur",
+    "incorrectAnswers": ["Meghalaya", "Mizoram", "Nagaland"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "hard",
+    "text": "Which Indian city is also known as the 'Manchester of India'?",
+    "correctAnswer": "Ahmedabad",
+    "incorrectAnswers": ["Kanpur", "Surat", "Coimbatore"]
+  },
+  {
+    "category": "geography",
+    "difficulty": "hard",
+    "text": "The Nilgiri Hills are part of which mountain range?",
+    "correctAnswer": "Western Ghats",
+    "incorrectAnswers": ["Eastern Ghats", "Satpura Range", "Aravalli Range"]
+  },
+
+  {
+    "category": "history",
+    "difficulty": "easy",
+    "text": "Who is known as the 'Father of the Nation' in India?",
+    "correctAnswer": "Mahatma Gandhi",
+    "incorrectAnswers": ["Jawaharlal Nehru", "Sardar Patel", "B. R. Ambedkar"]
+  },
+  {
+    "category": "history",
+    "difficulty": "easy",
+    "text": "In which year did India gain independence?",
+    "correctAnswer": "1947",
+    "incorrectAnswers": ["1942", "1950", "1945"]
+  },
+  {
+    "category": "history",
+    "difficulty": "easy",
+    "text": "Who was the first Prime Minister of India?",
+    "correctAnswer": "Jawaharlal Nehru",
+    "incorrectAnswers": ["Mahatma Gandhi", "Sardar Vallabhbhai Patel", "Rajendra Prasad"]
+  },
+  {
+    "category": "history",
+    "difficulty": "easy",
+    "text": "Who was the first President of India?",
+    "correctAnswer": "Rajendra Prasad",
+    "incorrectAnswers": ["Jawaharlal Nehru", "S. Radhakrishnan", "Zakir Husain"]
+  },
+  {
+    "category": "history",
+    "difficulty": "easy",
+    "text": "On which date does India celebrate Republic Day?",
+    "correctAnswer": "26 January",
+    "incorrectAnswers": ["15 August", "2 October", "14 November"]
+  },
+  {
+    "category": "history",
+    "difficulty": "easy",
+    "text": "Who is regarded as the chief architect of the Indian Constitution?",
+    "correctAnswer": "B. R. Ambedkar",
+    "incorrectAnswers": ["Jawaharlal Nehru", "Rajendra Prasad", "Sardar Patel"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "Which Mughal emperor built the Taj Mahal?",
+    "correctAnswer": "Shah Jahan",
+    "incorrectAnswers": ["Akbar", "Aurangzeb", "Jahangir"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "The Jallianwala Bagh massacre took place in which city?",
+    "correctAnswer": "Amritsar",
+    "incorrectAnswers": ["Lahore", "Delhi", "Jalandhar"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "Who founded the Maurya Empire?",
+    "correctAnswer": "Chandragupta Maurya",
+    "incorrectAnswers": ["Ashoka", "Bindusara", "Bimbisara"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "The Dandi March of 1930 was a protest against which British policy?",
+    "correctAnswer": "The salt tax",
+    "incorrectAnswers": ["The land tax", "Partition of Bengal", "The Rowlatt Act"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "Which emperor is associated with the spread of Buddhism after the Kalinga War?",
+    "correctAnswer": "Ashoka",
+    "incorrectAnswers": ["Chandragupta Maurya", "Harsha", "Kanishka"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "Who gave the slogan 'Jai Hind'?",
+    "correctAnswer": "Subhas Chandra Bose",
+    "incorrectAnswers": ["Bhagat Singh", "Bal Gangadhar Tilak", "Lala Lajpat Rai"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "The first war of Indian independence (the Sepoy Mutiny) began in which year?",
+    "correctAnswer": "1857",
+    "incorrectAnswers": ["1885", "1905", "1942"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "Who was the first woman Prime Minister of India?",
+    "correctAnswer": "Indira Gandhi",
+    "incorrectAnswers": ["Sarojini Naidu", "Pratibha Patil", "Sucheta Kripalani"]
+  },
+  {
+    "category": "history",
+    "difficulty": "medium",
+    "text": "The Indian National Congress was founded in which year?",
+    "correctAnswer": "1885",
+    "incorrectAnswers": ["1857", "1905", "1920"]
+  },
+  {
+    "category": "history",
+    "difficulty": "hard",
+    "text": "Who was the founder of the Sikh religion?",
+    "correctAnswer": "Guru Nanak",
+    "incorrectAnswers": ["Guru Gobind Singh", "Guru Arjan", "Guru Tegh Bahadur"]
+  },
+  {
+    "category": "history",
+    "difficulty": "hard",
+    "text": "The Vijayanagara Empire had its capital at which city?",
+    "correctAnswer": "Hampi",
+    "incorrectAnswers": ["Madurai", "Thanjavur", "Warangal"]
+  },
+  {
+    "category": "history",
+    "difficulty": "hard",
+    "text": "Who was the last Mughal emperor of India?",
+    "correctAnswer": "Bahadur Shah Zafar",
+    "incorrectAnswers": ["Aurangzeb", "Akbar Shah II", "Shah Alam II"]
+  },
+  {
+    "category": "history",
+    "difficulty": "hard",
+    "text": "Which Chola king is famous for his naval expeditions to Southeast Asia?",
+    "correctAnswer": "Rajendra Chola I",
+    "incorrectAnswers": ["Rajaraja Chola I", "Karikala Chola", "Kulottunga I"]
+  },
+  {
+    "category": "history",
+    "difficulty": "hard",
+    "text": "The Treaty of Srirangapatna (1792) was signed after the defeat of which ruler?",
+    "correctAnswer": "Tipu Sultan",
+    "incorrectAnswers": ["Hyder Ali", "Siraj-ud-Daulah", "Mir Jafar"]
+  },
+  {
+    "category": "history",
+    "difficulty": "hard",
+    "text": "Who was the Viceroy of India at the time of the partition in 1947?",
+    "correctAnswer": "Lord Mountbatten",
+    "incorrectAnswers": ["Lord Wavell", "Lord Linlithgow", "Lord Irwin"]
+  },
+
+  {
+    "category": "movies",
+    "difficulty": "easy",
+    "text": "What is the popular name for India's Hindi-language film industry based in Mumbai?",
+    "correctAnswer": "Bollywood",
+    "incorrectAnswers": ["Tollywood", "Kollywood", "Mollywood"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "easy",
+    "text": "Which actor is widely known as the 'Shahenshah of Bollywood' and 'Big B'?",
+    "correctAnswer": "Amitabh Bachchan",
+    "incorrectAnswers": ["Shah Rukh Khan", "Dilip Kumar", "Dharmendra"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "easy",
+    "text": "Which actor is nicknamed the 'King of Bollywood' or 'King Khan'?",
+    "correctAnswer": "Shah Rukh Khan",
+    "incorrectAnswers": ["Salman Khan", "Aamir Khan", "Akshay Kumar"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "medium",
+    "text": "Which 2008 film directed by Danny Boyle, set in Mumbai, won eight Academy Awards?",
+    "correctAnswer": "Slumdog Millionaire",
+    "incorrectAnswers": ["Lagaan", "Gandhi", "Life of Pi"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "medium",
+    "text": "Who directed the 1975 blockbuster 'Sholay'?",
+    "correctAnswer": "Ramesh Sippy",
+    "incorrectAnswers": ["Yash Chopra", "Raj Kapoor", "Manmohan Desai"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "medium",
+    "text": "The Telugu-language film industry is commonly nicknamed what?",
+    "correctAnswer": "Tollywood",
+    "incorrectAnswers": ["Kollywood", "Sandalwood", "Mollywood"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "medium",
+    "text": "Which Indian film won the Best Original Song Oscar for 'Naatu Naatu' in 2023?",
+    "correctAnswer": "RRR",
+    "incorrectAnswers": ["Baahubali", "Pushpa", "KGF"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "medium",
+    "text": "Which legendary filmmaker directed the 'Apu Trilogy'?",
+    "correctAnswer": "Satyajit Ray",
+    "incorrectAnswers": ["Mrinal Sen", "Ritwik Ghatak", "Guru Dutt"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "hard",
+    "text": "Which was the first Indian sound film, released in 1931?",
+    "correctAnswer": "Alam Ara",
+    "incorrectAnswers": ["Raja Harishchandra", "Kisan Kanya", "Devdas"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "hard",
+    "text": "Who directed India's first feature film 'Raja Harishchandra' (1913)?",
+    "correctAnswer": "Dadasaheb Phalke",
+    "incorrectAnswers": ["Satyajit Ray", "Bimal Roy", "V. Shantaram"]
+  },
+  {
+    "category": "movies",
+    "difficulty": "hard",
+    "text": "The highest award in Indian cinema is named after which film pioneer?",
+    "correctAnswer": "Dadasaheb Phalke",
+    "incorrectAnswers": ["Satyajit Ray", "Raj Kapoor", "Prithviraj Kapoor"]
+  },
+
+  {
+    "category": "music",
+    "difficulty": "easy",
+    "text": "Which stringed instrument did Pandit Ravi Shankar famously play?",
+    "correctAnswer": "Sitar",
+    "incorrectAnswers": ["Sarod", "Tabla", "Veena"]
+  },
+  {
+    "category": "music",
+    "difficulty": "easy",
+    "text": "Which singer is fondly called the 'Nightingale of India'?",
+    "correctAnswer": "Lata Mangeshkar",
+    "incorrectAnswers": ["Asha Bhosle", "Geeta Dutt", "Shreya Ghoshal"]
+  },
+  {
+    "category": "music",
+    "difficulty": "medium",
+    "text": "Which Indian composer won two Academy Awards for the 'Slumdog Millionaire' score?",
+    "correctAnswer": "A. R. Rahman",
+    "incorrectAnswers": ["Ilaiyaraaja", "Shankar Mahadevan", "Vishal Bhardwaj"]
+  },
+  {
+    "category": "music",
+    "difficulty": "medium",
+    "text": "The tabla is a percussion instrument consisting of how many drums?",
+    "correctAnswer": "Two",
+    "incorrectAnswers": ["One", "Three", "Four"]
+  },
+  {
+    "category": "music",
+    "difficulty": "medium",
+    "text": "Which classical dance form originates from Tamil Nadu?",
+    "correctAnswer": "Bharatanatyam",
+    "incorrectAnswers": ["Kathak", "Odissi", "Kuchipudi"]
+  },
+  {
+    "category": "music",
+    "difficulty": "medium",
+    "text": "In Indian classical music, what term describes the melodic framework of a composition?",
+    "correctAnswer": "Raga",
+    "incorrectAnswers": ["Tala", "Bhajan", "Gharana"]
+  },
+  {
+    "category": "music",
+    "difficulty": "hard",
+    "text": "Ustad Bismillah Khan was a maestro of which wind instrument?",
+    "correctAnswer": "Shehnai",
+    "incorrectAnswers": ["Bansuri", "Sarangi", "Nadaswaram"]
+  },
+  {
+    "category": "music",
+    "difficulty": "hard",
+    "text": "Which classical dance form is associated with the state of Kerala and uses elaborate face make-up?",
+    "correctAnswer": "Kathakali",
+    "incorrectAnswers": ["Mohiniyattam", "Sattriya", "Manipuri"]
+  },
+
+  {
+    "category": "science",
+    "difficulty": "easy",
+    "text": "What does the abbreviation ISRO stand for?",
+    "correctAnswer": "Indian Space Research Organisation",
+    "incorrectAnswers": [
+      "Indian Science Research Office",
+      "International Space Research Organisation",
+      "Indian Satellite Research Organisation"
+    ]
+  },
+  {
+    "category": "science",
+    "difficulty": "easy",
+    "text": "In 2023, which Indian mission became the first to land near the Moon's south pole?",
+    "correctAnswer": "Chandrayaan-3",
+    "incorrectAnswers": ["Chandrayaan-1", "Mangalyaan", "Aditya-L1"]
+  },
+  {
+    "category": "science",
+    "difficulty": "medium",
+    "text": "Who is known as the 'Missile Man of India' and served as its 11th President?",
+    "correctAnswer": "A. P. J. Abdul Kalam",
+    "incorrectAnswers": ["Vikram Sarabhai", "Homi Bhabha", "Satish Dhawan"]
+  },
+  {
+    "category": "science",
+    "difficulty": "medium",
+    "text": "Which Indian physicist won the Nobel Prize in 1930 for his work on light scattering?",
+    "correctAnswer": "C. V. Raman",
+    "incorrectAnswers": ["S. Chandrasekhar", "Homi Bhabha", "Satyendra Nath Bose"]
+  },
+  {
+    "category": "science",
+    "difficulty": "medium",
+    "text": "India's Mars Orbiter Mission is popularly known by what name?",
+    "correctAnswer": "Mangalyaan",
+    "incorrectAnswers": ["Gaganyaan", "Chandrayaan", "Aryabhata"]
+  },
+  {
+    "category": "science",
+    "difficulty": "medium",
+    "text": "Who is regarded as the 'father of the Indian space programme'?",
+    "correctAnswer": "Vikram Sarabhai",
+    "incorrectAnswers": ["A. P. J. Abdul Kalam", "Homi Bhabha", "Satish Dhawan"]
+  },
+  {
+    "category": "science",
+    "difficulty": "hard",
+    "text": "What was the name of India's first satellite, launched in 1975?",
+    "correctAnswer": "Aryabhata",
+    "incorrectAnswers": ["Bhaskara", "Rohini", "INSAT-1A"]
+  },
+  {
+    "category": "science",
+    "difficulty": "hard",
+    "text": "Which mathematician, largely self-taught, is celebrated for his work on infinite series and number theory?",
+    "correctAnswer": "Srinivasa Ramanujan",
+    "incorrectAnswers": ["Aryabhata", "Brahmagupta", "Bhaskara II"]
+  },
+  {
+    "category": "science",
+    "difficulty": "hard",
+    "text": "The 'Bose' in the boson particle is named after which Indian physicist?",
+    "correctAnswer": "Satyendra Nath Bose",
+    "incorrectAnswers": ["C. V. Raman", "Jagadish Chandra Bose", "Meghnad Saha"]
+  },
+
+  {
+    "category": "tech",
+    "difficulty": "easy",
+    "text": "Which Indian city is widely known as the 'Silicon Valley of India'?",
+    "correctAnswer": "Bengaluru",
+    "incorrectAnswers": ["Hyderabad", "Pune", "Chennai"]
+  },
+  {
+    "category": "tech",
+    "difficulty": "medium",
+    "text": "Which Indian IT services company, founded in 1981, is headquartered in Pune and Mumbai?",
+    "correctAnswer": "Infosys",
+    "incorrectAnswers": ["TCS", "Wipro", "HCL"]
+  },
+  {
+    "category": "tech",
+    "difficulty": "medium",
+    "text": "What is the name of India's real-time instant payment system launched in 2016?",
+    "correctAnswer": "UPI",
+    "incorrectAnswers": ["IMPS", "RuPay", "NEFT"]
+  },
+  {
+    "category": "tech",
+    "difficulty": "medium",
+    "text": "Aadhaar, the world's largest biometric ID system, is managed by which authority?",
+    "correctAnswer": "UIDAI",
+    "incorrectAnswers": ["TRAI", "MeitY", "NPCI"]
+  },
+  {
+    "category": "tech",
+    "difficulty": "hard",
+    "text": "Which Indian-origin CEO leads Google and its parent company Alphabet?",
+    "correctAnswer": "Sundar Pichai",
+    "incorrectAnswers": ["Satya Nadella", "Shantanu Narayen", "Arvind Krishna"]
+  },
+
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "What is the national animal of India?",
+    "correctAnswer": "Bengal Tiger",
+    "incorrectAnswers": ["Lion", "Elephant", "Peacock"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "What is the national bird of India?",
+    "correctAnswer": "Indian Peacock",
+    "incorrectAnswers": ["Sparrow", "Eagle", "Kingfisher"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "What is the national flower of India?",
+    "correctAnswer": "Lotus",
+    "incorrectAnswers": ["Rose", "Marigold", "Jasmine"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "How many colours are there in the Indian national flag?",
+    "correctAnswer": "Three",
+    "incorrectAnswers": ["Two", "Four", "Five"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "What is the wheel at the centre of the Indian flag called?",
+    "correctAnswer": "Ashoka Chakra",
+    "incorrectAnswers": ["Sudarshana Chakra", "Dharma Wheel", "Konark Wheel"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "Which festival is known as the 'Festival of Lights' in India?",
+    "correctAnswer": "Diwali",
+    "incorrectAnswers": ["Holi", "Navratri", "Pongal"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "Which colourful spring festival is celebrated by throwing coloured powders?",
+    "correctAnswer": "Holi",
+    "incorrectAnswers": ["Diwali", "Onam", "Baisakhi"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "What is the official currency of India?",
+    "correctAnswer": "Indian Rupee",
+    "incorrectAnswers": ["Taka", "Rupiah", "Ringgit"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "Which sport is associated with the term 'googly'?",
+    "correctAnswer": "Cricket",
+    "incorrectAnswers": ["Hockey", "Kabaddi", "Badminton"]
+  },
+  {
+    "category": "",
+    "difficulty": "easy",
+    "text": "Which is the national sport-like traditional game played in teams holding one's breath while chanting?",
+    "correctAnswer": "Kabaddi",
+    "incorrectAnswers": ["Kho Kho", "Gilli Danda", "Carrom"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which Indian cricketer is nicknamed the 'God of Cricket' and holds the record for most international centuries?",
+    "correctAnswer": "Sachin Tendulkar",
+    "incorrectAnswers": ["Virat Kohli", "Rahul Dravid", "Sourav Ganguly"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Under which captain did India win the 1983 Cricket World Cup?",
+    "correctAnswer": "Kapil Dev",
+    "incorrectAnswers": ["Sunil Gavaskar", "M. S. Dhoni", "Mohinder Amarnath"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which Indian captain led the team to the 2011 ODI World Cup title?",
+    "correctAnswer": "M. S. Dhoni",
+    "incorrectAnswers": ["Virat Kohli", "Sachin Tendulkar", "Rohit Sharma"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which Indian won the country's first individual Olympic gold medal, in shooting at Beijing 2008?",
+    "correctAnswer": "Abhinav Bindra",
+    "incorrectAnswers": ["Neeraj Chopra", "Rajyavardhan Rathore", "Gagan Narang"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Neeraj Chopra won an Olympic gold medal at Tokyo 2020 in which event?",
+    "correctAnswer": "Javelin throw",
+    "incorrectAnswers": ["Shot put", "Long jump", "Discus throw"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which harvest festival is celebrated in Tamil Nadu in mid-January?",
+    "correctAnswer": "Pongal",
+    "incorrectAnswers": ["Onam", "Bihu", "Lohri"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "The festival of Onam is most associated with which Indian state?",
+    "correctAnswer": "Kerala",
+    "incorrectAnswers": ["Tamil Nadu", "Karnataka", "Andhra Pradesh"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which Indian dish consists of a fermented rice-and-lentil batter steamed into soft cakes?",
+    "correctAnswer": "Idli",
+    "incorrectAnswers": ["Dosa", "Vada", "Uttapam"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which spice, prized and expensive, is grown notably in the Kashmir valley?",
+    "correctAnswer": "Saffron",
+    "incorrectAnswers": ["Cardamom", "Turmeric", "Cumin"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Approximately how many official languages are listed in the Eighth Schedule of the Indian Constitution?",
+    "correctAnswer": "22",
+    "incorrectAnswers": ["14", "18", "28"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which is the most widely spoken language in India by number of native speakers?",
+    "correctAnswer": "Hindi",
+    "incorrectAnswers": ["Bengali", "Telugu", "Tamil"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "What is the largest religion in India by number of followers?",
+    "correctAnswer": "Hinduism",
+    "incorrectAnswers": ["Islam", "Christianity", "Sikhism"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Which Indian author won the Booker Prize in 1997 for 'The God of Small Things'?",
+    "correctAnswer": "Arundhati Roy",
+    "incorrectAnswers": ["Kiran Desai", "Salman Rushdie", "Jhumpa Lahiri"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Who wrote the Indian national anthem, 'Jana Gana Mana'?",
+    "correctAnswer": "Rabindranath Tagore",
+    "incorrectAnswers": ["Bankim Chandra Chattopadhyay", "Sarojini Naidu", "Subramania Bharati"]
+  },
+  {
+    "category": "",
+    "difficulty": "medium",
+    "text": "Who composed the national song 'Vande Mataram'?",
+    "correctAnswer": "Bankim Chandra Chattopadhyay",
+    "incorrectAnswers": ["Rabindranath Tagore", "Muhammad Iqbal", "Sarojini Naidu"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "Which Indian was the first to win a Nobel Prize, awarded in Literature in 1913?",
+    "correctAnswer": "Rabindranath Tagore",
+    "incorrectAnswers": ["C. V. Raman", "Mother Teresa", "Amartya Sen"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "The ancient university of Nalanda was located in which present-day Indian state?",
+    "correctAnswer": "Bihar",
+    "incorrectAnswers": ["Uttar Pradesh", "West Bengal", "Odisha"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "Which Indian city hosts the Kumbh Mela on the largest scale, at the Triveni Sangam?",
+    "correctAnswer": "Prayagraj",
+    "incorrectAnswers": ["Haridwar", "Ujjain", "Nashik"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "The Konark Sun Temple, shaped like a giant chariot, is located in which state?",
+    "correctAnswer": "Odisha",
+    "incorrectAnswers": ["Tamil Nadu", "Madhya Pradesh", "Karnataka"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "Which Indian economist won the Nobel Prize in Economics in 1998?",
+    "correctAnswer": "Amartya Sen",
+    "incorrectAnswers": ["Abhijit Banerjee", "Raghuram Rajan", "Manmohan Singh"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "Which classical language of South India is recognised as one of the oldest living languages in the world?",
+    "correctAnswer": "Tamil",
+    "incorrectAnswers": ["Telugu", "Kannada", "Malayalam"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "The Ajanta and Ellora caves are located in which Indian state?",
+    "correctAnswer": "Maharashtra",
+    "incorrectAnswers": ["Madhya Pradesh", "Karnataka", "Gujarat"]
+  },
+  {
+    "category": "",
+    "difficulty": "hard",
+    "text": "Which Indian woman became the first to travel to space, aboard a 1997 NASA mission?",
+    "correctAnswer": "Kalpana Chawla",
+    "incorrectAnswers": ["Sunita Williams", "Sirisha Bandla", "Sania Mirza"]
+  }
+]

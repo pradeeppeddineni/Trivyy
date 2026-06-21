@@ -23,6 +23,7 @@
     "migrate:down": "npm run migrate:down --workspace server",
     "seed": "tsx scripts/seed-questions.ts",
     "seed:region": "tsx scripts/seed-trivia-api.ts",
+    "seed:india": "tsx scripts/seed-india.ts",
     "hash-admin": "tsx scripts/hash-admin.ts",
     "prepare": "husky"
   },
