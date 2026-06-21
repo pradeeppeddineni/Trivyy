@@ -87,8 +87,8 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
       setGameId(created.gameId);
       setCode(created.code);
       setQuestions(created.questions);
-      // Show VS intro for creator before questions start.
-      setScreen('vsintro');
+      // Creator plays first — no VS intro (opponent hasn't joined yet).
+      setScreen('playing');
     } catch {
       goError('We could not create your challenge. Please try again.');
     } finally {
@@ -194,7 +194,7 @@ export function DuelFlow(props: DuelFlowProps): JSX.Element {
               avatar: { kind: 'none', preset: null },
             }}
             onStart={() => setScreen('playing')}
-            autoStartMs={5000}
+            autoStartMs={2500}
           />
         );
       case 'playing':
