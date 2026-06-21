@@ -30,6 +30,8 @@ import {
 export interface GroupFlowProps {
   /** Present when this player joined an existing lobby (not the host). */
   readonly entry?: { readonly gameId: string };
+  /** Persistent group this round is played for (tags the game for standings). */
+  readonly groupId?: string;
 }
 
 type Screen = 'nickname' | 'setup' | 'lobby' | 'playing' | 'leaderboard' | 'error';
@@ -94,6 +96,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
         categorySlug: categorySlug === 'any' ? undefined : categorySlug,
         difficulty,
         maxPlayers,
+        groupId: props.groupId,
       });
       setGameId(created.gameId);
       setScreen('lobby');
@@ -102,7 +105,7 @@ export function GroupFlow(props: GroupFlowProps): JSX.Element {
     } finally {
       setStarting(false);
     }
-  }, [nickname, count, categorySlug, difficulty, maxPlayers, goError]);
+  }, [nickname, count, categorySlug, difficulty, maxPlayers, props.groupId, goError]);
 
   const onStartGame = useCallback(async () => {
     setStarting(true);

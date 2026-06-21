@@ -17,6 +17,8 @@ export const createGameSchema = z.object({
   count: z.coerce.number().int().min(1).max(50),
   // Group ("together") only: host-chosen lobby size. Ignored for solo/duel.
   maxPlayers: z.coerce.number().int().min(2).max(10).optional(),
+  // Together only: the persistent group this round belongs to (standings).
+  groupId: z.string().uuid().optional(),
 });
 
 export type CreateGameInput = z.infer<typeof createGameSchema>;

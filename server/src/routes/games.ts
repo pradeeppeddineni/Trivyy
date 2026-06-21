@@ -76,7 +76,11 @@ gamesRouter.post('/', async (req, res, next) => {
       return;
     }
     if (parsed.data.mode === 'together') {
-      const { gameId, code } = await createGroup({ ...opts, maxPlayers: parsed.data.maxPlayers });
+      const { gameId, code } = await createGroup({
+        ...opts,
+        maxPlayers: parsed.data.maxPlayers,
+        groupId: parsed.data.groupId,
+      });
       res.status(201).json({ gameId, mode: 'together', code });
       return;
     }

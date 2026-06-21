@@ -12,6 +12,7 @@ export interface HomeProps {
   readonly onJoin: () => void;
   readonly onAccount: () => void;
   readonly onFriends: () => void;
+  readonly onGroups: () => void;
   readonly onAdmin: () => void;
   /** Display name of the signed-in account, if any (null = guest). */
   readonly accountName?: string | null;
@@ -42,6 +43,7 @@ export function Home(props: HomeProps): JSX.Element {
     onJoin,
     onAccount,
     onFriends,
+    onGroups,
     onAdmin,
     accountName,
   } = props;
@@ -158,6 +160,21 @@ export function Home(props: HomeProps): JSX.Element {
                 }}
               >
                 Friends
+              </button>
+              <span style={{ color: 'var(--faint-soft)', margin: '0 8px' }}>·</span>
+              <button
+                type="button"
+                onClick={onGroups}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: '14px',
+                  color: 'var(--accent-strong)',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                }}
+              >
+                Groups
               </button>
             </>
           ) : null}

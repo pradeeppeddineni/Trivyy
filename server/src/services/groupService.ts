@@ -18,6 +18,8 @@ export interface CreateGroupOptions {
   readonly difficulty?: DifficultyFilter;
   /** Host-chosen lobby cap (including the host). Null = no cap. */
   readonly maxPlayers?: number;
+  /** Persistent group this round belongs to, for standings (spec v3 §13.3). */
+  readonly groupId?: string;
 }
 
 export interface CreateGroupResult {
@@ -27,7 +29,7 @@ export interface CreateGroupResult {
 
 /** Create a group game and seat the host; players join the open lobby next. */
 export async function createGroup(options: CreateGroupOptions): Promise<CreateGroupResult> {
-  const { playerId, count, categorySlug, difficulty, maxPlayers } = options;
+  const { playerId, count, categorySlug, difficulty, maxPlayers, groupId } = options;
 
   const picked = await pickQuestions({ playerId, count, categorySlug, difficulty });
   if (picked.length === 0) {
@@ -46,6 +48,7 @@ export async function createGroup(options: CreateGroupOptions): Promise<CreateGr
       questionIds,
       hostPlayerId: playerId,
       maxPlayers: maxPlayers ?? null,
+      groupId: groupId ?? null,
     });
     await client.query(
       `INSERT INTO game_players (game_id, player_id, role, status)
