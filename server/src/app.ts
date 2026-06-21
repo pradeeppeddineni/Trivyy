@@ -13,6 +13,8 @@ import { groupsRouter } from './routes/groups';
 import { gamesRouter } from './routes/games';
 import { adminRouter } from './routes/admin';
 import { avatarRouter } from './routes/avatar';
+import { presenceRouter } from './routes/presence';
+import { storiesRouter } from './routes/stories';
 import { errorHandler } from './middleware/error';
 
 /**
@@ -73,6 +75,8 @@ export function createApp(env: Env): express.Express {
   app.use('/api/games', gamesRouter);
   app.use('/api/admin', adminRouter(env));
   app.use('/api', avatarRouter);
+  app.use('/api/presence', presenceRouter);
+  app.use('/api/stories', storiesRouter);
 
   app.use(errorHandler);
 
