@@ -6,10 +6,8 @@ import { StatusScreen } from '../components/StatusScreen';
 import { GameCodeCard } from '../components/GameCodeCard';
 import { QRCard } from '../components/QRCard';
 import { InviteActions } from '../components/InviteActions';
-import { LeaderboardRow } from '../components/LeaderboardRow';
-import { Button } from '../components/Button';
+import { ResultsScreen } from '../components/ResultsScreen';
 import { VSIntro } from '../components/VSIntro';
-import { RematchButton } from '../components/RematchButton';
 import { Setup } from './Setup';
 import { NicknamePrompt } from './NicknamePrompt';
 import { RoundPlayer } from './RoundPlayer';
@@ -303,50 +301,36 @@ function DuelResult(props: DuelResultProps): JSX.Element {
   const draw = result.outcome === 'draw';
   const headline = draw ? "It's a draw!" : youWon ? 'You win!' : 'You lost';
 
+  const entries = [
+    {
+      rank: youWon || draw ? 1 : 2,
+      name: `${result.you.nickname} (you)`,
+      score: youScore,
+      total: result.total,
+    },
+    ...(result.opponent
+      ? [
+          {
+            rank: !youWon || draw ? 1 : 2,
+            name: result.opponent.nickname,
+            score: oppScore,
+            total: result.total,
+          },
+        ]
+      : []),
+  ];
+
+  const meRank = youWon || draw ? 1 : 2;
+  const hasRematch = Boolean(onRematch) && !rematchDisabled;
+
   return (
-    <main style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 22px 28px' }}>
-      <h2
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 700,
-          fontSize: '30px',
-          margin: '14px 0 18px',
-          textAlign: 'center',
-          color: 'var(--ink)',
-        }}
-      >
-        {headline}
-      </h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <LeaderboardRow
-          rank={youWon || draw ? 1 : 2}
-          name={`${result.you.nickname} (you)`}
-          score={youScore}
-          total={result.total}
-          isWinner={youWon || draw}
-        />
-        {result.opponent ? (
-          <LeaderboardRow
-            rank={!youWon || draw ? 1 : 2}
-            name={result.opponent.nickname}
-            score={oppScore}
-            total={result.total}
-            isWinner={!youWon || draw}
-          />
-        ) : null}
-      </div>
-      <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {onRematch ? (
-          <RematchButton
-            options={{ count: result.total }}
-            onRematch={() => onRematch()}
-            disabled={rematchDisabled}
-          />
-        ) : null}
-        <Button variant="ghost" onClick={onHome}>
-          Back to home
-        </Button>
-      </div>
-    </main>
+    <ResultsScreen
+      title={headline}
+      entries={entries}
+      meRank={meRank}
+      onPlayAgain={onHome}
+      onRematch={hasRematch ? () => onRematch!() : undefined}
+      playAgainLabel="Back to home"
+    />
   );
 }
