@@ -115,6 +115,47 @@
   --app-width: 440px;
 }
 
+/* Dark theme — overrides only the surface/ink/border tokens; accent + category
+ * hues are reused (with a lifted accent for contrast on dark surfaces). No
+ * component may hard-code a color; all values come from these tokens (ARC-3). */
+[data-theme='dark'] {
+  --accent: #4f9dff;
+  --accent-strong: #2f7fff;
+  --accent-soft: #16233f;
+  --accent-tint: #16233f;
+  --accent-glow: rgba(79, 157, 255, 0.4);
+
+  --page-bg: #0a1020;
+  --surface: #121a2e;
+  --surface-muted: #172138;
+  --surface-faint: #172138;
+  --card: #16203a;
+  --card-tint: #1b2741;
+  --admin-bg: #0c1426;
+
+  --ink: #eaf0ff;
+  --ink-deep: #ffffff;
+  --body: #e3e9f7;
+  --body-soft: #aab4cf;
+  --muted: #8c97b6;
+  --faint: #74809f;
+  --faint-soft: #5c6685;
+  --placeholder: #5c6685;
+  --score-total: #5c6685;
+
+  --border: #243150;
+  --border-soft: #222e4a;
+  --border-faint: #1e2942;
+  --border-accent: #2a3c63;
+  --border-accent-soft: #243a63;
+  --stat-border: #222e4a;
+  --track: #202c46;
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-card-soft: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-frame: 0 0 60px rgba(0, 0, 0, 0.6);
+}
+
 * {
   box-sizing: border-box;
 }
