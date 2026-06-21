@@ -24,6 +24,7 @@ import { Toast } from '../components/Toast';
 import { VSIntro } from '../components/VSIntro';
 import { SpinWheel } from '../components/SpinWheel';
 import { RematchButton } from '../components/RematchButton';
+import { signal } from '../feedback/feedback';
 
 const SECTION_LABEL: CSSProperties = {
   fontFamily: 'var(--font-display)',
@@ -483,6 +484,28 @@ function DuelPhase3Section(): JSX.Element {
   );
 }
 
+function FeedbackPhase5Section(): JSX.Element {
+  return (
+    <>
+      <p style={CAPTION}>ANSWER PILL STATES WITH MOTION</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <AnswerPill index={0} text="Correct answer (green pulse)" state="correct" />
+        <AnswerPill index={1} text="Incorrect answer (red shake)" state="incorrect" />
+      </div>
+
+      <p style={{ ...CAPTION, marginTop: '18px' }}>TRIGGER FEEDBACK SIGNAL</p>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <Button variant="primary" fullWidth={false} onClick={() => signal('correct')}>
+          Correct signal
+        </Button>
+        <Button variant="secondary" fullWidth={false} onClick={() => signal('wrong')}>
+          Wrong signal
+        </Button>
+      </div>
+    </>
+  );
+}
+
 const PAGE: CSSProperties = {
   position: 'relative',
   zIndex: 1,
@@ -549,6 +572,9 @@ export function Gallery(): JSX.Element {
         </Section>
         <Section title="Podium + Results Screen (Phase 4)">
           <Phase4Section />
+        </Section>
+        <Section title="Feedback (Phase 5)">
+          <FeedbackPhase5Section />
         </Section>
         <Section title="Toast">
           <Button
