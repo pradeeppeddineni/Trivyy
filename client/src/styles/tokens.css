@@ -46,6 +46,17 @@
   --stat-border: #eeecf6;
   --track: #edebf6;
 
+  /* ---- Medal / podium ---- */
+  --gold: #f5a623;
+  --gold-bg: #fff8e8;
+  --gold-border: #fbe6be;
+  --silver: #9baec8;
+  --silver-bg: #f4f6fa;
+  --silver-border: #d8e2f0;
+  --bronze: #c07a4b;
+  --bronze-bg: #fdf3eb;
+  --bronze-border: #f0d3bc;
+
   /* ---- Status ---- */
   --success: #16a765;
   --success-strong: #16c079;
@@ -150,6 +161,13 @@
   --border-accent-soft: #243a63;
   --stat-border: #222e4a;
   --track: #202c46;
+
+  --gold-bg: #2a2010;
+  --gold-border: #4a3810;
+  --silver-bg: #1a2030;
+  --silver-border: #2a3550;
+  --bronze-bg: #28180c;
+  --bronze-border: #4a2e18;
 
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-card-soft: 0 2px 6px rgba(0, 0, 0, 0.4);
