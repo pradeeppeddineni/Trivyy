@@ -1,9 +1,10 @@
-import type { CSSProperties } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { AnswerPill, type AnswerState } from '../components/AnswerPill';
 import { Button } from '../components/Button';
 import { GradeBanner } from '../components/GradeBanner';
 import { ProgressBar } from '../components/ProgressBar';
 import { QuestionCard, type Difficulty as CardDifficulty } from '../components/QuestionCard';
+import { signal } from '../feedback/feedback';
 import type { ApiQuestion } from '../api/client';
 
 export interface GradeState {
@@ -55,6 +56,12 @@ function pillState(choice: string, grade: GradeState | null): AnswerState {
 export function Gameplay(props: GameplayProps): JSX.Element {
   const { question, index, total, score, grade, submitting, isLast, onSelect, onNext, onQuit } =
     props;
+
+  useEffect(() => {
+    if (grade !== null) {
+      signal(grade.correct ? 'correct' : 'wrong');
+    }
+  }, [grade]);
 
   const answered = index + (grade ? 1 : 0);
   const progress = total > 0 ? answered / total : 0;
