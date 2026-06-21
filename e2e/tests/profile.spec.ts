@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 test('my stats reflects a finished solo game', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel(/your nickname/i).fill('StatsPlayer');
-  await page.getByRole('button', { name: /play solo/i }).click();
+  await page.getByRole('button', { name: /play as guest/i }).click();
   await page.getByRole('button', { name: '5', exact: true }).click();
   await page.getByRole('button', { name: /start round/i }).click();
 
