@@ -18,6 +18,11 @@ export interface FriendsBarProps {
   readonly friends: ReadonlyArray<FriendItem>;
   readonly onAddStory: () => void;
   readonly onOpenStory: (friend: FriendItem) => void;
+  /**
+   * When true the bar sits on the dark gradient home background.
+   * Background becomes transparent and text/icons use white/light colours.
+   */
+  readonly onDark?: boolean;
 }
 
 // ---- Preset colour palette (mirrors server AVATAR_PRESETS) ------------------
@@ -113,9 +118,10 @@ function AvatarCircle({ friend }: AvatarCircleProps): JSX.Element {
 interface FriendBubbleProps {
   readonly friend: FriendItem;
   readonly onOpenStory: (friend: FriendItem) => void;
+  readonly onDark: boolean;
 }
 
-function FriendBubble({ friend, onOpenStory }: FriendBubbleProps): JSX.Element {
+function FriendBubble({ friend, onOpenStory, onDark }: FriendBubbleProps): JSX.Element {
   const { nickname, online, hasStory } = friend;
 
   const ringWrapSt: CSSProperties = {
@@ -134,6 +140,8 @@ function FriendBubble({ friend, onOpenStory }: FriendBubbleProps): JSX.Element {
     display: 'inline-flex',
   };
 
+  const onlineDotBorder = onDark ? '2px solid rgba(255,255,255,0.2)' : '2px solid #fff';
+
   const onlineDotSt: CSSProperties = {
     position: 'absolute',
     bottom: '0px',
@@ -142,8 +150,10 @@ function FriendBubble({ friend, onOpenStory }: FriendBubbleProps): JSX.Element {
     height: '10px',
     borderRadius: '50%',
     background: 'var(--success)',
-    border: '2px solid #fff',
+    border: onlineDotBorder,
   };
+
+  const labelColor = onDark ? 'rgba(255,255,255,0.85)' : 'var(--body-soft)';
 
   function handleClick(): void {
     if (hasStory) {
@@ -180,7 +190,7 @@ function FriendBubble({ friend, onOpenStory }: FriendBubbleProps): JSX.Element {
         style={{
           fontSize: '11px',
           fontWeight: 600,
-          color: 'var(--body-soft)',
+          color: labelColor,
           maxWidth: '56px',
           textAlign: 'center',
           overflow: 'hidden',
@@ -200,29 +210,44 @@ function FriendBubble({ friend, onOpenStory }: FriendBubbleProps): JSX.Element {
  * Horizontal story-style friends bar. Purely presentational — no fetching.
  * First item: an add-story "+" button. Remaining items: friend avatars with
  * optional online indicator and gradient story ring.
+ *
+ * Pass `onDark={true}` when the bar sits on the dark gradient home background.
  */
-export function FriendsBar({ friends, onAddStory, onOpenStory }: FriendsBarProps): JSX.Element {
+export function FriendsBar({
+  friends,
+  onAddStory,
+  onOpenStory,
+  onDark = false,
+}: FriendsBarProps): JSX.Element {
   const barSt: CSSProperties = {
     display: 'flex',
     flexDirection: 'row',
     gap: '14px',
     overflowX: 'auto',
-    padding: '4px 0 8px',
+    padding: '4px 16px 8px',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none' as CSSProperties['msOverflowStyle'],
+    background: onDark ? 'transparent' : undefined,
   };
+
+  const addBtnColor = onDark ? 'rgba(255,255,255,0.9)' : 'var(--accent)';
+  const addBtnBg = onDark ? 'rgba(255,255,255,0.12)' : 'var(--surface-muted)';
+  const addBtnBorder = onDark
+    ? '2px dashed rgba(255,255,255,0.4)'
+    : '2px dashed var(--border-dashed)';
+  const addLabelColor = onDark ? 'rgba(255,255,255,0.9)' : 'var(--body-soft)';
 
   const addBtnSt: CSSProperties = {
     width: '56px',
     height: '56px',
     borderRadius: '50%',
-    border: '2px dashed var(--border-dashed)',
-    background: 'var(--surface-muted)',
+    border: addBtnBorder,
+    background: addBtnBg,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    color: 'var(--accent)',
+    color: addBtnColor,
     flexShrink: 0,
   };
 
@@ -237,7 +262,7 @@ export function FriendsBar({ friends, onAddStory, onOpenStory }: FriendsBarProps
           style={{
             fontSize: '11px',
             fontWeight: 600,
-            color: 'var(--body-soft)',
+            color: addLabelColor,
             whiteSpace: 'nowrap',
           }}
         >
@@ -247,7 +272,7 @@ export function FriendsBar({ friends, onAddStory, onOpenStory }: FriendsBarProps
 
       {/* Friend bubbles */}
       {friends.map((friend) => (
-        <FriendBubble key={friend.id} friend={friend} onOpenStory={onOpenStory} />
+        <FriendBubble key={friend.id} friend={friend} onOpenStory={onOpenStory} onDark={onDark} />
       ))}
     </div>
   );
