@@ -319,7 +319,7 @@ export function SoloFlow(): JSX.Element {
       case 'home':
         return (
           <>
-            {accountName && friends.length > 0 ? (
+            {accountName ? (
               <FriendsBar
                 friends={friends}
                 onAddStory={() => setShowShareSheet(true)}
