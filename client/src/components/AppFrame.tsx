@@ -14,6 +14,7 @@ const FRAME: CSSProperties = {
   boxShadow: 'var(--shadow-frame)',
   display: 'flex',
   flexDirection: 'column',
+  paddingBottom: 'calc(88px + env(safe-area-inset-bottom))',
 };
 
 /** Mobile-first phone frame that wraps every screen (design source of truth). */

@@ -1,10 +1,12 @@
-# Trivia App — Specification (v3)
+# Trivia App — Specification (v4)
 
 **Status:** Draft for workshop
-**Last updated:** June 20, 2026
+**Last updated:** June 21, 2026
 **Scope:** Self-hosted trivia web app for friends, hosted on a Raspberry Pi. Three ways to play (solo, async duel, group "play together"), now with an optional **social layer**: user accounts, friends, persistent groups that can rematch, leaderboards scoped to a group or your friends, and regional question content.
 
-> **v3 change (social layer):** adds **optional user accounts** (username + password, recovery-code reset, no email), **friends** (search + invite link), **persistent groups** the same players can re-summon for a **rematch**, **scoped leaderboards** (group standings + friends leaderboard, cumulative points), and **regional questions** (a country/region filter dimension, sourced from The Trivia API + admin authoring). Guest play (nickname only) is preserved. This reverses v1's "no accounts" stance for players who opt in; see §3 and §13. Real-time/WebSocket play, email/social login, global leaderboards, AI questions, and scheduled competitions remain non-goals.
+> **v4 change (look and feel):** adds §10 "Look and feel" covering the Phase 0 UI overhaul: electric-blue rebrand, light/dark theme system (ARC-3a), persistent bottom nav, installable PWA (UI-1), and Framer Motion transitions. Sections 10-13 renumbered to 11-14 to accommodate the new section. See `docs/superpowers/specs/2026-06-21-trivyy-ui-overhaul-design.md` and the Phase 0 implementation plan.
+>
+> **v3 change (social layer):** adds **optional user accounts** (username + password, recovery-code reset, no email), **friends** (search + invite link), **persistent groups** the same players can re-summon for a **rematch**, **scoped leaderboards** (group standings + friends leaderboard, cumulative points), and **regional questions** (a country/region filter dimension, sourced from The Trivia API + admin authoring). Guest play (nickname only) is preserved. This reverses v1's "no accounts" stance for players who opt in; see §3 and §14. Real-time/WebSocket play, email/social login, global leaderboards, AI questions, and scheduled competitions remain non-goals.
 >
 > **v2 change:** reconciled with the Claude Design prototype (`Trivyy.dc.html`). Added the **play-together group mode** (lobby + leaderboard, invite by code or QR). Group/lobby live updates use **short-interval polling over REST**, not WebSockets. See ADR `docs/adr/0003-three-modes-and-polling.md`.
 
@@ -30,7 +32,7 @@ The app is hosted at home on a Raspberry Pi, backed by a Postgres database, and 
 - Players can **challenge a friend** to an **asynchronous duel** using a shareable game code or link, then see a head-to-head, per-question breakdown.
 - Players can host a **play-together group game**: invite by **code or QR**, friends join on their own phones, all answer the **same locked set**, and a **leaderboard** ranks everyone.
 - Players **self-identify with a nickname**; registration is **optional** (guests can always play).
-- Players **may optionally register an account** (username + password, recovery-code reset) to unlock friends, persistent groups, scoped leaderboards, and cross-device history (§13).
+- Players **may optionally register an account** (username + password, recovery-code reset) to unlock friends, persistent groups, scoped leaderboards, and cross-device history (§14).
 - Players can **add friends** (username search or invite link) and see a **friends leaderboard**.
 - Players can **create persistent groups**, invite others, **rematch** with the same group, and see **group standings**.
 - Questions can carry a **region** (e.g. India) so players can filter by country/region as well as category.
@@ -58,7 +60,7 @@ The app is hosted at home on a Raspberry Pi, backed by a Postgres database, and 
 | **Registered player** | Username + password               | Everything a guest can, plus: friends, persistent groups, scoped (group/friends) leaderboards, and cross-device history tied to their account                |
 | **Admin**             | Username + password (single)      | Everything a player can do, plus: view statistics, add/edit questions, hide/unhide questions, manage categories                                              |
 
-There are **three auth roles** (guest player, registered player, single admin). The host/creator vs. opponent/player distinction inside a game, and group ownership, are per-game / per-group data, not an auth boundary. A guest is a nickname plus a browser-session cookie; a registered player additionally has a unique username + an argon2 password hash and can sign in on any device. **Registration is optional and upgrades the player's existing row in place**, preserving their nickname and history. Recovery uses a one-time code (see §13), not email.
+There are **three auth roles** (guest player, registered player, single admin). The host/creator vs. opponent/player distinction inside a game, and group ownership, are per-game / per-group data, not an auth boundary. A guest is a nickname plus a browser-session cookie; a registered player additionally has a unique username + an argon2 password hash and can sign in on any device. **Registration is optional and upgrades the player's existing row in place**, preserving their nickname and history. Recovery uses a one-time code (see §14), not email.
 
 ---
 
@@ -265,7 +267,20 @@ QR codes are generated on the client from the join link (no server endpoint need
 
 ---
 
-## 10. Open decisions
+## 10. Look & feel
+
+The UI overhaul (Phase 0 and beyond) establishes a consistent visual language on top of the existing token system.
+
+- **Brand accent:** electric blue (`#1f6bff`), replacing the original violet. All components consume `var(--accent)` (ARC-3), so the accent change re-skins the whole app from one file.
+- **Themes:** light and dark, driven by a `[data-theme]` attribute on `<html>` and a `[data-theme="dark"]` token cascade in `tokens.css`. The active theme is persisted to `localStorage` and defaults to `prefers-color-scheme`. No component may hard-code a color value (ARC-3, ARC-3a).
+- **Navigation:** a persistent `BottomNav` (Home, Friends, Play, Boards, You) renders on primary tab screens and is hidden during active gameplay. Navigation remains query-param based; no router library swap.
+- **Installable PWA:** the client ships a web manifest (`display: standalone`) and a Workbox service worker that caches the built app shell only; `/api` is always network (UI-1, API-6).
+- **Motion:** Framer Motion provides fade-up page transitions and element animations, respecting `prefers-reduced-motion`. Lottie and 3D animations are deferred to later phases.
+- **Typography:** Fredoka (display), Plus Jakarta Sans (body), self-hosted via `@fontsource` so no external CDN is required.
+
+---
+
+## 11. Open decisions
 
 - **Admin identity:** _Resolved_ — **username + password** (matches the design): `ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` from env, single admin, Postgres-backed sessions (`connect-pg-simple`). See ADR `docs/adr/0004-admin-auth-and-session-store.md`.
 - **Poll interval:** _Resolved_ — ~3s while active, back off to ~10s when idle, pause on a hidden tab, stop when the game completes; cheap version/`304` responses (API-7).
@@ -276,7 +291,7 @@ QR codes are generated on the client from the join link (no server endpoint need
 
 ---
 
-## 11. Future phases (post-v1)
+## 12. Future phases (post-v1)
 
 - **Live / synchronous multiplayer** via WebSockets (rooms + shared countdown).
 - **AI-generated questions** (admin approves before they go live).
@@ -286,7 +301,7 @@ QR codes are generated on the client from the join link (no server endpoint need
 
 ---
 
-## 12. Suggested build order
+## 13. Suggested build order
 
 1. **Design tokens + component library** translated from `Trivyy.dc.html` into the React client.
 2. **Postgres schema (v2) + question/category import script.**
@@ -298,11 +313,11 @@ QR codes are generated on the client from the join link (no server endpoint need
 8. **Deploy to the Pi behind the Cloudflare Tunnel.**
 
 v3 builds on this in dependency order (each its own PR → green CI → deploy):
-**A. Accounts** → **B. Friends** → **C. Groups + rematch + standings** → **D. Regional questions** (D is independent of A–C). See §13.
+**A. Accounts** → **B. Friends** → **C. Groups + rematch + standings** → **D. Regional questions** (D is independent of A–C). See §14.
 
 ---
 
-## 13. Social layer (v3)
+## 14. Social layer (v3)
 
 The social features are **opt-in** and layer onto the existing identity without breaking guest play or any v1/v2 flow.
 

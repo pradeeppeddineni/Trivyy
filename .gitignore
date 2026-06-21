@@ -33,3 +33,5 @@ __pycache__/
 .idea/
 .vscode/
 *.swp
+.superpowers/
+overhaul-*.png

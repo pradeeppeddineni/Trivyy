@@ -8,11 +8,13 @@
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "@fontsource/fredoka": "^5.1.0",
     "@fontsource/plus-jakarta-sans": "^5.1.0",
+    "framer-motion": "^11.18.2",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -26,8 +28,10 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^2.1.8",
     "jsdom": "^25.0.1",
+    "sharp": "^0.33.5",
     "typescript": "^5.7.2",
     "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.2",
     "vitest": "^2.1.8"
   }
 }

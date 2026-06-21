@@ -12,12 +12,15 @@ import '@fontsource/plus-jakarta-sans/500.css';
 import '@fontsource/plus-jakarta-sans/600.css';
 import '@fontsource/plus-jakarta-sans/700.css';
 import './styles/tokens.css';
+import { ThemeProvider } from './theme/ThemeProvider';
 
 const container = document.getElementById('root');
 if (container) {
   createRoot(container).render(
     <React.StrictMode>
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </React.StrictMode>,
   );
 }

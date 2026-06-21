@@ -57,6 +57,13 @@ The non-negotiable rules for building Trivyy, the solo / duel / group trivia gam
 - **ARC-1** The scoring and game-state logic SHALL be pure and unit-testable with no I/O, so unit tests need no database or network.
 - **ARC-2** API handlers SHALL stay thin; business logic lives in a service layer.
 - **ARC-3** Shared UI SHALL be built from one React component library and a single set of design tokens; raw hard-coded style values SHALL NOT appear in components.
+- **ARC-3a (theming):** The app supports light and dark themes via a
+  `[data-theme]` cascade over the design tokens. Components read colors only
+  from tokens; no component may hard-code a color value. The active theme is
+  chosen by the user (persisted) defaulting to the OS preference.
+- **UI-1 (installable):** The client ships a web manifest and a service worker
+  that caches only the built app shell (never `/api`), so the app is installable
+  and runs full-screen on phones.
 - **ARC-4** Every screen SHALL define explicit loading, empty, error, and success states.
 
 ## Part VI: Data

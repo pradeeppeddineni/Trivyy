@@ -8,6 +8,9 @@ import { GroupFlow } from './pages/GroupFlow';
 import { JoinFlow } from './pages/JoinFlow';
 import { Gallery } from './pages/Gallery';
 import { SoloFlow } from './pages/SoloFlow';
+import { BottomNav } from './components/BottomNav';
+import { SettingsFlow } from './pages/SettingsFlow';
+import { activeTab } from './nav';
 
 /**
  * App entry. The solo game flow is the default; the other modes and admin are
@@ -18,6 +21,7 @@ import { SoloFlow } from './pages/SoloFlow';
  *   ?account → optional sign up / log in / reset
  *   ?admin → admin sign-in + analytics
  *   ?gallery → Phase 0 component gallery
+ *   ?settings → user settings (theme, profile links)
  */
 export function App(): JSX.Element {
   const params =
@@ -25,35 +29,30 @@ export function App(): JSX.Element {
       ? new URLSearchParams(window.location.search)
       : new URLSearchParams();
 
-  if (params.has('admin')) {
-    return <AdminFlow />;
+  if (params.has('settings')) {
+    return <SettingsFlow />;
   }
-  if (params.has('account')) {
-    return <AccountFlow />;
-  }
-  if (params.has('friend')) {
-    return <FriendsFlow inviteCode={params.get('friend') ?? ''} />;
-  }
-  if (params.has('friends')) {
-    return <FriendsFlow />;
-  }
-  if (params.has('gjoin')) {
-    return <GroupsFlow autoJoinCode={params.get('gjoin') ?? ''} />;
-  }
-  if (params.has('groups')) {
-    return <GroupsFlow />;
-  }
-  if (params.has('me')) {
-    return <ProfileFlow />;
-  }
-  if (params.has('join')) {
-    return <JoinFlow code={params.get('join') ?? ''} />;
-  }
-  if (params.has('duel')) {
-    return <DuelFlow />;
-  }
-  if (params.has('group')) {
-    return <GroupFlow groupId={params.get('for') ?? undefined} />;
-  }
-  return params.has('gallery') ? <Gallery /> : <SoloFlow />;
+
+  const tab = activeTab(params);
+
+  let screen: JSX.Element;
+  if (params.has('admin')) screen = <AdminFlow />;
+  else if (params.has('account')) screen = <AccountFlow />;
+  else if (params.has('friend')) screen = <FriendsFlow inviteCode={params.get('friend') ?? ''} />;
+  else if (params.has('friends')) screen = <FriendsFlow />;
+  else if (params.has('gjoin')) screen = <GroupsFlow autoJoinCode={params.get('gjoin') ?? ''} />;
+  else if (params.has('groups')) screen = <GroupsFlow />;
+  else if (params.has('me')) screen = <ProfileFlow />;
+  else if (params.has('join')) screen = <JoinFlow code={params.get('join') ?? ''} />;
+  else if (params.has('duel')) screen = <DuelFlow />;
+  else if (params.has('group')) screen = <GroupFlow groupId={params.get('for') ?? undefined} />;
+  else if (params.has('gallery')) screen = <Gallery />;
+  else screen = <SoloFlow />;
+
+  return (
+    <>
+      {screen}
+      {tab !== null && <BottomNav active={tab} />}
+    </>
+  );
 }
