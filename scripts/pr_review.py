@@ -578,12 +578,30 @@ def _detect_verdict(review_body):
     return result
 
 
+_CRITICAL_COUNT_RE = re.compile(r"critical\s*\((\d+)\)", re.IGNORECASE)
+
+
+def _critical_count(review_body):
+    """Number of CRITICAL findings the report declares (default 0 if absent)."""
+    m = _CRITICAL_COUNT_RE.search(review_body)
+    return int(m.group(1)) if m else 0
+
+
 def post_review(pr_number, repo, body, version, sha, author=None, dry_run=False):
-    """Post the review as a GitHub PR review, tagging the author."""
+    """Post the review as a GitHub PR review, tagging the author.
+
+    The blocking REQUEST_CHANGES gate is reserved for CRITICAL findings only:
+    HIGH/MEDIUM are advisory (posted as a COMMENT) so they inform without holding
+    the merge hostage to an endless stream of nitpicks. A report with no CRITICAL
+    findings never blocks.
+    """
     marker = f"<!-- trivyy-pr-review:v{version}:{sha} -->"
     author_tag = f"cc @{author}\n\n" if author else ""
     full = f"{marker}\n{author_tag}{body}"
     verdict = _detect_verdict(body)
+    if verdict == "REQUEST_CHANGES" and _critical_count(body) == 0:
+        print("Downgrading REQUEST_CHANGES -> COMMENT (no CRITICAL findings; advisory only).")
+        verdict = "COMMENT"
 
     if dry_run:
         print(f"\n{'=' * 60}\nDRY RUN -- would post v{version} ({sha[:8]}), verdict {verdict}")
