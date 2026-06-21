@@ -19,6 +19,9 @@ import { QuestionCard } from '../components/QuestionCard';
 import { ScoreStat } from '../components/ScoreStat';
 import { StoryViewer } from '../components/StoryViewer';
 import { Toast } from '../components/Toast';
+import { VSIntro } from '../components/VSIntro';
+import { SpinWheel } from '../components/SpinWheel';
+import { RematchButton } from '../components/RematchButton';
 
 const SECTION_LABEL: CSSProperties = {
   fontFamily: 'var(--font-display)',
@@ -365,6 +368,74 @@ function ProfileSection(): JSX.Element {
   );
 }
 
+// ---- Phase 3: VS Intro + Spin Wheel + Rematch --------------------------------
+
+const SPIN_SEGMENTS = [
+  { key: 'science', label: 'Science', color: '#1f6bff' },
+  { key: 'geography', label: 'Geography', color: '#16a765' },
+  { key: 'movies', label: 'Movies', color: '#e91e8c' },
+  { key: 'music', label: 'Music', color: '#f5a623' },
+  { key: 'history', label: 'History', color: '#7c3aed' },
+  { key: 'tech', label: 'Tech', color: '#0f9fa5' },
+] as const;
+
+function DuelPhase3Section(): JSX.Element {
+  const [spinResult, setSpinResult] = useState<string | null>(null);
+  const [showVS, setShowVS] = useState(false);
+  const [rematchCount, setRematchCount] = useState(0);
+
+  return (
+    <>
+      <p style={CAPTION}>VS INTRO (two mock players)</p>
+      <Button variant="secondary" fullWidth={false} onClick={() => setShowVS((v) => !v)}>
+        {showVS ? 'Hide VS intro' : 'Show VS intro'}
+      </Button>
+      {showVS ? (
+        <div style={{ marginTop: '12px', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <VSIntro
+            left={{ nickname: 'Alice', avatar: { kind: 'preset', preset: 'blue' } }}
+            right={{ nickname: 'Bob', avatar: { kind: 'preset', preset: 'pink' } }}
+            onStart={() => setShowVS(false)}
+          />
+        </div>
+      ) : null}
+
+      <p style={{ ...CAPTION, marginTop: '24px' }}>SPIN WHEEL (6 category segments)</p>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <SpinWheel segments={[...SPIN_SEGMENTS]} onResult={(key) => setSpinResult(key)} />
+      </div>
+      {spinResult ? (
+        <p
+          style={{
+            fontSize: '13px',
+            fontWeight: 700,
+            color: 'var(--success-ink)',
+            marginTop: '8px',
+            textAlign: 'center',
+          }}
+        >
+          Landed on: {spinResult}
+        </p>
+      ) : null}
+
+      <p style={{ ...CAPTION, marginTop: '24px' }}>REMATCH BUTTON</p>
+      <RematchButton options={{ count: 10 }} onRematch={() => setRematchCount((n) => n + 1)} />
+      {rematchCount > 0 ? (
+        <p
+          style={{
+            fontSize: '12px',
+            color: 'var(--success-ink)',
+            marginTop: '6px',
+            fontWeight: 600,
+          }}
+        >
+          Rematch called {rematchCount} time{rematchCount !== 1 ? 's' : ''}.
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 const PAGE: CSSProperties = {
   position: 'relative',
   zIndex: 1,
@@ -425,6 +496,9 @@ export function Gallery(): JSX.Element {
         </Section>
         <Section title="Admin stats">
           <StatsSection />
+        </Section>
+        <Section title="VS Intro + Spin Wheel + Rematch (Phase 3)">
+          <DuelPhase3Section />
         </Section>
         <Section title="Toast">
           <Button
