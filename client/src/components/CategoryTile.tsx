@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
+import { CategoryIcon, CATEGORY_COLORS } from './CategoryIcon';
 
 export interface CategoryTileProps {
+  /** Category slug — passed to CategoryIcon and used to pick the accent color. */
   readonly icon: string;
   readonly label: string;
   readonly selected?: boolean;
@@ -11,6 +13,8 @@ export interface CategoryTileProps {
 export function CategoryTile(props: CategoryTileProps): JSX.Element {
   const { icon, label, selected = false, onClick } = props;
 
+  const accentColor = CATEGORY_COLORS[icon] ?? 'var(--accent)';
+
   const style: CSSProperties = {
     width: '100%',
     display: 'flex',
@@ -20,17 +24,31 @@ export function CategoryTile(props: CategoryTileProps): JSX.Element {
     padding: '18px 12px',
     borderRadius: 'var(--radius-lg)',
     cursor: 'pointer',
-    transition: 'transform var(--t) ease, border-color 0.15s',
-    border: selected ? '2px solid var(--accent)' : '2px solid var(--border)',
-    background: selected ? 'var(--accent-soft)' : 'var(--card)',
-    color: selected ? 'var(--accent-strong)' : 'var(--ink)',
-    boxShadow: selected ? 'var(--shadow-accent-soft)' : 'var(--shadow-card)',
+    transition: 'transform var(--t) ease, border-color 0.15s, box-shadow 0.15s',
+    border: selected ? `2px solid ${accentColor}` : '2px solid var(--border)',
+    background: selected ? `${accentColor}18` : 'var(--card)',
+    color: selected ? accentColor : 'var(--ink)',
+    boxShadow: selected ? `0 4px 14px ${accentColor}30` : 'var(--shadow-card)',
   };
 
   return (
     <button type="button" onClick={onClick} aria-pressed={selected} style={style}>
-      <span style={{ fontSize: '26px', lineHeight: 1 }}>{icon}</span>
-      <span style={{ fontSize: '14.5px', fontWeight: 600, marginTop: '7px' }}>{label}</span>
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          borderRadius: '50%',
+          background: selected ? `${accentColor}22` : 'var(--card-tint)',
+          color: selected ? accentColor : (CATEGORY_COLORS[icon] ?? 'var(--muted)'),
+          marginBottom: '6px',
+        }}
+      >
+        <CategoryIcon slug={icon} size={20} />
+      </span>
+      <span style={{ fontSize: '14.5px', fontWeight: 600 }}>{label}</span>
     </button>
   );
 }

@@ -34,6 +34,7 @@ export default defineConfig({
         'src/components/Podium.tsx',
         'src/components/ResultsScreen.tsx',
         'src/components/AnswerPill.tsx',
+        'src/components/CategoryIcon.tsx',
         'src/components/Switch.tsx',
         'src/components/HomeHeroScene.tsx',
         'src/feedback/**',
