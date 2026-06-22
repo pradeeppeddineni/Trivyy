@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { AppFrame } from '../components/AppFrame';
 import { Button } from '../components/Button';
-import { Logo } from '../components/Logo';
 import { StatusScreen } from '../components/StatusScreen';
+import { HeroMascot } from '../three/HeroMascot';
 import { copyText } from '../lib/share';
 import { setStoredNickname } from '../lib/nickname';
 import {
@@ -213,14 +213,21 @@ export function AccountFlow(): JSX.Element {
           style={{
             background:
               'radial-gradient(120% 80% at 50% -20%, #4f9dff 0%, #1f6bff 40%, #4b1fb8 100%)',
-            padding: '32px 24px 48px',
+            padding: '20px 24px 44px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '10px',
+            gap: '6px',
+            position: 'relative',
+            overflow: 'hidden',
           }}
         >
-          <Logo size={56} />
+          {/* Static mascot in the auth header — the auth flow switches screens
+              (sign-in/register/reset) frequently, so we avoid mounting a WebGL
+              canvas here (context churn). The live 3-D stays on landing/home. */}
+          <div aria-hidden="true" style={{ pointerEvents: 'none' }}>
+            <HeroMascot size={110} variant="compact" forceStatic />
+          </div>
           <span
             style={{
               fontFamily: 'var(--font-display)',

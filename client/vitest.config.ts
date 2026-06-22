@@ -41,7 +41,11 @@ export default defineConfig({
         'src/theme/**',
         'src/nav.ts',
         'src/pages/Home.tsx',
+        // HeroMascot wrapper is unit-tested (jsdom, static fallback only).
+        // Scene.tsx and Mascot.tsx require WebGL — excluded from coverage.
+        'src/three/HeroMascot.tsx',
       ],
+      exclude: ['src/three/Scene.tsx', 'src/three/Mascot.tsx'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

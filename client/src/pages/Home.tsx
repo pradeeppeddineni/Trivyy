@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 import { Button } from '../components/Button';
 import { HomeHeroScene } from '../components/HomeHeroScene';
-import { Logo } from '../components/Logo';
 import { NicknameInput } from '../components/NicknameInput';
+import { HeroMascot } from '../three/HeroMascot';
 
 export interface HomeProps {
   readonly nickname: string;
@@ -72,8 +72,9 @@ function GuestHome(props: HomeProps): JSX.Element {
           paddingBottom: '8px',
         }}
       >
-        <div style={{ marginBottom: '20px' }}>
-          <Logo size={88} />
+        {/* 3-D mascot replaces the Logo medallion above the form card */}
+        <div style={{ marginBottom: '8px' }}>
+          <HeroMascot size={180} variant="hero" />
         </div>
         <h1
           style={{

@@ -1,15 +1,17 @@
 /**
- * HomeHeroScene — premium animated SVG hero for the logged-in Home screen.
+ * HomeHeroScene — premium animated hero for the logged-in Home screen.
  *
  * Entirely presentational; receives callbacks for the three gameplay modes.
- * Uses hand-crafted SVG + CSS only (no raster images, no new npm deps).
- * All animations are suppressed via CSS `prefers-reduced-motion: reduce`.
+ * The SVG medallion is replaced by the lazy-loaded 3-D WebGL mascot
+ * (HeroMascot), which falls back to an inline SVG when WebGL is unavailable
+ * or prefers-reduced-motion is set.
  *
  * Architecture note: business logic (navigation, auth state) lives in
  * SoloFlow / Home. This component is pure display (ARC-1, ARC-2).
  */
 
 import './HomeHeroScene.css';
+import { HeroMascot } from '../three/HeroMascot';
 
 export interface HomeHeroSceneProps {
   readonly accountName: string;
@@ -19,128 +21,6 @@ export interface HomeHeroSceneProps {
 }
 
 // ─── SVG sub-components ───────────────────────────────────────────────────────
-
-/** 3-D glossy medallion with radial depth, specular highlight, inner shadow, and
- *  a central spark emblem. Looks rendered, not flat. */
-function HeroEmblem(): JSX.Element {
-  return (
-    <svg
-      width="180"
-      height="180"
-      viewBox="0 0 180 180"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      style={{ display: 'block', overflow: 'visible' }}
-    >
-      <defs>
-        {/* Outer glow filter */}
-        <filter id="hhs-glow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-          <feColorMatrix
-            in="blur"
-            type="matrix"
-            values="0 0 0 0 0.31   0 0 0 0 0.61   0 0 0 0 1   0 0 0 0.7 0"
-            result="glow"
-          />
-          <feMerge>
-            <feMergeNode in="glow" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-
-        {/* Main sphere body: deep 3-D radial — amber-orange palette gives
-            premium "gold coin" feel distinct from the blue background */}
-        <radialGradient id="hhs-sphere" cx="38%" cy="30%" r="75%" fx="38%" fy="30%">
-          <stop offset="0%" stopColor="#fff8e0" />
-          <stop offset="18%" stopColor="#ffe484" />
-          <stop offset="48%" stopColor="#ffb020" />
-          <stop offset="76%" stopColor="#e07800" />
-          <stop offset="100%" stopColor="#a04a00" />
-        </radialGradient>
-
-        {/* Inner shadow at bottom of sphere */}
-        <radialGradient id="hhs-inner-shadow" cx="50%" cy="85%" r="55%" fx="50%" fy="95%">
-          <stop offset="0%" stopColor="rgba(80,20,0,0.55)" />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-
-        {/* Specular highlight: bright white near top-left */}
-        <radialGradient id="hhs-spec" cx="30%" cy="22%" r="32%" fx="28%" fy="20%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.92)" />
-          <stop offset="55%" stopColor="rgba(255,255,255,0.22)" />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-
-        {/* Rim light on the right side (faint cool highlight) */}
-        <radialGradient id="hhs-rim" cx="85%" cy="55%" r="30%" fx="90%" fy="55%">
-          <stop offset="0%" stopColor="rgba(180,210,255,0.35)" />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-
-        {/* Ring / bezel gradient */}
-        <linearGradient id="hhs-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ffe29a" />
-          <stop offset="40%" stopColor="#d4860a" />
-          <stop offset="100%" stopColor="#7a4400" />
-        </linearGradient>
-
-        {/* Spark / star inner shadow for depth */}
-        <filter id="hhs-spark-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="rgba(80,30,0,0.5)" />
-        </filter>
-      </defs>
-
-      {/* Outer glow ring (soft, blurred) */}
-      <circle cx="90" cy="90" r="88" fill="rgba(255,176,32,0.18)" filter="url(#hhs-glow)" />
-
-      {/* Bezel / ring stroke */}
-      <circle
-        cx="90"
-        cy="90"
-        r="82"
-        stroke="url(#hhs-ring)"
-        strokeWidth="4"
-        fill="none"
-        opacity="0.7"
-      />
-
-      {/* Main sphere body */}
-      <circle cx="90" cy="90" r="80" fill="url(#hhs-sphere)" />
-
-      {/* Inner shadow at bottom */}
-      <circle cx="90" cy="90" r="80" fill="url(#hhs-inner-shadow)" />
-
-      {/* Rim light */}
-      <circle cx="90" cy="90" r="80" fill="url(#hhs-rim)" />
-
-      {/* Specular highlight (top-left bright spot) */}
-      <ellipse cx="63" cy="55" rx="36" ry="28" fill="url(#hhs-spec)" />
-
-      {/* Central Trivyy spark / 6-point star emblem embossed on the sphere */}
-      {/* Outer star shape — slightly larger, darker for depth */}
-      <path
-        d="M90 44 L96 78 L128 72 L104 94 L120 124 L90 106 L60 124 L76 94 L52 72 L84 78 Z"
-        fill="rgba(120,50,0,0.22)"
-        filter="url(#hhs-spark-shadow)"
-        transform="translate(1,2)"
-      />
-      {/* Main star */}
-      <path
-        d="M90 44 L96 78 L128 72 L104 94 L120 124 L90 106 L60 124 L76 94 L52 72 L84 78 Z"
-        fill="#fff"
-        fillOpacity="0.92"
-        filter="url(#hhs-spark-shadow)"
-      />
-      {/* Small inner circle center detail */}
-      <circle cx="90" cy="91" r="9" fill="rgba(255,176,32,0.75)" />
-      <circle cx="90" cy="91" r="5" fill="rgba(255,255,255,0.6)" />
-
-      {/* Second specular glint (tiny, sharp — "sparkle" on top-left edge) */}
-      <ellipse cx="54" cy="44" rx="10" ry="6" fill="rgba(255,255,255,0.7)" />
-    </svg>
-  );
-}
 
 /** 4-point star sparkle shape */
 function Sparkle({ size, color }: { readonly size: number; readonly color: string }): JSX.Element {
@@ -383,15 +263,13 @@ export function HomeHeroScene({
           <Sparkle size={10} color="rgba(160,200,255,0.85)" />
         </div>
 
-        {/* 3-D glossy medallion — floats gently, decorative */}
+        {/* 3-D WebGL mascot — decorative, floats gently via CSS wrapper */}
         <div
           aria-hidden="true"
           className="hhs-emblem-wrap"
           style={{ display: 'inline-block', position: 'relative' }}
         >
-          <HeroEmblem />
-          {/* Shimmer sweep overlay */}
-          <div className="hhs-shimmer" />
+          <HeroMascot size={220} variant="hero" />
         </div>
 
         <h2
