@@ -93,7 +93,7 @@ function Lights(): JSX.Element {
 
 function Effects(): JSX.Element {
   return (
-    <EffectComposer multisampling={0}>
+    <EffectComposer multisampling={8}>
       <Bloom intensity={0.35} luminanceThreshold={0.7} luminanceSmoothing={0.9} mipmapBlur />
     </EffectComposer>
   );
@@ -138,7 +138,7 @@ export default function Scene({ variant = 'hero', size }: SceneProps): JSX.Eleme
       }}
     >
       <Canvas
-        dpr={[1, 1.5]}
+        dpr={[1, 2.5]}
         camera={{ position: [0, 0.1, cameraZ], fov: 40 }}
         gl={{ antialias: true, alpha: true }}
         shadows
