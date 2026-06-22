@@ -222,9 +222,11 @@ export function AccountFlow(): JSX.Element {
             overflow: 'hidden',
           }}
         >
-          {/* Compact 3-D mascot in the auth header */}
+          {/* Static mascot in the auth header — the auth flow switches screens
+              (sign-in/register/reset) frequently, so we avoid mounting a WebGL
+              canvas here (context churn). The live 3-D stays on landing/home. */}
           <div aria-hidden="true" style={{ pointerEvents: 'none' }}>
-            <HeroMascot size={110} variant="compact" />
+            <HeroMascot size={110} variant="compact" forceStatic />
           </div>
           <span
             style={{

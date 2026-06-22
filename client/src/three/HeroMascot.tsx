@@ -23,6 +23,13 @@ import { lazy, Suspense } from 'react';
 export interface HeroMascotProps {
   readonly size?: number;
   readonly variant?: 'hero' | 'compact';
+  /**
+   * Force the static SVG mascot (no WebGL canvas). Used on screens that mount
+   * and unmount frequently (e.g. the auth flow's sign-in/register/reset
+   * switches) where repeatedly creating/destroying WebGL contexts is wasteful
+   * and exhausts the browser's context limit.
+   */
+  readonly forceStatic?: boolean;
 }
 
 // ── WebGL + environment detection ─────────────────────────────────────────────
@@ -168,8 +175,8 @@ const PUPIL = '#2b264a';
  * HeroMascot — the only component that pages import.
  * Lazy-loads Scene.tsx (WebGL chunk) when the environment supports it.
  */
-export function HeroMascot({ size, variant = 'hero' }: HeroMascotProps): JSX.Element {
-  if (!shouldUse3D()) {
+export function HeroMascot({ size, variant = 'hero', forceStatic }: HeroMascotProps): JSX.Element {
+  if (forceStatic || !shouldUse3D()) {
     return <StaticFallback size={size} variant={variant} />;
   }
 
