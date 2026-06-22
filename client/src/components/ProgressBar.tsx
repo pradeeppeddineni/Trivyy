@@ -27,10 +27,20 @@ export function ProgressBar(props: ProgressBarProps): JSX.Element {
     background: fillColor,
     width: `${clamp(value) * 100}%`,
     transition: 'width 0.5s var(--ease)',
+    boxShadow:
+      clamp(value) > 0
+        ? `0 0 6px ${fillColor === 'var(--accent)' ? 'rgba(31,107,255,0.4)' : 'transparent'}`
+        : 'none',
   };
 
   return (
-    <div style={track}>
+    <div
+      style={track}
+      role="progressbar"
+      aria-valuenow={Math.round(clamp(value) * 100)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
       <div style={fill} />
     </div>
   );
