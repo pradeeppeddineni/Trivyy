@@ -123,7 +123,8 @@ export default function Scene({ variant = 'hero', size }: SceneProps): JSX.Eleme
 
   const isCompact = variant === 'compact';
   const canvasSize = size ?? (isCompact ? 120 : 220);
-  const cameraZ = isCompact ? 3.2 : 2.8;
+  // Pulled back so the full mascot (antenna + spark on top, shadow below) fits.
+  const cameraZ = isCompact ? 4.1 : 3.7;
 
   return (
     <div
@@ -147,10 +148,14 @@ export default function Scene({ variant = 'hero', size }: SceneProps): JSX.Eleme
         <Lights />
         <InlineEnvironment />
 
-        <Mascot />
+        {/* Shift down so the antenna/spark clears the top edge and the whole
+            mascot is centered in frame. */}
+        <group position={[0, -0.42, 0]}>
+          <Mascot />
+        </group>
 
         <ContactShadows
-          position={[0, -0.78, 0]}
+          position={[0, -1.2, 0]}
           opacity={isCompact ? 0.3 : 0.45}
           scale={2.5}
           blur={2.5}
