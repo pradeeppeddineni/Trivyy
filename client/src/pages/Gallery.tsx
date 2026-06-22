@@ -60,10 +60,10 @@ function Section(props: { readonly title: string; readonly children: ReactNode }
 }
 
 const CATEGORIES = [
-  { id: 'science', icon: '🔬', label: 'Science' },
-  { id: 'geography', icon: '🌍', label: 'Geography' },
-  { id: 'movies', icon: '🎬', label: 'Movies' },
-  { id: 'music', icon: '🎵', label: 'Music' },
+  { id: 'science', icon: 'science', label: 'Science' },
+  { id: 'geography', icon: 'geography', label: 'Geography' },
+  { id: 'movies', icon: 'movies', label: 'Movies' },
+  { id: 'music', icon: 'music', label: 'Music' },
 ] as const;
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard', 'Any'] as const;
@@ -140,7 +140,7 @@ function GameplaySection(): JSX.Element {
       <ProgressBar value={0.4} />
       <div style={{ height: '16px' }} />
       <QuestionCard
-        categoryIcon="🔬"
+        categoryIcon="science"
         categoryLabel="Science"
         difficulty="medium"
         question="How many bones are in the adult human body?"

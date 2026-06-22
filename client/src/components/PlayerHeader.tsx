@@ -228,9 +228,9 @@ export function PlayerHeader(props: PlayerHeaderProps): JSX.Element {
   const barStyle: CSSProperties = lightText
     ? {
         ...BAR,
-        background: 'rgba(0,0,0,0.12)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255,255,255,0.15)',
+        background: 'transparent',
+        backdropFilter: 'none',
+        borderBottom: 'none',
       }
     : BAR;
 
