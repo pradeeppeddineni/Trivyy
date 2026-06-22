@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { CategoryIcon, CATEGORY_COLORS } from './CategoryIcon';
+import { CategoryIcon, CATEGORY_COLORS, normalizeCategorySlug } from './CategoryIcon';
 
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'any';
 
@@ -34,7 +34,7 @@ const DIFF_STYLE: Record<Difficulty, DiffStyle> = {
 export function QuestionCard(props: QuestionCardProps): JSX.Element {
   const { categoryIcon, categoryLabel, difficulty, question } = props;
 
-  const accentColor = CATEGORY_COLORS[categoryIcon] ?? '#1f6bff';
+  const accentColor = CATEGORY_COLORS[normalizeCategorySlug(categoryIcon)] ?? '#1f6bff';
   const diffStyle = DIFF_STYLE[difficulty];
 
   const card: CSSProperties = {

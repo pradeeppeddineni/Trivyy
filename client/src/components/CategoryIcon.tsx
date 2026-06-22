@@ -1,10 +1,38 @@
 import type { CSSProperties } from 'react';
 
 export interface CategoryIconProps {
-  /** Category slug: 'science' | 'geography' | 'movies' | 'music' | 'history' | 'tech' | 'any' */
+  /** Category slug, legacy emoji, or label — resolved to a canonical slug. */
   readonly slug: string;
   /** Icon size in pixels (width and height). Defaults to 24. */
   readonly size?: number;
+}
+
+/** Legacy emoji icons (from the server / older data) → canonical slug. */
+const EMOJI_TO_SLUG: Readonly<Record<string, string>> = {
+  '🔬': 'science',
+  '🌍': 'geography',
+  '🎬': 'movies',
+  '🎵': 'music',
+  '📜': 'history',
+  '💻': 'tech',
+  '🎲': 'any',
+};
+
+const KNOWN_SLUGS = new Set(['science', 'geography', 'movies', 'music', 'history', 'tech', 'any']);
+
+/**
+ * Resolve a category slug from a slug, a legacy emoji icon, or a display label
+ * (e.g. the server still sends the emoji or "Science"). Falls back to 'any'.
+ */
+export function normalizeCategorySlug(input: string | null | undefined): string {
+  if (!input) return 'any';
+  const v = input.trim();
+  if (KNOWN_SLUGS.has(v)) return v;
+  if (EMOJI_TO_SLUG[v]) return EMOJI_TO_SLUG[v];
+  const lower = v.toLowerCase();
+  if (KNOWN_SLUGS.has(lower)) return lower;
+  if (lower.startsWith('surprise')) return 'any';
+  return 'any';
 }
 
 /** Inline SVG category icon. Uses currentColor so the parent controls the hue. */
@@ -16,7 +44,7 @@ export function CategoryIcon({ slug, size = 24 }: CategoryIconProps): JSX.Elemen
     flexShrink: 0,
   };
 
-  switch (slug) {
+  switch (normalizeCategorySlug(slug)) {
     case 'science':
       return (
         <svg viewBox="0 0 24 24" fill="none" style={style} aria-hidden="true" focusable="false">
