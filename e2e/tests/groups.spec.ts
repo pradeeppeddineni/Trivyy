@@ -16,7 +16,8 @@ async function register(page: Page, username: string): Promise<void> {
   await page.getByLabel(/^password$/i).fill('password1');
   await page.getByRole('button', { name: /create account/i }).click();
   await page.getByRole('button', { name: /saved it/i }).click();
-  await expect(page.getByRole('heading', { name: /your account/i })).toBeVisible();
+  // Finishing registration lands on the signed-in home (account pill present).
+  await expect(page.getByRole('button', { name: /account menu/i })).toBeVisible();
 }
 
 test('create a group and open its detail', async ({ page }) => {
