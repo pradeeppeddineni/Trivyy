@@ -15,7 +15,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ContactShadows, Environment, Lightformer } from '@react-three/drei';
+import { Environment, Lightformer } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { Mascot } from './Mascot';
 
@@ -149,19 +149,11 @@ export default function Scene({ variant = 'hero', size }: SceneProps): JSX.Eleme
         <InlineEnvironment />
 
         {/* Shift down so the antenna/spark clears the top edge and the whole
-            mascot is centered in frame. */}
+            mascot is centered in frame. The mascot floats (no ContactShadows
+            plane, which rendered as a hard box/wedge on light backgrounds). */}
         <group position={[0, -0.42, 0]}>
           <Mascot />
         </group>
-
-        <ContactShadows
-          position={[0, -1.2, 0]}
-          opacity={isCompact ? 0.3 : 0.45}
-          scale={2.5}
-          blur={2.5}
-          far={1.5}
-          color="#1f6bff"
-        />
 
         <Effects />
       </Canvas>
