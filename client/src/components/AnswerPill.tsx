@@ -16,8 +16,10 @@ interface PillTheme {
   readonly cardBorder: string;
   readonly cardBg: string;
   readonly cardColor: string;
+  readonly cardShadow: string;
   readonly badgeBg: string;
   readonly badgeColor: string;
+  readonly badgeShadow?: string;
   readonly badge?: string;
 }
 
@@ -26,6 +28,7 @@ const THEMES: Record<AnswerState, PillTheme> = {
     cardBorder: '2px solid var(--border)',
     cardBg: 'var(--card)',
     cardColor: 'var(--ink)',
+    cardShadow: 'var(--shadow-card)',
     badgeBg: 'var(--accent-tint)',
     badgeColor: 'var(--accent)',
   },
@@ -33,23 +36,29 @@ const THEMES: Record<AnswerState, PillTheme> = {
     cardBorder: '2px solid var(--accent)',
     cardBg: 'var(--accent-soft)',
     cardColor: 'var(--accent-strong)',
+    cardShadow: '0 4px 14px rgba(31,107,255,0.18)',
     badgeBg: 'var(--accent)',
     badgeColor: '#fff',
+    badgeShadow: '0 2px 6px rgba(31,107,255,0.35)',
   },
   correct: {
     cardBorder: '2px solid var(--success-strong)',
     cardBg: 'var(--success-tint)',
     cardColor: 'var(--success-ink)',
+    cardShadow: '0 4px 14px rgba(22,192,121,0.18)',
     badgeBg: 'var(--success-strong)',
     badgeColor: '#fff',
+    badgeShadow: '0 2px 6px rgba(22,192,121,0.35)',
     badge: '✓',
   },
   incorrect: {
     cardBorder: '2px solid var(--danger-soft)',
     cardBg: 'var(--danger-tint)',
     cardColor: 'var(--danger-ink)',
+    cardShadow: '0 4px 14px rgba(229,72,77,0.14)',
     badgeBg: 'var(--danger-soft)',
     badgeColor: '#fff',
+    badgeShadow: '0 2px 6px rgba(229,72,77,0.3)',
     badge: '✕',
   },
 };
@@ -89,17 +98,24 @@ export function AnswerPill(props: AnswerPillProps): JSX.Element {
     alignItems: 'center',
     gap: '13px',
     width: '100%',
-    padding: '15px 16px',
+    padding: '14px 16px',
     borderRadius: 'var(--radius-lg)',
-    cursor: 'pointer',
+    cursor: onClick ? 'pointer' : 'default',
     textAlign: 'left',
-    transition: 'all 0.18s',
+    transition: 'box-shadow 0.18s, border-color 0.18s, background 0.18s, opacity 0.18s',
     fontFamily: 'inherit',
     border: theme.cardBorder,
     background: theme.cardBg,
     color: theme.cardColor,
-    opacity: dimmed ? 0.5 : 1,
+    boxShadow: dimmed ? 'none' : theme.cardShadow,
+    opacity: dimmed ? 0.48 : 1,
     animation,
+    /* Gloss overlay via pseudo-element is not possible in inline styles,
+       so we approximate with a subtle inset gradient on the background. */
+    backgroundImage:
+      state === 'idle' || state === 'selected'
+        ? 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 60%)'
+        : undefined,
   };
 
   const letter: CSSProperties = {
@@ -111,9 +127,10 @@ export function AnswerPill(props: AnswerPillProps): JSX.Element {
     placeItems: 'center',
     fontWeight: 800,
     fontSize: '15px',
-    transition: 'all 0.18s',
+    transition: 'background 0.18s, box-shadow 0.18s',
     background: dimmed ? 'var(--accent-tint)' : theme.badgeBg,
     color: dimmed ? 'var(--faint-soft)' : theme.badgeColor,
+    boxShadow: dimmed ? 'none' : (theme.badgeShadow ?? 'none'),
   };
 
   return (
