@@ -19,6 +19,10 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
+    // Render the static (non-WebGL) mascot in E2E: avoids GPU/WebGL context
+    // churn from the 3D canvas mounting across many navigations in CI, and keeps
+    // the critical-flow tests deterministic. Real users are unaffected.
+    reducedMotion: 'reduce',
   },
   expect: {
     // Small tolerance absorbs sub-pixel anti-aliasing. Visual goldens must be
