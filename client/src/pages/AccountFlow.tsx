@@ -152,10 +152,10 @@ export function AccountFlow(): JSX.Element {
       const r = await loginAccount(username.trim(), password);
       if (r === 'ok') {
         const acc = await authMe();
-        setAccount(acc);
         if (acc) setStoredNickname(acc.nickname);
         setPassword('');
-        setScreen('account');
+        // Signed in → go straight to the home screen (not the account page).
+        goHome();
       } else {
         setError(resultMessage(r));
       }
@@ -378,7 +378,10 @@ export function AccountFlow(): JSX.Element {
           <Button variant="secondary" onClick={() => void copyText(issuedCode)}>
             Copy code
           </Button>
-          <Button variant="primary" onClick={() => setScreen(afterRecovery)}>
+          <Button
+            variant="primary"
+            onClick={() => (afterRecovery === 'login' ? setScreen('login') : goHome())}
+          >
             I&apos;ve saved it — continue
           </Button>
         </div>
