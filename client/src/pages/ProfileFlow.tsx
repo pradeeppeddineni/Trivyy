@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AppFrame } from '../components/AppFrame';
 import { PlayerHeader } from '../components/PlayerHeader';
 import { StatusScreen } from '../components/StatusScreen';
@@ -44,7 +45,8 @@ function PickerModal(props: PickerModalProps): JSX.Element {
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    zIndex: 100,
+    // Above the floating bottom nav (which otherwise occludes the upload button).
+    zIndex: 1000,
   };
 
   const sheet = {
@@ -52,11 +54,17 @@ function PickerModal(props: PickerModalProps): JSX.Element {
     maxWidth: 'var(--app-width)',
     background: 'var(--surface)',
     borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0',
-    padding: '20px 20px 32px',
+    // Extra bottom padding clears the safe area; the sheet scrolls if its
+    // content is taller than the viewport.
+    padding: '20px 20px calc(28px + env(safe-area-inset-bottom))',
     boxShadow: 'var(--shadow-toast)',
+    maxHeight: '85vh',
+    overflowY: 'auto' as const,
   };
 
-  return (
+  // Portal to <body> so the sheet escapes the screen's PageTransition stacking
+  // context (a transformed ancestor would otherwise trap it below the nav).
+  return createPortal(
     <div
       style={overlay}
       role="dialog"
@@ -109,7 +117,8 @@ function PickerModal(props: PickerModalProps): JSX.Element {
           onUploadFile={onUploadFile}
         />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
