@@ -1,5 +1,15 @@
 # Trivyy
 
+> [!CAUTION]
+>
+> ### 🔴 This repository is no longer being maintained.
+>
+> The Trivyy domain (**trivyy.com**) has been deleted and the live site is offline.
+> No further changes, fixes, or support will be provided. The code is kept public for reference only.
+
+![Status: unmaintained](https://img.shields.io/badge/status-unmaintained-red)
+![Site: offline](https://img.shields.io/badge/trivyy.com-deleted-red)
+
 A turn-based trivia game for a small friend group. Players pick a nickname and
 play solo or invite a friend to an asynchronous duel with a shareable game code.
 A single admin curates the question bank. Self-hosted on a Raspberry Pi behind a
